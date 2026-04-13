@@ -90,11 +90,11 @@ new #[Layout('components.layouts.app')] class extends Component {
             @forelse ($riwayat as $item)
                 <div class="border rounded p-3 mb-3">
                     <div class="mb-2">
-                        <span class="badge bg-label-primary me-1">Q</span>
+                        <span class="badge bg-label-primary me-1">{{ __('messages.question_short') }}</span>
                         <span class="fw-semibold">{{ $item['pertanyaan'] }}</span>
                     </div>
                     <div class="mb-2">
-                        <span class="badge bg-label-success me-1">A</span>
+                        <span class="badge bg-label-success me-1">{{ __('messages.answer_short') }}</span>
                         <span>{{ $item['jawaban'] }}</span>
                     </div>
                     <small class="text-muted">

@@ -36,6 +36,16 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
         $this->ensureIsNotRateLimited();
 
+        if (Schema::hasColumn('t_user', 'is_active')) {
+            $akun = \App\Models\User::query()->where('email', $this->email)->first();
+
+            if ($akun && ! $akun->is_active) {
+                throw ValidationException::withMessages([
+                    'email' => __('messages.auth_user_inactive'),
+                ]);
+            }
+        }
+
         if (! Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
             RateLimiter::hit($this->throttleKey());
 
@@ -248,7 +258,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
         </div>
 
         {{-- Submit --}}
-        <button type="submit" class="sio-btn-submit"
+        <button type="submit" class="isk-btn-submit"
                 wire:loading.attr="disabled" wire:target="login">
             <span class="d-flex align-items-center justify-content-center gap-2">
                 <span wire:loading.remove wire:target="login">

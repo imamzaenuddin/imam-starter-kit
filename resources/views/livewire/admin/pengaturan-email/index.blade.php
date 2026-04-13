@@ -99,8 +99,8 @@ new #[Layout('components.layouts.app')] class extends Component {
         app(PengaturanEmailService::class)->terapkanKonfigurasiRuntime($pengaturan);
 
         app(LogAktivitasService::class)->catatManual(
-            'Pengaturan Email',
-            'Menyimpan konfigurasi pengiriman email',
+            __('messages.email_setting_module_name'),
+            __('messages.email_setting_log_save_config'),
             '/admin/pengaturan-email',
             ['pengaturan_email_id' => $pengaturan->id]
         );
@@ -144,8 +144,8 @@ new #[Layout('components.layouts.app')] class extends Component {
             });
 
             app(LogAktivitasService::class)->catatManual(
-                'Pengaturan Email',
-                'Uji kirim email ke ' . $data['emailUji'],
+                __('messages.email_setting_module_name'),
+                __('messages.email_setting_log_test_send', ['email' => $data['emailUji']]),
                 '/admin/pengaturan-email',
                 ['email_tujuan' => $data['emailUji']]
             );
@@ -184,55 +184,55 @@ new #[Layout('components.layouts.app')] class extends Component {
             <form wire:submit="simpan">
                 <div class="row g-3">
                     <div class="col-md-4">
-                        <label class="form-label">Mailer</label>
+                        <label class="form-label">{{ __('messages.email_mailer') }}</label>
                         <select wire:model="mailer" class="form-select">
-                            <option value="smtp">SMTP</option>
+                            <option value="smtp">{{ __('messages.email_mailer_smtp') }}</option>
                         </select>
                     </div>
 
                     <div class="col-md-4">
-                        <label class="form-label">Host SMTP</label>
-                        <input type="text" wire:model="host" class="form-control" placeholder="smtp.mailtrap.io">
+                        <label class="form-label">{{ __('messages.email_host_smtp') }}</label>
+                        <input type="text" wire:model="host" class="form-control" placeholder="{{ __('messages.email_host_smtp_placeholder') }}">
                     </div>
 
                     <div class="col-md-4">
-                        <label class="form-label">Port</label>
+                        <label class="form-label">{{ __('messages.email_port') }}</label>
                         <input type="number" wire:model="port" class="form-control" min="1" max="65535">
                     </div>
 
                     <div class="col-md-4">
-                        <label class="form-label">Enkripsi</label>
+                        <label class="form-label">{{ __('messages.email_encryption') }}</label>
                         <select wire:model="enkripsi" class="form-select">
-                            <option value="">Tanpa Enkripsi</option>
-                            <option value="tls">TLS</option>
-                            <option value="ssl">SSL</option>
-                            <option value="starttls">STARTTLS</option>
+                            <option value="">{{ __('messages.email_encryption_none') }}</option>
+                            <option value="tls">{{ __('messages.email_encryption_tls') }}</option>
+                            <option value="ssl">{{ __('messages.email_encryption_ssl') }}</option>
+                            <option value="starttls">{{ __('messages.email_encryption_starttls') }}</option>
                         </select>
                     </div>
 
                     <div class="col-md-4">
-                        <label class="form-label">Username SMTP</label>
+                        <label class="form-label">{{ __('messages.email_username_smtp') }}</label>
                         <input type="text" wire:model="username" class="form-control">
                     </div>
 
                     <div class="col-md-4">
-                        <label class="form-label">Password SMTP</label>
+                        <label class="form-label">{{ __('messages.email_password_smtp') }}</label>
                         <input type="password" wire:model="password" class="form-control" autocomplete="new-password">
                     </div>
 
                     <div class="col-md-4">
-                        <label class="form-label">From Address</label>
-                        <input type="email" wire:model="fromAddress" class="form-control" placeholder="noreply@domain.id">
+                        <label class="form-label">{{ __('messages.email_from_address') }}</label>
+                        <input type="email" wire:model="fromAddress" class="form-control" placeholder="{{ __('messages.email_from_address_placeholder') }}">
                     </div>
 
                     <div class="col-md-4">
-                        <label class="form-label">From Name</label>
-                        <input type="text" wire:model="fromName" class="form-control" placeholder="Sistem Informasi Organisasi">
+                        <label class="form-label">{{ __('messages.email_from_name') }}</label>
+                        <input type="text" wire:model="fromName" class="form-control" placeholder="{{ __('messages.email_from_name_placeholder') }}">
                     </div>
 
                     <div class="col-md-4">
-                        <label class="form-label">Reply-To (opsional)</label>
-                        <input type="email" wire:model="replyTo" class="form-control" placeholder="support@domain.id">
+                        <label class="form-label">{{ __('messages.email_reply_to_optional') }}</label>
+                        <input type="email" wire:model="replyTo" class="form-control" placeholder="{{ __('messages.email_reply_to_placeholder') }}">
                     </div>
 
                     <div class="col-12">
@@ -262,7 +262,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                 <div class="row g-3 align-items-end">
                     <div class="col-md-8">
                         <label class="form-label">{{ __('messages.email_test_target') }}</label>
-                        <input type="email" wire:model="emailUji" class="form-control" placeholder="contoh@email.com">
+                        <input type="email" wire:model="emailUji" class="form-control" placeholder="{{ __('messages.email_test_target_placeholder') }}">
                     </div>
                     <div class="col-md-4">
                         <button type="submit" class="btn btn-outline-primary w-100" wire:loading.attr="disabled" wire:target="ujiKirim">

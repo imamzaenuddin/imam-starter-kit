@@ -27,7 +27,15 @@ class Level extends Model
     public function menus(): BelongsToMany
     {
         return $this->belongsToMany(Menu::class, 'm_level_menu')
-            ->withPivot(['dapat_buat', 'dapat_lihat', 'dapat_ubah', 'dapat_hapus'])
+            ->withPivot([
+                'dapat_buat',
+                'dapat_lihat',
+                'dapat_ubah',
+                'dapat_hapus',
+                'dapat_backup',
+                'dapat_restore',
+                'dapat_hapus_backup',
+            ])
             ->withTimestamps();
     }
 

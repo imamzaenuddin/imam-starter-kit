@@ -40,6 +40,14 @@
         <!-- /Search -->
 
         <ul class="navbar-nav flex-row align-items-center ms-md-auto">
+            <!-- Notifications -->
+            @if (Auth::check())
+                <li class="nav-item me-3">
+                    <livewire:components.notification-dropdown />
+                </li>
+            @endif
+            <!-- /Notifications -->
+
             <li class="nav-item dropdown me-3">
                 <a class="nav-link dropdown-toggle" href="javascript:void(0);" data-bs-toggle="dropdown">
                     <img src="{{ $pathBendera($kodeAktif) }}" alt="Flag {{ strtoupper($kodeAktif) }}" class="rounded me-1" style="width:20px;height:14px;object-fit:cover;border:1px solid rgba(0,0,0,.12)">

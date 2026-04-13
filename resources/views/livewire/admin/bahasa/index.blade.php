@@ -35,7 +35,7 @@ new #[Layout('components.layouts.app')] class extends Component {
         }
 
         $jumlah = app(BahasaService::class)->sinkronkanDariFolder();
-        app(LogAktivitasService::class)->catatManual('Bahasa', 'Sinkronisasi folder bahasa', '/admin/bahasa', ['jumlah' => $jumlah]);
+        app(LogAktivitasService::class)->catatManual(__('messages.language_module_name'), __('messages.language_log_sync_folder'), '/admin/bahasa', ['jumlah' => $jumlah]);
         session()->flash('sukses', __('messages.sync_success_total', ['jumlah' => $jumlah]));
     }
 
@@ -76,7 +76,7 @@ new #[Layout('components.layouts.app')] class extends Component {
         }
 
         $data = $this->validate([
-            'kode' => 'required|string|max:10|regex:/^[a-z]{2}([_-][A-Z]{2})?$/|unique:bahasa,kode,' . ($this->editId ?? 'NULL'),
+          'kode' => 'required|string|max:10|regex:/^[a-z]{2}([_-][A-Z]{2})?$/|unique:m_bahasa,kode,' . ($this->editId ?? 'NULL'),
             'nama' => 'required|string|max:100',
             'namaNative' => 'nullable|string|max:100',
             'urutan' => 'required|integer|min:0|max:999',
@@ -105,9 +105,16 @@ new #[Layout('components.layouts.app')] class extends Component {
             $bahasa->update(['is_active' => true]);
         }
 
-        app(LogAktivitasService::class)->catatManual('Bahasa', ($this->editId ? 'Memperbarui' : 'Menambahkan') . ' bahasa ' . $bahasa->kode, '/admin/bahasa', [
+        app(LogAktivitasService::class)->catatManual(
+          __('messages.language_module_name'),
+          $this->editId
+            ? __('messages.language_log_update', ['kode' => $bahasa->kode])
+            : __('messages.language_log_add', ['kode' => $bahasa->kode]),
+          '/admin/bahasa',
+          [
             'bahasa_id' => $bahasa->id,
-        ]);
+          ]
+        );
 
         $this->showModal = false;
         $this->reset(['kode', 'nama', 'namaNative', 'urutan', 'isActive', 'isDefault', 'editId']);
@@ -124,7 +131,7 @@ new #[Layout('components.layouts.app')] class extends Component {
         $bahasa = Bahasa::findOrFail($id);
         $bahasa->update(['is_default' => true, 'is_active' => true]);
 
-        app(LogAktivitasService::class)->catatManual('Bahasa', 'Menjadikan default bahasa ' . $bahasa->kode, '/admin/bahasa', [
+        app(LogAktivitasService::class)->catatManual(__('messages.language_module_name'), __('messages.language_log_set_default', ['kode' => $bahasa->kode]), '/admin/bahasa', [
             'bahasa_id' => $bahasa->id,
         ]);
     }
@@ -142,7 +149,7 @@ new #[Layout('components.layouts.app')] class extends Component {
             return;
         }
 
-        app(LogAktivitasService::class)->catatManual('Bahasa', 'Menghapus bahasa ' . $bahasa->kode, '/admin/bahasa', [
+        app(LogAktivitasService::class)->catatManual(__('messages.language_module_name'), __('messages.language_log_delete', ['kode' => $bahasa->kode]), '/admin/bahasa', [
             'bahasa_id' => $bahasa->id,
         ]);
 

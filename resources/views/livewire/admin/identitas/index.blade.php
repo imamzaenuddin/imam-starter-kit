@@ -165,7 +165,7 @@ new #[Layout('components.layouts.app')] class extends Component {
         if ($this->editId) {
             $identitas = Identitas::findOrFail($this->editId);
             $identitas->update($payload);
-            app(LogAktivitasService::class)->catatManual('Identitas', 'Memperbarui identitas ' . $identitas->nama_aplikasi, '/admin/identitas', [
+            app(LogAktivitasService::class)->catatManual(__('messages.identity_module_name'), __('messages.identity_log_update', ['nama' => $identitas->nama_aplikasi]), '/admin/identitas', [
                 'identitas_id' => $identitas->id,
             ]);
         } else {
@@ -173,7 +173,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                 Identitas::query()->update(['is_active' => false]);
             }
             $identitas = Identitas::create($payload);
-            app(LogAktivitasService::class)->catatManual('Identitas', 'Menambahkan identitas ' . $identitas->nama_aplikasi, '/admin/identitas', [
+            app(LogAktivitasService::class)->catatManual(__('messages.identity_module_name'), __('messages.identity_log_add', ['nama' => $identitas->nama_aplikasi]), '/admin/identitas', [
                 'identitas_id' => $identitas->id,
             ]);
         }
@@ -198,7 +198,7 @@ new #[Layout('components.layouts.app')] class extends Component {
         Identitas::query()->update(['is_active' => false]);
         Identitas::whereKey($id)->update(['is_active' => true]);
         $identitas = Identitas::findOrFail($id);
-        app(LogAktivitasService::class)->catatManual('Identitas', 'Mengaktifkan identitas ' . $identitas->nama_aplikasi, '/admin/identitas', [
+        app(LogAktivitasService::class)->catatManual(__('messages.identity_module_name'), __('messages.identity_log_activate', ['nama' => $identitas->nama_aplikasi]), '/admin/identitas', [
             'identitas_id' => $identitas->id,
         ]);
         app(IdentitasService::class)->hapusCache();
@@ -211,7 +211,7 @@ new #[Layout('components.layouts.app')] class extends Component {
         }
 
         $data = Identitas::findOrFail($id);
-        app(LogAktivitasService::class)->catatManual('Identitas', 'Menghapus identitas ' . $data->nama_aplikasi, '/admin/identitas', [
+        app(LogAktivitasService::class)->catatManual(__('messages.identity_module_name'), __('messages.identity_log_delete', ['nama' => $data->nama_aplikasi]), '/admin/identitas', [
             'identitas_id' => $data->id,
         ]);
         if ($data->logo_path && Storage::disk('public')->exists($data->logo_path)) {
@@ -269,15 +269,15 @@ new #[Layout('components.layouts.app')] class extends Component {
         $this->mainColor = '#696cff';
         $this->secondaryColor = '#8592a3';
         $this->fiturLogin = [
-            'Manajemen Anggota',
-            'Laporan Real-time',
-            'Keamanan Terjamin',
-            'Akses Multi-peran',
+            __('messages.identity_default_feature_1'),
+            __('messages.identity_default_feature_2'),
+            __('messages.identity_default_feature_3'),
+            __('messages.identity_default_feature_4'),
         ];
         $this->statistikLogin = [
-            ['nilai' => '500+', 'label' => 'Anggota Aktif'],
-            ['nilai' => '50+', 'label' => 'Departemen'],
-            ['nilai' => '99%', 'label' => 'Uptime'],
+            ['nilai' => '500+', 'label' => __('messages.identity_default_stat_label_1')],
+            ['nilai' => '50+', 'label' => __('messages.identity_default_stat_label_2')],
+            ['nilai' => '99%', 'label' => __('messages.identity_default_stat_label_3')],
         ];
         $this->isActive = true;
     }
@@ -335,7 +335,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                             <td>{{ $identitasList->firstItem() + $loop->index }}</td>
                             <td>
                                 @if ($item->logo_path)
-                                    <img src="{{ asset('storage/' . $item->logo_path) }}" alt="Logo {{ $item->nama_aplikasi }}"
+                                    <img src="{{ asset('storage/' . $item->logo_path) }}" alt="{{ __('messages.identity_logo_alt', ['name' => $item->nama_aplikasi]) }}"
                                          class="rounded mb-1" style="height:32px;width:32px;object-fit:cover;">
                                 @endif
                                 <div class="fw-semibold">{{ $item->nama_aplikasi }}</div>
@@ -353,7 +353,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                             </td>
                             <td>
                                 <div>{{ $item->email ?: '-' }}</div>
-                                <small class="text-muted d-block">WA: {{ $item->wa_center ?: '-' }}</small>
+                                <small class="text-muted d-block">{{ __('messages.wa_center') }}: {{ $item->wa_center ?: '-' }}</small>
                             </td>
                             <td>
                                 @if ($item->website)
@@ -421,17 +421,17 @@ new #[Layout('components.layouts.app')] class extends Component {
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">{{ __('messages.app_name') }} <span class="text-danger">*</span></label>
-                                    <input wire:model="namaAplikasi" type="text" class="form-control @error('namaAplikasi') is-invalid @enderror" placeholder="Contoh: Sistem Informasi Organisasi">
+                                    <input wire:model="namaAplikasi" type="text" class="form-control @error('namaAplikasi') is-invalid @enderror" placeholder="{{ __('messages.identity_app_name_placeholder') }}">
                                     @error('namaAplikasi') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label fw-semibold">{{ __('messages.app_abbreviation') }}</label>
-                                    <input wire:model="singkatanAplikasi" type="text" class="form-control @error('singkatanAplikasi') is-invalid @enderror" placeholder="Contoh: SIO">
+                                    <input wire:model="singkatanAplikasi" type="text" class="form-control @error('singkatanAplikasi') is-invalid @enderror" placeholder="{{ __('messages.identity_app_abbreviation_placeholder') }}">
                                     @error('singkatanAplikasi') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label fw-semibold">{{ __('messages.version') }} <span class="text-danger">*</span></label>
-                                    <input wire:model="versi" type="text" class="form-control @error('versi') is-invalid @enderror" placeholder="1.0.0">
+                                    <input wire:model="versi" type="text" class="form-control @error('versi') is-invalid @enderror" placeholder="{{ __('messages.identity_version_placeholder') }}">
                                     @error('versi') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
@@ -445,13 +445,13 @@ new #[Layout('components.layouts.app')] class extends Component {
                                     <label class="form-label fw-semibold">{{ __('messages.logo_preview') }}</label>
                                     <div class="border rounded p-2 d-flex align-items-center gap-2" style="min-height:72px">
                                         @if ($logoUpload)
-                                            <img src="{{ $logoUpload->temporaryUrl() }}" alt="Preview Logo" style="height:48px;width:48px;object-fit:cover" class="rounded">
+                                            <img src="{{ $logoUpload->temporaryUrl() }}" alt="{{ __('messages.identity_logo_preview_alt') }}" style="height:48px;width:48px;object-fit:cover" class="rounded">
                                             <span class="text-muted small">{{ __('messages.new_upload_preview') }}</span>
                                         @elseif ($logoPath)
-                                            <img src="{{ asset('storage/' . $logoPath) }}" alt="Logo Saat Ini" style="height:48px;width:48px;object-fit:cover" class="rounded">
+                                            <img src="{{ asset('storage/' . $logoPath) }}" alt="{{ __('messages.identity_current_logo_alt') }}" style="height:48px;width:48px;object-fit:cover" class="rounded">
                                             <span class="text-muted small">{{ __('messages.saved_logo') }}</span>
                                         @else
-                                            <img src="{{ asset('assets/img/identitas/gedung-default.svg') }}" alt="Default Gedung" style="height:48px;width:48px;object-fit:cover" class="rounded">
+                                            <img src="{{ asset('assets/img/identitas/gedung-default.svg') }}" alt="{{ __('messages.identity_default_building_alt') }}" style="height:48px;width:48px;object-fit:cover" class="rounded">
                                             <span class="text-muted small">{{ __('messages.fallback_building_logo') }}</span>
                                         @endif
                                     </div>
@@ -459,41 +459,41 @@ new #[Layout('components.layouts.app')] class extends Component {
 
                                 <div class="col-md-4">
                                     <label class="form-label fw-semibold">{{ __('messages.email') }}</label>
-                                    <input wire:model="email" type="email" class="form-control @error('email') is-invalid @enderror" placeholder="helpdesk@domain.id">
+                                    <input wire:model="email" type="email" class="form-control @error('email') is-invalid @enderror" placeholder="{{ __('messages.identity_email_placeholder') }}">
                                     @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-semibold">{{ __('messages.wa_center') }}</label>
-                                    <input wire:model="waCenter" type="text" class="form-control" placeholder="6281234567890">
+                                    <input wire:model="waCenter" type="text" class="form-control" placeholder="{{ __('messages.identity_wa_placeholder') }}">
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-semibold">{{ __('messages.phone') }}</label>
-                                    <input wire:model="telepon" type="text" class="form-control" placeholder="(021) 555-0101">
+                                    <input wire:model="telepon" type="text" class="form-control" placeholder="{{ __('messages.identity_phone_placeholder') }}">
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">{{ __('messages.website') }}</label>
-                                    <input wire:model="website" type="text" class="form-control" placeholder="https://domain.id">
+                                    <input wire:model="website" type="text" class="form-control" placeholder="{{ __('messages.identity_website_placeholder') }}">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">{{ __('messages.address') }}</label>
-                                    <input wire:model="alamat" type="text" class="form-control" placeholder="Alamat kantor/sekretariat">
+                                    <input wire:model="alamat" type="text" class="form-control" placeholder="{{ __('messages.identity_address_placeholder') }}">
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">{{ __('messages.icon_boxicons') }}</label>
-                                    <input wire:model="icon" type="text" class="form-control" placeholder="bx bx-buildings">
+                                    <input wire:model="icon" type="text" class="form-control" placeholder="{{ __('messages.identity_icon_placeholder') }}">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">{{ __('messages.slogan') }}</label>
-                                    <input wire:model="slogan" type="text" class="form-control" placeholder="Tagline singkat aplikasi">
+                                    <input wire:model="slogan" type="text" class="form-control" placeholder="{{ __('messages.identity_slogan_placeholder') }}">
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">{{ __('messages.main_color') }}</label>
                                     <div class="input-group">
                                         <span class="input-group-text p-1">
-                                            <input wire:model.live="mainColor" type="color" class="form-control form-control-color border-0 p-0" title="Pilih main color" style="width:28px;height:28px;min-width:28px">
+                                            <input wire:model.live="mainColor" type="color" class="form-control form-control-color border-0 p-0" title="{{ __('messages.identity_pick_main_color') }}" style="width:28px;height:28px;min-width:28px">
                                         </span>
                                         <input wire:model.live="mainColor" type="text" class="form-control @error('mainColor') is-invalid @enderror" placeholder="#696cff">
                                         @error('mainColor') <div class="invalid-feedback">{{ __('messages.hex_color_format_error', ['contoh' => '#696cff']) }}</div> @enderror
@@ -502,7 +502,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                                         @foreach ($warnaPreset as $warna)
                                             <button type="button" class="btn btn-sm p-0 border rounded-circle"
                                                     wire:click="pilihMainColor('{{ $warna }}')"
-                                                    title="Pilih {{ $warna }}"
+                                                    title="{{ __('messages.identity_pick_color', ['color' => $warna]) }}"
                                                     style="width:20px;height:20px;background:{{ $warna }}"></button>
                                         @endforeach
                                     </div>
@@ -511,7 +511,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                                     <label class="form-label fw-semibold">{{ __('messages.secondary_color') }}</label>
                                     <div class="input-group">
                                         <span class="input-group-text p-1">
-                                            <input wire:model.live="secondaryColor" type="color" class="form-control form-control-color border-0 p-0" title="Pilih secondary color" style="width:28px;height:28px;min-width:28px">
+                                            <input wire:model.live="secondaryColor" type="color" class="form-control form-control-color border-0 p-0" title="{{ __('messages.identity_pick_secondary_color') }}" style="width:28px;height:28px;min-width:28px">
                                         </span>
                                         <input wire:model.live="secondaryColor" type="text" class="form-control @error('secondaryColor') is-invalid @enderror" placeholder="#8592a3">
                                         @error('secondaryColor') <div class="invalid-feedback">{{ __('messages.hex_color_format_error', ['contoh' => '#8592a3']) }}</div> @enderror
@@ -520,7 +520,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                                         @foreach ($warnaPreset as $warna)
                                             <button type="button" class="btn btn-sm p-0 border rounded-circle"
                                                     wire:click="pilihSecondaryColor('{{ $warna }}')"
-                                                    title="Pilih {{ $warna }}"
+                                                    title="{{ __('messages.identity_pick_color', ['color' => $warna]) }}"
                                                     style="width:20px;height:20px;background:{{ $warna }}"></button>
                                         @endforeach
                                     </div>
@@ -546,41 +546,41 @@ new #[Layout('components.layouts.app')] class extends Component {
 
                                 <div class="col-12">
                                     <label class="form-label fw-semibold">{{ __('messages.description') }}</label>
-                                    <textarea wire:model="deskripsi" rows="3" class="form-control" placeholder="Deskripsi singkat aplikasi"></textarea>
+                                    <textarea wire:model="deskripsi" rows="3" class="form-control" placeholder="{{ __('messages.identity_description_placeholder') }}"></textarea>
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label fw-semibold">{{ __('messages.login_feature_pills') }}</label>
                                     <div class="row g-2">
                                         <div class="col-md-6">
-                                            <input wire:model="fiturLogin.0" type="text" class="form-control" placeholder="Fitur 1">
+                                            <input wire:model="fiturLogin.0" type="text" class="form-control" placeholder="{{ __('messages.identity_feature_placeholder', ['number' => 1]) }}">
                                         </div>
                                         <div class="col-md-6">
-                                            <input wire:model="fiturLogin.1" type="text" class="form-control" placeholder="Fitur 2">
+                                            <input wire:model="fiturLogin.1" type="text" class="form-control" placeholder="{{ __('messages.identity_feature_placeholder', ['number' => 2]) }}">
                                         </div>
                                         <div class="col-md-6">
-                                            <input wire:model="fiturLogin.2" type="text" class="form-control" placeholder="Fitur 3">
+                                            <input wire:model="fiturLogin.2" type="text" class="form-control" placeholder="{{ __('messages.identity_feature_placeholder', ['number' => 3]) }}">
                                         </div>
                                         <div class="col-md-6">
-                                            <input wire:model="fiturLogin.3" type="text" class="form-control" placeholder="Fitur 4">
+                                            <input wire:model="fiturLogin.3" type="text" class="form-control" placeholder="{{ __('messages.identity_feature_placeholder', ['number' => 4]) }}">
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label fw-semibold">{{ __('messages.login_statistics') }}</label>
                                     <div class="row g-2 mb-2">
-                                        <div class="col-md-3"><input wire:model="statistikLogin.0.nilai" type="text" class="form-control" placeholder="Nilai 1"></div>
-                                        <div class="col-md-3"><input wire:model="statistikLogin.0.label" type="text" class="form-control" placeholder="Label 1"></div>
-                                        <div class="col-md-3"><input wire:model="statistikLogin.1.nilai" type="text" class="form-control" placeholder="Nilai 2"></div>
-                                        <div class="col-md-3"><input wire:model="statistikLogin.1.label" type="text" class="form-control" placeholder="Label 2"></div>
+                                        <div class="col-md-3"><input wire:model="statistikLogin.0.nilai" type="text" class="form-control" placeholder="{{ __('messages.identity_stat_value_placeholder', ['number' => 1]) }}"></div>
+                                        <div class="col-md-3"><input wire:model="statistikLogin.0.label" type="text" class="form-control" placeholder="{{ __('messages.identity_stat_label_placeholder', ['number' => 1]) }}"></div>
+                                        <div class="col-md-3"><input wire:model="statistikLogin.1.nilai" type="text" class="form-control" placeholder="{{ __('messages.identity_stat_value_placeholder', ['number' => 2]) }}"></div>
+                                        <div class="col-md-3"><input wire:model="statistikLogin.1.label" type="text" class="form-control" placeholder="{{ __('messages.identity_stat_label_placeholder', ['number' => 2]) }}"></div>
                                     </div>
                                     <div class="row g-2">
-                                        <div class="col-md-3"><input wire:model="statistikLogin.2.nilai" type="text" class="form-control" placeholder="Nilai 3"></div>
-                                        <div class="col-md-9"><input wire:model="statistikLogin.2.label" type="text" class="form-control" placeholder="Label 3"></div>
+                                        <div class="col-md-3"><input wire:model="statistikLogin.2.nilai" type="text" class="form-control" placeholder="{{ __('messages.identity_stat_value_placeholder', ['number' => 3]) }}"></div>
+                                        <div class="col-md-9"><input wire:model="statistikLogin.2.label" type="text" class="form-control" placeholder="{{ __('messages.identity_stat_label_placeholder', ['number' => 3]) }}"></div>
                                     </div>
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label fw-semibold">{{ __('messages.footer_text') }}</label>
-                                    <input wire:model="footerText" type="text" class="form-control" placeholder="Teks footer aplikasi">
+                                    <input wire:model="footerText" type="text" class="form-control" placeholder="{{ __('messages.identity_footer_placeholder') }}">
                                 </div>
 
                                 <div class="col-12">

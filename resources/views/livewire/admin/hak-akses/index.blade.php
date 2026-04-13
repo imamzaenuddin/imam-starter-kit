@@ -46,6 +46,9 @@ new #[Layout('components.layouts.app')] class extends Component {
                 'buat'   => false,
                 'ubah'   => false,
                 'hapus'  => false,
+            'backup' => false,
+            'restore' => false,
+            'hapus_backup' => false,
             ];
         }
 
@@ -56,6 +59,9 @@ new #[Layout('components.layouts.app')] class extends Component {
                 'buat'   => (bool) $menu->pivot->dapat_buat,
                 'ubah'   => (bool) $menu->pivot->dapat_ubah,
                 'hapus'  => (bool) $menu->pivot->dapat_hapus,
+            'backup' => (bool) ($menu->pivot->dapat_backup ?? false),
+            'restore' => (bool) ($menu->pivot->dapat_restore ?? false),
+            'hapus_backup' => (bool) ($menu->pivot->dapat_hapus_backup ?? false),
             ];
         }
     }
@@ -66,16 +72,34 @@ new #[Layout('components.layouts.app')] class extends Component {
         if (! $this->selectedLevel) return;
 
         $level = Level::findOrFail($this->selectedLevel);
+        $menuBackupRestoreId = (int) (Menu::query()->where('url', '/admin/backup-restore')->value('id') ?? 0);
 
         $sync = [];
         foreach ($this->permissions as $menuId => $hak) {
+            $isMenuBackupRestore = ((int) $menuId === $menuBackupRestoreId);
+
+            $izinBackup = $isMenuBackupRestore ? (bool) ($hak['backup'] ?? false) : false;
+            $izinRestore = $isMenuBackupRestore ? (bool) ($hak['restore'] ?? false) : false;
+            $izinHapusBackup = $isMenuBackupRestore ? (bool) ($hak['hapus_backup'] ?? false) : false;
+
             // Hanya simpan jika minimal 'lihat' aktif
-            if ($hak['lihat'] || $hak['buat'] || $hak['ubah'] || $hak['hapus']) {
+            if (
+                $hak['lihat'] ||
+                $hak['buat'] ||
+                $hak['ubah'] ||
+                $hak['hapus'] ||
+                $izinBackup ||
+                $izinRestore ||
+                $izinHapusBackup
+            ) {
                 $sync[(int) $menuId] = [
                     'dapat_lihat' => (bool) $hak['lihat'],
                     'dapat_buat'  => (bool) $hak['buat'],
                     'dapat_ubah'  => (bool) $hak['ubah'],
                     'dapat_hapus' => (bool) $hak['hapus'],
+                    'dapat_backup' => $izinBackup,
+                    'dapat_restore' => $izinRestore,
+                    'dapat_hapus_backup' => $izinHapusBackup,
                 ];
             }
         }
@@ -85,7 +109,7 @@ new #[Layout('components.layouts.app')] class extends Component {
 
         // Hapus cache menu semua user di level ini
         app(MenuService::class)->hapusCacheLevel($level->id);
-        app(LogAktivitasService::class)->catatManual('Hak Akses', 'Memperbarui hak akses untuk level ' . $level->nama_level, '/admin/hak-akses', [
+        app(LogAktivitasService::class)->catatManual(__('messages.access_mapping_module_name'), __('messages.access_mapping_log_update', ['level' => $level->nama_level]), '/admin/hak-akses', [
           'level_id' => $level->id,
           'jumlah_menu' => count($sync),
         ]);
@@ -170,10 +194,22 @@ new #[Layout('components.layouts.app')] class extends Component {
                 <th class="text-center">
                   <span class="badge bg-label-danger">{{ __('messages.delete') }}</span>
                 </th>
+                <th class="text-center">
+                  <span class="badge bg-label-info">{{ __('messages.backup_permission_backup') }}</span>
+                </th>
+                <th class="text-center">
+                  <span class="badge bg-label-warning">{{ __('messages.backup_permission_restore') }}</span>
+                </th>
+                <th class="text-center">
+                  <span class="badge bg-label-danger">{{ __('messages.backup_permission_delete') }}</span>
+                </th>
               </tr>
             </thead>
             <tbody>
               @foreach ($rootMenus as $root)
+                @php
+                    $isMenuBackupRoot = $root->url === '/admin/backup-restore';
+                @endphp
                 {{-- Baris menu root --}}
                 <tr class="table-light">
                   <td>
@@ -184,17 +220,24 @@ new #[Layout('components.layouts.app')] class extends Component {
                       <span class="fw-semibold">{{ $root->nama }}</span>
                     </div>
                   </td>
-                  @foreach (['lihat','buat','ubah','hapus'] as $hak)
+                  @foreach (['lihat','buat','ubah','hapus','backup','restore','hapus_backup'] as $hak)
                     <td class="text-center">
-                      <input type="checkbox"
-                             class="form-check-input"
-                             wire:model="permissions.{{ $root->id }}.{{ $hak }}">
+                      @if (in_array($hak, ['backup', 'restore', 'hapus_backup'], true) && ! $isMenuBackupRoot)
+                        <span class="text-muted">-</span>
+                      @else
+                        <input type="checkbox"
+                               class="form-check-input"
+                               wire:model="permissions.{{ $root->id }}.{{ $hak }}">
+                      @endif
                     </td>
                   @endforeach
                 </tr>
 
                 {{-- Baris sub-menu --}}
                 @foreach ($root->children as $child)
+                  @php
+                      $isMenuBackupChild = $child->url === '/admin/backup-restore';
+                  @endphp
                   <tr>
                     <td style="padding-left:2rem">
                       <div class="d-flex align-items-center gap-2 text-muted">
@@ -205,11 +248,15 @@ new #[Layout('components.layouts.app')] class extends Component {
                         {{ $child->nama }}
                       </div>
                     </td>
-                    @foreach (['lihat','buat','ubah','hapus'] as $hak)
+                    @foreach (['lihat','buat','ubah','hapus','backup','restore','hapus_backup'] as $hak)
                       <td class="text-center">
-                        <input type="checkbox"
-                               class="form-check-input"
-                               wire:model="permissions.{{ $child->id }}.{{ $hak }}">
+                        @if (in_array($hak, ['backup', 'restore', 'hapus_backup'], true) && ! $isMenuBackupChild)
+                          <span class="text-muted">-</span>
+                        @else
+                          <input type="checkbox"
+                                 class="form-check-input"
+                                 wire:model="permissions.{{ $child->id }}.{{ $hak }}">
+                        @endif
                       </td>
                     @endforeach
                   </tr>

@@ -51,7 +51,7 @@ new #[Layout('components.layouts.app')] class extends Component {
             'nama'     => 'required|string|max:100',
             'url'      => 'nullable|string|max:255',
             'icon'     => 'nullable|string|max:100',
-            'parentId' => 'nullable|exists:menus,id',
+          'parentId' => 'nullable|exists:m_menu,id',
             'urutan'   => 'required|integer|min:0',
             'isActive' => 'boolean',
         ]);
@@ -68,12 +68,12 @@ new #[Layout('components.layouts.app')] class extends Component {
         if ($this->editId) {
           $menu = Menu::findOrFail($this->editId);
           $menu->update($payload);
-          app(LogAktivitasService::class)->catatManual('Menu', 'Memperbarui menu ' . $menu->nama, '/admin/menus', [
+          app(LogAktivitasService::class)->catatManual(__('messages.menu_module_name'), __('messages.menu_log_update', ['nama' => $menu->nama]), '/admin/menus', [
             'menu_id' => $menu->id,
           ]);
         } else {
           $menu = Menu::create($payload);
-          app(LogAktivitasService::class)->catatManual('Menu', 'Menambahkan menu ' . $menu->nama, '/admin/menus', [
+          app(LogAktivitasService::class)->catatManual(__('messages.menu_module_name'), __('messages.menu_log_add', ['nama' => $menu->nama]), '/admin/menus', [
             'menu_id' => $menu->id,
           ]);
         }
@@ -86,7 +86,7 @@ new #[Layout('components.layouts.app')] class extends Component {
     public function hapus(int $id): void
     {
       $menu = Menu::findOrFail($id);
-      app(LogAktivitasService::class)->catatManual('Menu', 'Menghapus menu ' . $menu->nama, '/admin/menus', [
+      app(LogAktivitasService::class)->catatManual(__('messages.menu_module_name'), __('messages.menu_log_delete', ['nama' => $menu->nama]), '/admin/menus', [
         'menu_id' => $menu->id,
       ]);
       $menu->delete();
@@ -229,7 +229,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                 <label class="form-label fw-semibold">{{ __('messages.icon') }}
                   <a href="https://boxicons.com" target="_blank" class="ms-1" style="font-size:.75rem">(Boxicons)</a>
                 </label>
-                <input wire:model="icon" type="text" class="form-control" placeholder="bx bx-home">
+                <input wire:model="icon" type="text" class="form-control" placeholder="{{ __('messages.menu_icon_placeholder') }}">
               </div>
 
               <div class="mb-3">

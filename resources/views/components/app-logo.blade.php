@@ -1,6 +1,6 @@
 @php
 	$identitas = app(\App\Services\IdentitasService::class)->aktif();
-	$namaAplikasi = $identitas?->nama_aplikasi ?? 'Sistem Informasi Organisasi';
+	$namaAplikasi = $identitas?->nama_aplikasi ?? 'ISK';
 	$labelBrand = $identitas?->singkatan_aplikasi ?: $namaAplikasi;
 @endphp
 <span class="app-brand-logo demo"><x-app-logo-icon /></span>

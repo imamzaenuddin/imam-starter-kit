@@ -21,6 +21,14 @@
 
 ---
 
+## PERINTAH
+
+php artisan optimize:clear
+php artisan view:clear
+php artisan config:clear
+php artisan route:clear
+php artisan cache:clear
+
 ## 2. KONVENSI FILE & FOLDER
 
 ### Livewire Volt (Komponen Halaman)

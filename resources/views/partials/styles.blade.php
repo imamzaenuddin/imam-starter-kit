@@ -78,6 +78,38 @@
 		background-color: color-mix(in srgb, var(--sio-main-color) 14%, #ffffff) !important;
 	}
 
+	/* Sidebar menu panjang: aktifkan scroll vertikal pada daftar menu */
+	.layout-menu {
+		height: 100vh;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.layout-menu .app-brand,
+	.layout-menu .menu-inner-shadow {
+		flex: 0 0 auto;
+	}
+
+	.layout-menu .menu-inner {
+		flex: 1 1 auto;
+		overflow-y: auto;
+		overflow-x: hidden;
+		min-height: 0;
+	}
+
+	.layout-menu .menu-inner::-webkit-scrollbar {
+		width: 8px;
+	}
+
+	.layout-menu .menu-inner::-webkit-scrollbar-thumb {
+		background-color: color-mix(in srgb, var(--sio-secondary-color) 45%, #ffffff);
+		border-radius: 999px;
+	}
+
+	.layout-menu .menu-inner::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
 	.form-check-input:checked {
 		background-color: var(--sio-main-color) !important;
 		border-color: var(--sio-main-color) !important;

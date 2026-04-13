@@ -38,6 +38,7 @@ class User extends Authenticatable
         'kewarganegaraan',
         'foto_profil',
         'level_id',
+        'is_active',
         'password',
     ];
 
@@ -51,6 +52,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'tanggal_lahir' => 'date',
+            'is_active' => 'boolean',
             'password'          => 'hashed',
         ];
     }
@@ -78,6 +80,27 @@ class User extends Authenticatable
             ->where('url', $menuUrl)
             ->where('is_active', true)
             ->wherePivot($izin, true)
+            ->exists();
+    }
+
+    public function bisaAksiSensitif(string $menuUrl, string $aksi): bool
+    {
+        $kolomIzin = match ($aksi) {
+            'backup' => 'dapat_backup',
+            'restore' => 'dapat_restore',
+            'hapus_backup' => 'dapat_hapus_backup',
+            default => null,
+        };
+
+        if (! $kolomIzin || ! $this->level_id) {
+            return false;
+        }
+
+        return $this->level
+            ->menus()
+            ->where('url', $menuUrl)
+            ->where('is_active', true)
+            ->wherePivot($kolomIzin, true)
             ->exists();
     }
 

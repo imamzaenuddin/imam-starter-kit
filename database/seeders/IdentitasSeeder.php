@@ -12,8 +12,8 @@ class IdentitasSeeder extends Seeder
     Identitas::updateOrCreate(
       ['id' => 1],
       [
-        'nama_aplikasi' => 'Starter-Kit-SIstem',
-        'singkatan_aplikasi' => 'SIO',
+        'nama_aplikasi' => 'Imam Starter-Kit',
+        'singkatan_aplikasi' => 'ISK',
         'versi'         => '1.0.0',
         'icon'          => 'bx bx-buildings',
         'logo_path'     => null,
@@ -26,7 +26,7 @@ class IdentitasSeeder extends Seeder
         'alamat'        => 'Jl. Organisasi No. 1, Jakarta',
         'slogan'        => 'Terintegrasi, Akurat, dan Adaptif',
         'deskripsi'     => 'Platform manajemen organisasi untuk mengelola data anggota, menu akses, dan pelaporan secara terpusat.',
-        'footer_text'   => 'Starter-Kit-SIstem',
+        'footer_text'   => 'Imam Starter-Kit',
         'fitur_login'   => [
           'Manajemen Anggota',
           'Laporan Real-time',

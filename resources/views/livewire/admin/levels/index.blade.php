@@ -47,7 +47,7 @@ new #[Layout('components.layouts.app')] class extends Component {
     public function simpan(): void
     {
         $data = $this->validate([
-            'namaLevel' => 'required|string|max:50|unique:levels,nama_level,' . ($this->editId ?? 'NULL'),
+          'namaLevel' => 'required|string|max:50|unique:m_level,nama_level,' . ($this->editId ?? 'NULL'),
             'deskripsi' => 'nullable|string|max:255',
             'isActive'  => 'boolean',
         ]);
@@ -59,7 +59,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                 'deskripsi'  => $data['deskripsi'],
                 'is_active'  => $data['isActive'],
             ]);
-          app(LogAktivitasService::class)->catatManual('Level', 'Memperbarui level ' . $level->nama_level, '/admin/levels', [
+          app(LogAktivitasService::class)->catatManual(__('messages.level_module_name'), __('messages.level_log_update', ['nama' => $level->nama_level]), '/admin/levels', [
             'level_id' => $level->id,
           ]);
             // Hapus cache menu semua user di level ini
@@ -70,7 +70,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                 'deskripsi'  => $data['deskripsi'],
                 'is_active'  => $data['isActive'],
             ]);
-          app(LogAktivitasService::class)->catatManual('Level', 'Menambahkan level ' . $level->nama_level, '/admin/levels', [
+          app(LogAktivitasService::class)->catatManual(__('messages.level_module_name'), __('messages.level_log_add', ['nama' => $level->nama_level]), '/admin/levels', [
             'level_id' => $level->id,
           ]);
         }
@@ -84,7 +84,7 @@ new #[Layout('components.layouts.app')] class extends Component {
     public function hapus(int $id): void
     {
         $level = Level::findOrFail($id);
-      app(LogAktivitasService::class)->catatManual('Level', 'Menghapus level ' . $level->nama_level, '/admin/levels', [
+      app(LogAktivitasService::class)->catatManual(__('messages.level_module_name'), __('messages.level_log_delete', ['nama' => $level->nama_level]), '/admin/levels', [
         'level_id' => $level->id,
       ]);
         app(MenuService::class)->hapusCacheLevel($level->id);

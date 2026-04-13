@@ -91,6 +91,27 @@ class LevelMenuSeeder extends Seeder
       'is_active' => true,
     ]);
 
+    $mUsers = Menu::firstOrCreate(['nama' => 'Kelola User', 'parent_id' => $administrasi->id], [
+      'url'       => '/admin/users',
+      'icon'      => 'bx bx-user-pin',
+      'urutan'    => 18,
+      'is_active' => true,
+    ]);
+
+    $mMedia = Menu::firstOrCreate(['nama' => 'Kelola Media', 'parent_id' => $administrasi->id], [
+      'url'       => '/admin/media',
+      'icon'      => 'bx bx-images',
+      'urutan'    => 19,
+      'is_active' => true,
+    ]);
+
+    $mBackupRestore = Menu::firstOrCreate(['nama' => 'Backup & Restore', 'parent_id' => $administrasi->id], [
+      'url'       => '/admin/backup-restore',
+      'icon'      => 'bx bx-data',
+      'urutan'    => 20,
+      'is_active' => true,
+    ]);
+
     // --- Anggota (parent) ---
     $mAnggota = Menu::firstOrCreate(['nama' => 'Anggota', 'parent_id' => null], [
       'url'       => '/anggota',
@@ -134,30 +155,69 @@ class LevelMenuSeeder extends Seeder
           'dapat_buat'  => true,
           'dapat_ubah'  => true,
           'dapat_hapus' => true,
+          'dapat_backup' => true,
+          'dapat_restore' => true,
+          'dapat_hapus_backup' => true,
         ],
       ]);
     }
 
     // Admin: kelola anggota & laporan, tanpa menu administrasi sistem
-    foreach ([$administrasi, $mLevel, $mMenu, $mMapping, $mIdentitas, $mDashboard, $mBahasa, $mPengaturanEmail, $mAnggota, $laporan, $lAktivitas, $lChatAi] as $m) {
+    foreach ([$administrasi, $mLevel, $mMenu, $mMapping, $mIdentitas, $mDashboard, $mBahasa, $mPengaturanEmail, $mUsers, $mMedia, $mBackupRestore, $mAnggota, $laporan, $lAktivitas, $lChatAi] as $m) {
       $akses = match ($m->id) {
+        $mUsers->id => [
+          'dapat_lihat' => true,
+          'dapat_buat' => true,
+          'dapat_ubah'  => true,
+          'dapat_hapus' => true,
+          'dapat_backup' => false,
+          'dapat_restore' => false,
+          'dapat_hapus_backup' => false,
+        ],
+        $mMedia->id => [
+          'dapat_lihat' => true,
+          'dapat_buat' => true,
+          'dapat_ubah'  => true,
+          'dapat_hapus' => true,
+          'dapat_backup' => false,
+          'dapat_restore' => false,
+          'dapat_hapus_backup' => false,
+        ],
+        $mBackupRestore->id => [
+          'dapat_lihat' => false,
+          'dapat_buat' => false,
+          'dapat_ubah'  => false,
+          'dapat_hapus' => false,
+          'dapat_backup' => false,
+          'dapat_restore' => false,
+          'dapat_hapus_backup' => false,
+        ],
         $mPengaturanEmail->id => [
           'dapat_lihat' => true,
           'dapat_buat' => false,
           'dapat_ubah'  => true,
           'dapat_hapus' => false,
+          'dapat_backup' => false,
+          'dapat_restore' => false,
+          'dapat_hapus_backup' => false,
         ],
         $administrasi->id, $mLevel->id, $mMenu->id, $mMapping->id, $mIdentitas->id, $mDashboard->id, $mBahasa->id => [
           'dapat_lihat' => false,
           'dapat_buat' => false,
           'dapat_ubah'  => false,
           'dapat_hapus' => false,
+          'dapat_backup' => false,
+          'dapat_restore' => false,
+          'dapat_hapus_backup' => false,
         ],
         default => [
           'dapat_lihat' => true,
           'dapat_buat' => true,
           'dapat_ubah'  => true,
           'dapat_hapus' => false,
+          'dapat_backup' => false,
+          'dapat_restore' => false,
+          'dapat_hapus_backup' => false,
         ],
       };
       $admin->menus()->syncWithoutDetaching([$m->id => $akses]);
@@ -170,18 +230,27 @@ class LevelMenuSeeder extends Seeder
         'dapat_buat' => false,
         'dapat_ubah'  => false,
         'dapat_hapus' => false,
+        'dapat_backup' => false,
+        'dapat_restore' => false,
+        'dapat_hapus_backup' => false,
       ],
       $lAktivitas->id => [
         'dapat_lihat' => true,
         'dapat_buat' => false,
         'dapat_ubah'  => false,
         'dapat_hapus' => false,
+        'dapat_backup' => false,
+        'dapat_restore' => false,
+        'dapat_hapus_backup' => false,
       ],
       $lChatAi->id => [
         'dapat_lihat' => true,
         'dapat_buat' => false,
         'dapat_ubah'  => false,
         'dapat_hapus' => false,
+        'dapat_backup' => false,
+        'dapat_restore' => false,
+        'dapat_hapus_backup' => false,
       ],
     ]);
 
@@ -191,18 +260,21 @@ class LevelMenuSeeder extends Seeder
     User::firstOrCreate(['email' => 'superadmin@sio.id'], [
       'name'     => 'Super Admin',
       'level_id' => $superadmin->id,
+      'is_active' => true,
       'password' => Hash::make('password'),
     ]);
 
     User::firstOrCreate(['email' => 'admin@sio.id'], [
       'name'     => 'Admin Umum',
       'level_id' => $admin->id,
+      'is_active' => true,
       'password' => Hash::make('password'),
     ]);
 
     User::firstOrCreate(['email' => 'anggota@sio.id'], [
       'name'     => 'Budi Santoso',
       'level_id' => $anggota->id,
+      'is_active' => true,
       'password' => Hash::make('password'),
     ]);
   }

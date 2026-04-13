@@ -41,11 +41,11 @@ new #[Layout('components.layouts.app')] class extends Component {
     public bool $isActive = true;
     public array $selectedLevels = [];
     public array $presetPaletChart = [
-      'Tema Utama' => ['#696cff', '#03c3ec', '#71dd37', '#ffab00'],
-      'Laut Cerah' => ['#0ea5e9', '#06b6d4', '#14b8a6', '#22c55e'],
-      'Sunset' => ['#f97316', '#ef4444', '#ec4899', '#8b5cf6'],
-      'Emerald' => ['#10b981', '#84cc16', '#22c55e', '#14b8a6'],
-      'Slate' => ['#334155', '#475569', '#64748b', '#94a3b8'],
+      'dashboard_palette_main' => ['#696cff', '#03c3ec', '#71dd37', '#ffab00'],
+      'dashboard_palette_ocean' => ['#0ea5e9', '#06b6d4', '#14b8a6', '#22c55e'],
+      'dashboard_palette_sunset' => ['#f97316', '#ef4444', '#ec4899', '#8b5cf6'],
+      'dashboard_palette_emerald' => ['#10b981', '#84cc16', '#22c55e', '#14b8a6'],
+      'dashboard_palette_slate' => ['#334155', '#475569', '#64748b', '#94a3b8'],
     ];
 
     public ?int $editId = null;
@@ -185,17 +185,17 @@ new #[Layout('components.layouts.app')] class extends Component {
             'urutan' => 'required|integer|min:0|max:999',
             'isActive' => 'boolean',
             'selectedLevels' => 'required|array|min:1',
-            'selectedLevels.*' => 'exists:levels,id',
+            'selectedLevels.*' => 'exists:m_level,id',
         ]);
 
         if (in_array($this->tipeTampilan, ['statistik', 'grafik'], true) && $this->tipeQuery !== 'count' && ! $this->kolomAgregasi) {
-            $this->addError('kolomAgregasi', 'Kolom agregasi wajib dipilih untuk tipe query ini.');
+            $this->addError('kolomAgregasi', __('messages.dashboard_error_aggregation_required'));
 
             return;
         }
 
         if (in_array($this->tipeTampilan, ['daftar', 'grafik'], true) && ! $this->kolomLabel) {
-          $this->addError('kolomLabel', 'Kolom label wajib dipilih untuk tampilan daftar atau grafik.');
+          $this->addError('kolomLabel', __('messages.dashboard_error_label_required'));
 
             return;
         }
@@ -230,8 +230,10 @@ new #[Layout('components.layouts.app')] class extends Component {
         $widget->levels()->sync($data['selectedLevels']);
 
         app(LogAktivitasService::class)->catatManual(
-          'Dashboard',
-          ($this->editId ? 'Memperbarui' : 'Menambahkan') . ' widget dashboard ' . $widget->nama_widget,
+          __('messages.dashboard'),
+          $this->editId
+            ? __('messages.dashboard_log_update_widget', ['nama' => $widget->nama_widget])
+            : __('messages.dashboard_log_add_widget', ['nama' => $widget->nama_widget]),
           '/admin/dashboard',
           [
             'widget_id' => $widget->id,
@@ -252,7 +254,7 @@ new #[Layout('components.layouts.app')] class extends Component {
         }
 
         $widget = DashboardWidget::findOrFail($id);
-        app(LogAktivitasService::class)->catatManual('Dashboard', 'Menghapus widget dashboard ' . $widget->nama_widget, '/admin/dashboard', [
+        app(LogAktivitasService::class)->catatManual(__('messages.dashboard'), __('messages.dashboard_log_delete_widget', ['nama' => $widget->nama_widget]), '/admin/dashboard', [
           'widget_id' => $widget->id,
         ]);
         $widget->delete();
@@ -352,7 +354,7 @@ new #[Layout('components.layouts.app')] class extends Component {
       return {
         chart: null,
         tipeSaatIni: 'bar',
-        namaWidgetSaatIni: 'Preview Widget Grafik',
+        namaWidgetSaatIni: @js(__('messages.dashboard_chart_preview_widget_name')),
         iconSaatIni: 'bx bx-bar-chart-alt-2',
         warnaWidgetSaatIni: 'primary',
         init() {
@@ -383,7 +385,8 @@ new #[Layout('components.layouts.app')] class extends Component {
         },
         sinkronkanMeta() {
           this.tipeSaatIni = this.baca('chartTypeInput', 'bar') || 'bar';
-          this.namaWidgetSaatIni = this.baca('widgetNameInput', 'Preview Widget Grafik') || 'Preview Widget Grafik';
+          const defaultNamaWidget = @js(__('messages.dashboard_chart_preview_widget_name'));
+          this.namaWidgetSaatIni = this.baca('widgetNameInput', defaultNamaWidget) || defaultNamaWidget;
           this.iconSaatIni = this.baca('widgetIconInput', 'bx bx-bar-chart-alt-2') || 'bx bx-bar-chart-alt-2';
           this.warnaWidgetSaatIni = this.baca('widgetColorInput', 'primary') || 'primary';
         },
@@ -398,7 +401,12 @@ new #[Layout('components.layouts.app')] class extends Component {
             this.chart.destroy();
           }
 
-          const labels = ['Label A', 'Label B', 'Label C', 'Label D'];
+          const labels = [
+            @js(__('messages.dashboard_chart_label_a')),
+            @js(__('messages.dashboard_chart_label_b')),
+            @js(__('messages.dashboard_chart_label_c')),
+            @js(__('messages.dashboard_chart_label_d')),
+          ];
           const angka = [42, 28, 18, 12];
           const tinggi = Number(this.baca('chartHeightInput', 280) || 280);
           const warna = this.palet();
@@ -427,9 +435,9 @@ new #[Layout('components.layouts.app')] class extends Component {
                 ...opsiDasar,
                 chart: { ...opsiDasar.chart, type: this.tipeSaatIni || 'bar' },
                 xaxis: { categories: labels },
-                series: [{ name: 'Preview', data: angka }],
+                series: [{ name: @js(__('messages.dashboard_chart_preview_series_name')), data: angka }],
                 plotOptions: { bar: { borderRadius: 6, columnWidth: '42%' } },
-                yaxis: { labels: { formatter: value => Number(value).toLocaleString('id-ID') } }
+                yaxis: { labels: { formatter: value => Number(value).toLocaleString(@js(str_replace('_', '-', app()->getLocale()))) } }
               };
 
           this.chart = new ApexCharts(this.$refs.chart, opsi);
@@ -557,7 +565,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                   <label class="form-label fw-semibold">{{ __('messages.widget_name') }} <span class="text-danger">*</span></label>
                   <input wire:model="namaWidget" type="text" class="form-control @error('namaWidget') is-invalid @enderror"
                          x-ref="widgetNameInput" x-on:input.debounce.150ms="render()"
-                         placeholder="Contoh: Total Pengguna Aktif">
+                        placeholder="{{ __('messages.dashboard_widget_name_placeholder') }}">
                   @error('namaWidget') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
                 <div class="col-md-4 mb-3">
@@ -570,7 +578,7 @@ new #[Layout('components.layouts.app')] class extends Component {
               <div class="mb-3">
                 <label class="form-label fw-semibold">{{ __('messages.description') }}</label>
                 <textarea wire:model="deskripsi" rows="2" class="form-control @error('deskripsi') is-invalid @enderror"
-                          placeholder="Keterangan singkat widget dashboard ini..."></textarea>
+                          placeholder="{{ __('messages.dashboard_widget_description_placeholder') }}"></textarea>
                 @error('deskripsi') <div class="invalid-feedback">{{ $message }}</div> @enderror
               </div>
 
@@ -626,7 +634,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                   <div class="col-md-6 mb-3">
                     <label class="form-label fw-semibold">{{ __('messages.aggregation_column') }} <span class="text-danger">*</span></label>
                     <select wire:model="kolomAgregasi" class="form-select @error('kolomAgregasi') is-invalid @enderror">
-                      <option value="">-- Pilih kolom --</option>
+                      <option value="">{{ __('messages.dashboard_select_column') }}</option>
                       @foreach ($opsiKolomAgregasi as $value => $label)
                         <option value="{{ $value }}">{{ $label }}</option>
                       @endforeach
@@ -639,7 +647,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                   <div class="col-md-3 mb-3">
                     <label class="form-label fw-semibold">{{ __('messages.label_column') }} <span class="text-danger">*</span></label>
                     <select wire:model="kolomLabel" class="form-select @error('kolomLabel') is-invalid @enderror">
-                      <option value="">-- Pilih kolom --</option>
+                      <option value="">{{ __('messages.dashboard_select_column') }}</option>
                       @foreach ($opsiKolomFilter as $value => $label)
                         <option value="{{ $value }}">{{ $label }}</option>
                       @endforeach
@@ -650,7 +658,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                     <div class="col-md-3 mb-3">
                       <label class="form-label fw-semibold">{{ __('messages.value_column') }}</label>
                       <select wire:model="kolomNilai" class="form-select @error('kolomNilai') is-invalid @enderror">
-                        <option value="">-- Opsional --</option>
+                        <option value="">{{ __('messages.dashboard_optional') }}</option>
                         @foreach ($opsiKolomFilter as $value => $label)
                           <option value="{{ $value }}">{{ $label }}</option>
                         @endforeach
@@ -686,7 +694,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                   <label class="form-label fw-semibold">{{ __('messages.chart_series_color') }}</label>
                   <input wire:model="chartWarna" type="text" class="form-control @error('chartWarna') is-invalid @enderror"
                         x-ref="chartColorInput" x-on:input.debounce.150ms="render()"
-                         placeholder="#696cff, #03c3ec, #71dd37">
+                     placeholder="{{ __('messages.dashboard_chart_color_placeholder') }}">
                   <div class="form-text">{{ __('messages.chart_color_hint') }}</div>
                   @error('chartWarna') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
@@ -704,7 +712,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                               <span class="rounded-circle border" style="width:12px;height:12px;background:{{ $warnaItem }}"></span>
                             @endforeach
                           </span>
-                          <span>{{ $namaPalet }}</span>
+                          <span>{{ __('messages.' . $namaPalet) }}</span>
                         </span>
                       </button>
                     @endforeach
@@ -761,7 +769,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                 <div class="col-md-4 mb-3">
                   <label class="form-label fw-semibold">{{ __('messages.filter_value') }}</label>
                   <input wire:model="filterNilai" type="text" class="form-control @error('filterNilai') is-invalid @enderror"
-                         placeholder="Contoh: 1, GET, admin">
+                        placeholder="{{ __('messages.dashboard_filter_value_placeholder') }}">
                   @error('filterNilai') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
               </div>
@@ -787,7 +795,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                 </div>
                 <div class="col-md-4 mb-3">
                   <label class="form-label fw-semibold">{{ __('messages.icon_boxicons') }}</label>
-                  <input wire:model="icon" x-ref="widgetIconInput" x-on:input.debounce.150ms="render()" type="text" class="form-control @error('icon') is-invalid @enderror" placeholder="bx bx-bar-chart-alt-2">
+                  <input wire:model="icon" x-ref="widgetIconInput" x-on:input.debounce.150ms="render()" type="text" class="form-control @error('icon') is-invalid @enderror" placeholder="{{ __('messages.dashboard_icon_placeholder') }}">
                   @error('icon') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
               </div>

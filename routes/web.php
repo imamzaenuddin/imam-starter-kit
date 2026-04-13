@@ -145,6 +145,9 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('dashboard', 'admin.dashboard.index')->name('dashboard');
     Volt::route('bahasa', 'admin.bahasa.index')->name('bahasa');
     Volt::route('pengaturan-email', 'admin.pengaturan-email.index')->name('pengaturan-email');
+    Volt::route('users', 'admin.users.index')->name('users');
+    Volt::route('media', 'admin.media.index')->name('media');
+    Volt::route('backup-restore', 'admin.backup-restore.index')->name('backup-restore');
   });
 
   // Laporan
