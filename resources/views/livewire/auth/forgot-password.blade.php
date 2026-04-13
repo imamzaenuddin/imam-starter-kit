@@ -18,11 +18,11 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
         Password::sendResetLink($this->only('email'));
 
-        session()->flash('status', __('A reset link will be sent if the account exists.'));
+        session()->flash('status', __('messages.reset_link_sent_if_exists'));
     }
 }; ?>
 
-@section('title', 'Forgot Password')
+    @section('title', __('messages.forgot_password_page_title'))
 
 @section('page-style')
 @vite([
@@ -31,8 +31,8 @@ new #[Layout('components.layouts.auth')] class extends Component {
 @endsection
 
 <div>
-    <h4 class="mb-1">{{ __('Forgot Password?') }} 🔒</h4>
-    <p class="mb-6">{{ __('Enter your email and we\'ll send you instructions to reset your password') }}</p>
+    <h4 class="mb-1">{{ __('messages.forgot_password_title') }} 🔒</h4>
+    <p class="mb-6">{{ __('messages.forgot_password_subtitle') }}</p>
 
     <!-- Session Status -->
     @if (session('status'))
@@ -43,7 +43,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
     <form wire:submit="sendPasswordResetLink" class="mb-6">
         <div class="mb-6">
-            <label for="email" class="form-label">{{ __('Email') }}</label>
+            <label for="email" class="form-label">{{ __('messages.email') }}</label>
             <input
                 wire:model="email"
                 type="email"
@@ -52,7 +52,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
                 required
                 autofocus
                 autocomplete="email"
-                placeholder="{{ __('Enter your email') }}"
+                placeholder="{{ __('messages.enter_your_email') }}"
             >
             @error('email')
                 <div class="invalid-feedback">{{ $message }}</div>
@@ -60,14 +60,14 @@ new #[Layout('components.layouts.auth')] class extends Component {
         </div>
 
         <button type="submit" class="btn btn-primary d-grid w-100 mb-6">
-            {{ __('Send Reset Link') }}
+            {{ __('messages.send_reset_link') }}
         </button>
     </form>
 
     <div class="text-center">
         <a href="{{ route('login') }}" class="d-flex justify-content-center" wire:navigate>
             <i class="bx bx-chevron-left scaleX-n1-rtl me-1"></i>
-            {{ __('Back to login') }}
+            {{ __('messages.back_to_login') }}
         </a>
     </div>
 </div>

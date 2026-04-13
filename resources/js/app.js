@@ -1,4 +1,20 @@
 import './bootstrap';
+import Swal from 'sweetalert2';
+import 'sweetalert2/themes/bootstrap-5.css';
+
+/**
+ * SweetAlert2 Bootstrap 5 mixin — digunakan di seluruh aplikasi.
+ * Expose sebagai window.Swal agar bisa dipakai di Blade / Alpine inline.
+ */
+window.Swal = Swal.mixin({
+  theme: 'bootstrap-5',
+  buttonsStyling: false,
+  customClass: {
+    confirmButton: 'btn btn-danger me-2',
+    cancelButton: 'btn btn-outline-secondary',
+  },
+  reverseButtons: true,
+});
 
 /**
  * Initialize mobile menu toggle functionality
@@ -78,6 +94,7 @@ function handleResize() {
     document.querySelector('.layout-overlay')?.remove();
   }
 }
+
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function () {

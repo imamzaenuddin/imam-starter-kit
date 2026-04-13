@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="layout-menu-fixed" data-base-url="{{url('/')}}" data-framework="laravel">
-  @section('title', __('Welcome'))
+  @section('title', __('messages.welcome_page_title'))
   <head>
     @include('partials.head')
   </head>
@@ -9,12 +9,12 @@
       <div class="d-flex justify-content-end">
           @if (Route::has('login'))
             @auth
-                <a href="{{ url('/dashboard') }}" class="btn btn-primary">Dashboard</a>
+              <a href="{{ url('/dashboard') }}" class="btn btn-primary">{{ __('messages.dashboard') }}</a>
             @else
-                <a href="{{ route('login') }}" class="btn btn-secondary me-2">Log in</a>
+              <a href="{{ route('login') }}" class="btn btn-secondary me-2">{{ __('messages.log_in') }}</a>
 
                 @if (Route::has('register'))
-                    <a href="{{ route('register') }}" class="btn btn-primary">Register</a>
+                <a href="{{ route('register') }}" class="btn btn-primary">{{ __('messages.register_now') }}</a>
                 @endif
             @endauth
           @endif
@@ -24,17 +24,17 @@
           <div class="row g-0">
             <div class="col-md-6 d-flex align-items-center">
               <div class="card-body">
-                <h1 class="h4 card-title">Sneat Design Laravel Livewire</h1>
-                <p class="card-text mb-5">The Starter Kit integrates Sneat components into Laravel Livewire. Visit our live docs and demo to explore the components.</p>
+                <h1 class="h4 card-title">{{ __('messages.welcome_card_title') }}</h1>
+                <p class="card-text mb-5">{{ __('messages.welcome_card_subtitle') }}</p>
                 <ul class="mb-0">
-                  <li class="mb-3">Read the Laravel <a href="https://laravel.com/docs" target="_blank">Documentation</a></li>
-                  <li class="mb-3">Read the Sneat Laravel <a href="https://demos.themeselection.com/sneat-bootstrap-html-admin-template/documentation/laravel-introduction.html" target="_blank">Documentation</a></li>
-                  <li>Sneat <a href="https://demos.themeselection.com/sneat-bootstrap-html-laravel-admin-template-free/demo/" target="_blank">Components</a></li>
+                  <li class="mb-3">{{ __('messages.read_laravel_docs') }} <a href="https://laravel.com/docs" target="_blank">{{ __('messages.documentation') }}</a></li>
+                  <li class="mb-3">{{ __('messages.read_sneat_docs') }} <a href="{{ config('variables.documentation') }}" target="_blank">{{ __('messages.documentation') }}</a></li>
+                  <li>{{ __('messages.sneat_components') }} <a href="{{ config('variables.repository') }}" target="_blank">{{ __('messages.components') }}</a></li>
                 </ul>
               </div>
             </div>
             <div class="col-md-6">
-              <img class="card-img card-img-right" src="{{asset('assets/img/illustrations/laravel-livewire-sneat.png')}}" alt="Card image">
+              <img class="card-img card-img-right" src="{{asset('assets/img/illustrations/laravel-livewire-sneat.png')}}" alt="imam-starter-kit preview">
             </div>
           </div>
         </div>

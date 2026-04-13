@@ -31,7 +31,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
     }
 }; ?>
 
-@section('title', 'Verify Email')
+@section('title', __('messages.verify_email_page_title'))
 
 @section('page-style')
 @vite([
@@ -40,22 +40,22 @@ new #[Layout('components.layouts.auth')] class extends Component {
 @endsection
 
 <div>
-    <h4 class="mb-1">{{ __('Verify Your Email') }} 📧</h4>
-    <p class="mb-6">{{ __('Please verify your email address by clicking on the link we just emailed to you.') }}</p>
+    <h4 class="mb-1">{{ __('messages.verify_email_title') }} 📧</h4>
+    <p class="mb-6">{{ __('messages.verify_email_subtitle') }}</p>
 
     @if (session('status') == 'verification-link-sent')
         <div class="alert alert-success mb-4">
-            {{ __('A new verification link has been sent to the email address you provided during registration.') }}
+            {{ __('messages.verification_link_sent') }}
         </div>
     @endif
 
     <div class="text-center mb-6">
         <button wire:click="sendVerification" class="btn btn-primary d-grid w-100 mb-3">
-            {{ __('Resend Verification Email') }}
+            {{ __('messages.resend_verification_email') }}
         </button>
 
         <button wire:click="logout" class="btn btn-link">
-            {{ __('Log Out') }}
+            {{ __('messages.log_out') }}
         </button>
     </div>
 </div>

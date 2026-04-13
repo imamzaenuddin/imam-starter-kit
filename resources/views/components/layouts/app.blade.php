@@ -41,5 +41,9 @@
     <!-- Include Scripts -->
     @include('partials.scripts')
     <!-- / Include Scripts -->
+
+    @if (auth()->check() && auth()->user()?->bisaMenu('/laporan/chat-ai', 'dapat_lihat'))
+      <x-chat-ai-floating />
+    @endif
   </body>
 </html>

@@ -37,33 +37,33 @@ new class extends Component {
     }
 }; ?>
 
-@section('title', 'Update password')
+@section('title', __('messages.update_password_title'))
 
 <section>
     @include('partials.settings-heading')
 
-    <x-settings.layout :subheading="__('Ensure your account is using a long, random password to stay secure')">
+    <x-settings.layout :subheading="__('messages.settings_password_subheading')">
         <form wire:submit="updatePassword" class="w-50">
             <div class="mb-3">
-                <label for="current_password" class="form-label">{{ __('Current password') }}</label>
+                <label for="current_password" class="form-label">{{ __('messages.current_password') }}</label>
                 <input type="password" id="current_password" wire:model="current_password" class="form-control" required autocomplete="current-password" />
             </div>
 
             <div class="mb-3">
-                <label for="password" class="form-label">{{ __('New password') }}</label>
+                <label for="password" class="form-label">{{ __('messages.new_password') }}</label>
                 <input type="password" id="password" wire:model="password" class="form-control" required autocomplete="new-password" />
             </div>
 
             <div class="mb-3">
-                <label for="password_confirmation" class="form-label">{{ __('Confirm Password') }}</label>
+                <label for="password_confirmation" class="form-label">{{ __('messages.confirm_password') }}</label>
                 <input type="password" id="password_confirmation" wire:model="password_confirmation" class="form-control" required autocomplete="new-password" />
             </div>
 
             <div class="d-flex justify-content-between">
-                <button type="submit" class="btn btn-primary w-100">{{ __('Save') }}</button>
+                <button type="submit" class="btn btn-primary w-100">{{ __('messages.save') }}</button>
 
                 <x-action-message class="ms-3" on="password-updated">
-                    {{ __('Saved.') }}
+                    {{ __('messages.saved') }}
                 </x-action-message>
             </div>
         </form>

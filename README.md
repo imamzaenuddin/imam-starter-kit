@@ -1,34 +1,35 @@
 <p align="center">
-   <a href="https://themeselection.com/item/sneat-free-bootstrap-laravel-livewire-starter-kit/" target="_blank">
-      <img src="https://cdn.themeselection.com/ts-assets/sneat/logo/logo.png" alt="sneat-logo" width="60px" height="auto">
+   <a href="https://github.com/imamzaenuddin/imam-starter-kit" target="_blank">
+      <img src="https://img.shields.io/badge/imam--starter--kit-Laravel%2012%20%2B%20Livewire%20Volt-blue" alt="imam-starter-kit" height="28">
    </a>
 </p>
 
 <h1 align="center">
-   <a href="https://themeselection.com/item/sneat-free-bootstrap-laravel-livewire-starter-kit/" target="_blank" align="center">
-      Sneat Design Bootstrap Laravel Starter Kit
+   <a href="https://github.com/imamzaenuddin/imam-starter-kit" target="_blank" align="center">
+      imam-starter-kit
    </a>
 </h1>
 
 <p align="center">
-   🚀 A powerful, clean, and minimal Laravel 12 Starter Kit integrated with Bootstrap 5, ready to kickstart your next big project!
+   🚀 Starter kit Laravel 12 + Livewire Volt + Bootstrap 5 untuk pengembangan aplikasi organisasi.
 </p>
 
 <p align="center">
-  <a href="https://github.com/themeselection/sneat-bootstrap-laravel-livewire-starter-kit/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/themeselection/sneat-bootstrap-laravel-livewire-starter-kit" alt="license">
+  Turunan dari <b>Sneat Bootstrap Laravel Livewire Starter Kit</b> by ThemeSelection.
+</p>
+
+<p align="center">
+   <a href="https://github.com/imamzaenuddin/imam-starter-kit/blob/main/LICENSE">
+      <img src="https://img.shields.io/github/license/imamzaenuddin/imam-starter-kit" alt="license">
   </a>
-  <a href="https://github.com/themeselection/sneat-bootstrap-laravel-livewire-starter-kit/releases/">
-    <img src="https://img.shields.io/github/release/themeselection/sneat-bootstrap-laravel-livewire-starter-kit.svg" alt="GitHub release">
+   <a href="https://github.com/imamzaenuddin/imam-starter-kit/releases/">
+      <img src="https://img.shields.io/github/release/imamzaenuddin/imam-starter-kit.svg" alt="GitHub release">
   </a>
-  <a href="https://github.com/themeselection/sneat-bootstrap-laravel-livewire-starter-kit/issues">
-    <img src="https://img.shields.io/github/issues/themeselection/sneat-bootstrap-laravel-livewire-starter-kit.svg" alt="GitHub issues">
+   <a href="https://github.com/imamzaenuddin/imam-starter-kit/issues">
+      <img src="https://img.shields.io/github/issues/imamzaenuddin/imam-starter-kit.svg" alt="GitHub issues">
   </a>
-  <a href="https://github.com/themeselection/sneat-bootstrap-laravel-livewire-starter-kit/issues">
-    <img src="https://img.shields.io/github/issues-closed/themeselection/sneat-bootstrap-laravel-livewire-starter-kit.svg" alt="GitHub closed issues">
-  </a>
-  <a href="https://twitter.com/Theme_Selection" target="_blank">
-    <img alt="Twitter Follow" src="https://img.shields.io/twitter/follow/Theme_Selection">
+   <a href="https://github.com/imamzaenuddin/imam-starter-kit/issues">
+      <img src="https://img.shields.io/github/issues-closed/imamzaenuddin/imam-starter-kit.svg" alt="GitHub closed issues">
   </a>
 </p>
 
@@ -40,11 +41,11 @@
 
 ## 🚀 Introduction
 
-The **Laravel 12 Bootstrap Starter Kit** is a clean and minimal starting point for your Laravel applications. It’s designed to give developers a robust structure while saving hours of initial setup time.
+The **imam-starter-kit** is a clean and minimal starting point for your Laravel applications. It’s designed to give developers a robust structure while saving hours of initial setup time.
 
 This kit is integrated with **Bootstrap 5**, providing a responsive, mobile-first UI out-of-the-box. Whether you're building a simple CRUD, admin panel, or a complex web app, this starter kit speeds up your workflow and keeps your code clean and maintainable.
 
-🔗 **[Live Demo](https://demos.themeselection.com/sneat-bootstrap-html-laravel-admin-template-free/demo/)**
+🔗 **[Project Repository](https://github.com/imamzaenuddin/imam-starter-kit)**
 
 ---
 
@@ -53,17 +54,20 @@ This kit is integrated with **Bootstrap 5**, providing a responsive, mobile-firs
 Getting started is super simple! Follow the steps below:
 
 1. **Clone the Repository**
+
    ```bash
-   git clone https://github.com/themeselection/sneat-bootstrap-laravel-livewire-starter-kit.git
-   cd sneat-bootstrap-laravel-livewire-starter-kit
+   git clone https://github.com/imamzaenuddin/imam-starter-kit.git
+   cd imam-starter-kit
    ```
 
 2. **Install Composer Dependencies**
+
    ```bash
    composer install
    ```
 
 3. **Copy `.env` & Generate App Key**
+
    ```bash
    cp .env.example .env
    php artisan key:generate
@@ -73,11 +77,13 @@ Getting started is super simple! Follow the steps below:
    - Open `.env` file and update your DB credentials.
 
 5. **Run Migrations**
+
    ```bash
    php artisan migrate
    ```
 
 6. **Install Node Modules**
+
    ```bash
    npm install
    # OR
@@ -85,6 +91,7 @@ Getting started is super simple! Follow the steps below:
    ```
 
 7. **Build Frontend Assets**
+
    ```bash
    npm run dev
    # OR
@@ -153,20 +160,20 @@ yarn build
   - Sidebar
   - Footer
 - **Profile Settings Page**
-- [Explore additional components](https://demos.themeselection.com/sneat-bootstrap-html-laravel-admin-template-free/demo/)
+- [Project metadata dan asal template](IMAM_STARTER_KIT_INFO.md)
 
 ---
 
 ## 📚 Documentation
 
-For detailed documentation, check the **[Wiki](https://github.com/themeselection/sneat-bootstrap-laravel-livewire-starter-kit/wiki)** or refer to the **[Documentation](https://demos.themeselection.com/sneat-bootstrap-html-admin-template/documentation/laravel-introduction.html)** in this repo.
+For detailed documentation, check **[IMAM_STARTER_KIT_INFO.md](IMAM_STARTER_KIT_INFO.md)** and project docs in this repository.
 
 ---
 
 ## 🖥️ Browser Support
 
 | Chrome | Firefox | Safari | Edge |
-|--------|---------|--------|------|
+| ------ | ------- | ------ | ---- |
 | ✅     | ✅      | ✅     | ✅   |
 
 ---
@@ -201,10 +208,10 @@ Check out the [CHANGELOG](CHANGELOG.md) for detailed release notes.
 
 ## 🛠️ Support
 
-For free community support, open an issue on [GitHub Issues](https://github.com/themeselection/sneat-bootstrap-laravel-livewire-starter-kit/issues).
+For free community support, open an issue on [GitHub Issues](https://github.com/imamzaenuddin/imam-starter-kit/issues).
 
 For priority support or custom development:  
-📧 [Support](https://themeselection.com/support/)
+📧 [Repository Owner](https://github.com/imamzaenuddin/)
 
 ---
 
@@ -216,4 +223,4 @@ This project is open-sourced software licensed under the [MIT license](LICENSE).
 
 ## 🔥 Looking for More?
 
-Check out other awesome starter kits and templates at [Website](https://themeselection.com/).
+Referensi asal template Sneat tetap tersedia di [IMAM_STARTER_KIT_INFO.md](IMAM_STARTER_KIT_INFO.md).

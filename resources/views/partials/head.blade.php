@@ -6,9 +6,15 @@
     'pageTitle',
 ])
 
+@php
+  $identitas = app(\App\Services\IdentitasService::class)->aktif();
+  $namaAplikasi = $identitas?->nama_aplikasi ?? 'Sistem Informasi Organisasi';
+  $faviconUrl = $identitas?->logo_path ? asset('storage/' . ltrim($identitas->logo_path, '/')) : asset('assets/img/identitas/gedung-default.svg');
+@endphp
+
 
 <title>@yield('title') |
-  {{ config('variables.templateName') ? config('variables.templateName') : 'TemplateName' }} -
+  {{ $namaAplikasi }} -
   {{ config('variables.templateSuffix') ? config('variables.templateSuffix') : 'TemplateSuffix' }}
 </title>
 
@@ -25,7 +31,7 @@
 <meta property="og:site_name" content="{{ config('variables.creatorName') ? config('variables.creatorName') : '' }}" />
 <link rel="canonical" href="{{ config('variables.productPage') ? config('variables.productPage') : '' }}">
 <!-- Favicon -->
-<link rel="icon" type="image/x-icon" href="{{ asset('assets/img/favicon/favicon.ico') }}" />
+<link rel="icon" type="image/x-icon" href="{{ $faviconUrl }}" />
 
 
 <!-- Include Styles -->

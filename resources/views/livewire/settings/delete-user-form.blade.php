@@ -22,18 +22,18 @@ new class extends Component {
     }
 }; ?>
 
-@section('title', 'Delete account')
+@section('title', __('messages.delete_account_title'))
 
 <section>
     <hr class="my-4 w-50" />
     <div class="mb-5">
-        <h5 class="mb-2">{{ __('Delete account') }}</h5>
-        <p class="text-muted">{{ __('Delete your account and all of its resources') }}</p>
+        <h5 class="mb-2">{{ __('messages.delete_account_title') }}</h5>
+        <p class="text-muted">{{ __('messages.delete_account_subtitle') }}</p>
     </div>
 
     <!-- Button to open the modal -->
     <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
-        {{ __('Delete account') }}
+        {{ __('messages.delete_account_title') }}
     </button>
 
     <!-- Modal -->
@@ -41,21 +41,21 @@ new class extends Component {
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="confirmDeleteModalLabel">{{ __('Are you sure you want to delete your account?') }}</h5>
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">{{ __('messages.delete_account_confirm_title') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p>{{ __('Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.') }}</p>
+                    <p>{{ __('messages.delete_account_warning') }}</p>
 
                     <form wire:submit="deleteUser" class="space-y-3">
                         <div class="mb-3">
-                            <label for="password" class="form-label">{{ __('Password') }}</label>
+                            <label for="password" class="form-label">{{ __('messages.password') }}</label>
                             <input type="password" id="password" wire:model="password" class="form-control" required />
                         </div>
 
                         <div class="d-flex justify-content-between">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
-                            <button type="submit" class="btn btn-danger">{{ __('Delete account') }}</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('messages.cancel') }}</button>
+                            <button type="submit" class="btn btn-danger">{{ __('messages.delete_account_title') }}</button>
                         </div>
                     </form>
                 </div>

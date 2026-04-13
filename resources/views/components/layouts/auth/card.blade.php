@@ -15,7 +15,7 @@
           <!-- /Content -->
 
           <div class="divider my-6">
-            <div class="divider-text">or</div>
+            <div class="divider-text">{{ __('messages.or') }}</div>
           </div>
 
           <div class="d-flex justify-content-center">
