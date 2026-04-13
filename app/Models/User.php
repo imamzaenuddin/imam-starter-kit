@@ -15,6 +15,8 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
+    protected $table = 't_user';
+
     protected $fillable = [
         'name',
         'email',
@@ -53,7 +55,7 @@ class User extends Authenticatable
         ];
     }
 
-    /** Relasi ke tabel levels */
+    /** Relasi ke tabel m_level */
     public function level(): BelongsTo
     {
         return $this->belongsTo(Level::class);

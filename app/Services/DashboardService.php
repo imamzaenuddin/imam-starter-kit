@@ -114,7 +114,7 @@ class DashboardService
     return DashboardWidget::query()
       ->with('levels:id,nama_level')
       ->where('is_active', true)
-      ->whereHas('levels', fn($query) => $query->where('levels.id', $user->level_id))
+      ->whereHas('levels', fn($query) => $query->where('m_level.id', $user->level_id))
       ->orderBy('urutan')
       ->orderBy('nama_widget')
       ->get()

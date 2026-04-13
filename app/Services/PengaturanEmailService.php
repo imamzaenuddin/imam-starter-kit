@@ -10,7 +10,7 @@ class PengaturanEmailService
 {
   public function konfigurasiAktif(): ?PengaturanEmail
   {
-    if (! Schema::hasTable('pengaturan_email')) {
+    if (! Schema::hasTable('m_pengaturan_email')) {
       return null;
     }
 

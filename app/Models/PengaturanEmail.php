@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class PengaturanEmail extends Model
 {
-    protected $table = 'pengaturan_email';
+    protected $table = 'm_pengaturan_email';
 
     protected $fillable = [
         'mailer',

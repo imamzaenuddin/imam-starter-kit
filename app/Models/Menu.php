@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Menu extends Model
 {
+    protected $table = 'm_menu';
+
     protected $fillable = ['nama', 'url', 'icon', 'parent_id', 'urutan', 'is_active'];
 
     protected $casts = ['is_active' => 'boolean'];
@@ -28,7 +30,7 @@ class Menu extends Model
     /** Level-level yang memiliki akses ke menu ini */
     public function levels(): BelongsToMany
     {
-        return $this->belongsToMany(Level::class, 'level_menu')
+        return $this->belongsToMany(Level::class, 'm_level_menu')
             ->withPivot(['dapat_buat', 'dapat_lihat', 'dapat_ubah', 'dapat_hapus'])
             ->withTimestamps();
     }

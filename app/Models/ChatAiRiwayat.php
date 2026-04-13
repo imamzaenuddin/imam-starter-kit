@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ChatAiRiwayat extends Model
 {
-    protected $table = 'chat_ai_riwayat';
+    protected $table = 't_chat_ai_riwayat';
 
     protected $fillable = [
         'user_id',

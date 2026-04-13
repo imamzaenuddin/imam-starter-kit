@@ -32,7 +32,7 @@ class CekModeMaintenanceIdentitas
 
     private function modeMaintenanceAktif(): bool
     {
-        if (! Schema::hasTable('identitas')) {
+        if (! Schema::hasTable('m_identitas')) {
             return false;
         }
 

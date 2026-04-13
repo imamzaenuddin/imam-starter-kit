@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class DashboardWidget extends Model
 {
+    protected $table = 'm_dashboard_widget';
+
     protected $fillable = [
         'nama_widget',
         'deskripsi',
@@ -40,7 +42,7 @@ class DashboardWidget extends Model
 
     public function levels(): BelongsToMany
     {
-        return $this->belongsToMany(Level::class, 'dashboard_widget_level')
+        return $this->belongsToMany(Level::class, 'm_dashboard_widget_level')
             ->withTimestamps();
     }
 }

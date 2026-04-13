@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Bahasa extends Model
 {
-    protected $table = 'bahasa';
+    protected $table = 'm_bahasa';
 
     protected $fillable = [
         'kode',

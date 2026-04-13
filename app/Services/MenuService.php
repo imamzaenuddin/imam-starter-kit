@@ -32,7 +32,7 @@ class MenuService
                 ->menus()
                 ->active()
                 ->wherePivot('dapat_lihat', true)
-                ->pluck('menus.id');
+                ->pluck('m_menu.id');
 
             // Muat menu root beserta children yang diizinkan, eager-load pivot sekali
             return Menu::with(['children' => function ($query) use ($menuIds) {

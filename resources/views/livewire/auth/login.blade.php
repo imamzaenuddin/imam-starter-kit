@@ -91,7 +91,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
     protected function modeMaintenanceAktif(): bool
     {
-        if (! Schema::hasTable('identitas')) {
+        if (! Schema::hasTable('m_identitas')) {
             return false;
         }
 
@@ -108,7 +108,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
     $identitas = app(\App\Services\IdentitasService::class)->aktif();
     $namaAplikasi = $identitas?->nama_aplikasi ?? 'Sistem Informasi Organisasi';
     $emailHelpdesk = $identitas?->email;
-    $maintenanceAktif = \Illuminate\Support\Facades\Schema::hasTable('identitas')
+    $maintenanceAktif = \Illuminate\Support\Facades\Schema::hasTable('m_identitas')
         && ! \App\Models\Identitas::query()->where('is_active', true)->exists();
 @endphp
 
