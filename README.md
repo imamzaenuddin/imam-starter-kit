@@ -1,3 +1,4 @@
+<HEAD
 <p align="center">
    <a href="https://github.com/imamzaenuddin/imam-starter-kit" target="_blank">
       <img src="https://img.shields.io/badge/imam--starter--kit-Laravel%2012%20%2B%20Livewire%20Volt-blue" alt="imam-starter-kit" height="28">
@@ -223,4 +224,6 @@ This project is open-sourced software licensed under the [MIT license](LICENSE).
 
 ## 🔥 Looking for More?
 
-Referensi asal template Sneat tetap tersedia di [IMAM_STARTER_KIT_INFO.md](IMAM_STARTER_KIT_INFO.md).
+# Referensi asal template Sneat tetap tersedia di [IMAM_STARTER_KIT_INFO.md](IMAM_STARTER_KIT_INFO.md).
+
+# imam-starter-kit
