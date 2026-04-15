@@ -12,6 +12,8 @@ Dokumen ini menyusun implementasi fitur lanjutan secara bertahap sesuai aturan d
 
 ### 1. Audit Log Viewer Lengkap
 
+Status: [x] Selesai
+
 Tujuan:
 
 - Menyediakan viewer log aktivitas yang bisa difilter dan diexport.
@@ -37,6 +39,8 @@ Kriteria Selesai:
 
 ### 2. Role & Permission Granular (Aksi Sensitif)
 
+Status: [x] Selesai
+
 Tujuan:
 
 - Hak akses tidak hanya menu, tapi juga aksi sensitif (backup, restore, delete massal).
@@ -59,6 +63,8 @@ Kriteria Selesai:
 ---
 
 ### 3. Backup Scheduler + Retensi Otomatis
+
+Status: [x] Selesai
 
 Tujuan:
 
@@ -84,6 +90,8 @@ Kriteria Selesai:
 ---
 
 ### 4. Restore Safety Mode
+
+Status: [x] Selesai
 
 Tujuan:
 
@@ -184,6 +192,11 @@ Kriteria Selesai:
 
 ## Fase 3 (Analitik & Data)
 
+Status terkini:
+
+- [x] 8. Dashboard Widget Builder Advanced
+- [x] 9. Import/Export Data Master
+
 ### 8. Dashboard Widget Builder Advanced
 
 Tujuan:
@@ -227,6 +240,12 @@ Kriteria Selesai:
 - Import menampilkan ringkasan sukses/gagal dengan jelas.
 
 ## Fase 4 (Hardening Produksi)
+
+Status terkini:
+
+- [x] 10. Setting App Runtime Terpusat
+- [x] 11. Keamanan Tambahan
+- [x] 12. Testing & CI Minimum
 
 ### 10. Setting App Runtime Terpusat
 

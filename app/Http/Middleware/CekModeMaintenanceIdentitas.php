@@ -36,6 +36,12 @@ class CekModeMaintenanceIdentitas
             return false;
         }
 
+        // Hanya maintenance jika ada records tapi semua non-aktif
+        // DB kosong = setup awal, bukan maintenance
+        if (! Identitas::query()->exists()) {
+            return false;
+        }
+
         return ! Identitas::query()->where('is_active', true)->exists();
     }
 

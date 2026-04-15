@@ -220,7 +220,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                         ->orWhere('email', 'like', '%' . $this->search . '%');
                 })
                 ->orderBy('name')
-                ->paginate(10),
+              ->paginate((int) config('app_runtime.pagination_default', 10)),
             'levels' => Level::query()->where('is_active', true)->orderBy('nama_level')->get(),
         ];
     }

@@ -111,6 +111,11 @@
         <li class="menu-item {{ request()->routeIs('settings.password') ? 'active' : '' }}">
           <a class="menu-link" href="{{ route('settings.password') }}" wire:navigate>{{ __('messages.password') }}</a>
         </li>
+        @if (auth()->user()?->isSuperadmin())
+          <li class="menu-item {{ request()->routeIs('settings.two-factor') ? 'active' : '' }}">
+            <a class="menu-link" href="{{ route('settings.two-factor') }}" wire:navigate>{{ __('messages.two_factor_settings_menu') }}</a>
+          </li>
+        @endif
       </ul>
     </li>
 

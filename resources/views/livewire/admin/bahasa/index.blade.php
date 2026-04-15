@@ -168,7 +168,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                 })
                 ->orderBy('urutan')
                 ->orderBy('kode')
-                ->paginate(10),
+              ->paginate((int) config('app_runtime.pagination_default', 10)),
             'folderBahasa' => app(BahasaService::class)->sumberBahasaTersedia(),
         ];
     }

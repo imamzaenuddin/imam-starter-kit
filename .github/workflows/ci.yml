@@ -1,0 +1,153 @@
+name: CI/Testing & Lint
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    name: PHP Lint & Code Style
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: mbstring, ctype, fileinfo, openssl, PDO, pdo_mysql
+          coverage: none
+
+      - name: Validate composer.json
+        run: composer validate
+
+      - name: Check PHP Syntax
+        run: php -l app/ routes/ config/ tests/ --exclude vendor
+        continue-on-error: true
+
+  test:
+    runs-on: ubuntu-latest
+    name: Unit & Feature Tests
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: testing
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+        ports:
+          - 3306:3306
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: mbstring, ctype, fileinfo, openssl, pdo_mysql
+          coverage: pcov
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Setup Environment
+        run: |
+          cp .env.example .env.testing
+          php artisan key:generate --env=testing
+
+      - name: Create Database
+        run: |
+          mysql -h 127.0.0.1 -u root -proot -e "CREATE DATABASE IF NOT EXISTS testing;"
+
+      - name: Run Migrations
+        run: php artisan migrate --env=testing
+
+      - name: Run Tests
+        run: php artisan test --parallel --processes=4
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: testing
+          DB_USERNAME: root
+          DB_PASSWORD: root
+          APP_ENV: testing
+
+      - name: Upload Coverage Reports
+        uses: codecov/codecov-action@v3
+        if: always()
+
+  build:
+    runs-on: ubuntu-latest
+    name: Build & Artifacts
+    needs: [lint, test]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: mbstring, ctype, fileinfo, openssl, PDO
+
+      - name: Install Dependencies
+        run: composer install --prefer-dist --no-dev --no-progress --no-interaction
+
+      - name: Build Assets
+        run: |
+          if [ -f "package.json" ]; then
+            npm ci
+            npm run build
+          fi
+        continue-on-error: true
+
+      - name: Create Artifact
+        run: |
+          mkdir -p build
+          cp -r app bootstrap config database public resources routes storage vendor .env.example artisan build/
+          echo "Build completed successfully"
+
+  quality:
+    runs-on: ubuntu-latest
+    name: Code Quality Checks
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: mbstring, ctype, fileinfo, openssl
+
+      - name: Install Dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Check for Security Issues
+        run: composer audit --locked
+        continue-on-error: true
+
+      - name: Check Code Standards
+        run: vendor/bin/pint --test
+        continue-on-error: true

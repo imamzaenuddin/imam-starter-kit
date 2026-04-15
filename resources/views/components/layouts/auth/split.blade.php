@@ -405,7 +405,7 @@
 
   {{-- ========== RIGHT PANEL: FORM ========== --}}
   <div class="isk-right-panel col-12 col-lg-5">
-    <div class="isk-form-card">
+    <div class="isk-form-card animate__animated animate__backInUp" style="--animate-duration: 3s; --animate-delay: 10s;">
 
       {{-- Mobile header --}}
       <div class="d-lg-none text-center mb-4">

@@ -39,6 +39,9 @@ class User extends Authenticatable
         'foto_profil',
         'level_id',
         'is_active',
+        'two_factor_enabled',
+        'two_factor_confirmed_at',
+        'last_login_at',
         'password',
     ];
 
@@ -53,6 +56,9 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'tanggal_lahir' => 'date',
             'is_active' => 'boolean',
+            'two_factor_enabled' => 'boolean',
+            'two_factor_confirmed_at' => 'datetime',
+            'last_login_at' => 'datetime',
             'password'          => 'hashed',
         ];
     }
@@ -104,6 +110,11 @@ class User extends Authenticatable
             ->exists();
     }
 
+    public function isSuperadmin(): bool
+    {
+        return strtolower((string) optional($this->level)->nama_level) === 'superadmin';
+    }
+
     /** Inisial nama user untuk avatar */
     public function initials(): string
     {
@@ -117,7 +128,10 @@ class User extends Authenticatable
     public function getProfilePhotoUrlAttribute(): string
     {
         if (! empty($this->foto_profil) && Storage::disk('public')->exists($this->foto_profil)) {
-            return Storage::url($this->foto_profil);
+            $url = Storage::url($this->foto_profil);
+            $versi = Storage::disk('public')->lastModified($this->foto_profil);
+
+            return $url . '?v=' . $versi;
         }
 
         return asset('assets/img/avatars/1.png');

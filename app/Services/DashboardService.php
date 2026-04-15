@@ -321,6 +321,155 @@ class DashboardService
     return number_format($nilai, $desimal, ',', '.');
   }
 
+  public function dataWidgetDenganKPI(DashboardWidget $widget): array
+  {
+    $data = $this->dataWidget($widget);
+
+    // Tambah KPI calculation jika widget memiliki target
+    if ($widget->kpi_target && $widget->kpi_target > 0) {
+      $nilaiAktualan = (float) $data['nilai'] ?? 0;
+      $persentaseKPI = ($nilaiAktualan / $widget->kpi_target) * 100;
+
+      $data['kpi_target'] = $widget->kpi_target;
+      $data['persentase_kpi'] = min(100, round($persentaseKPI, 2));
+      $data['progress_bar_color'] = $this->warnaThreshold($persentaseKPI, $widget);
+      $data['tampilkan_progress_bar'] = (bool) $widget->tampilkan_progress_bar;
+    }
+
+    // Tambah period comparison jika diaktifkan
+    if ($widget->bandingkan_periode && $widget->bandingkan_dengan) {
+      $dataPeriodePrev = $this->dataPeriodeSebelumnya($widget);
+      if ($dataPeriodePrev) {
+        $selisih = ((float) $data['nilai'] ?? 0) - ((float) $dataPeriodePrev['nilai'] ?? 0);
+        $persentasePerubahan = $dataPeriodePrev['nilai'] ? ($selisih / $dataPeriodePrev['nilai']) * 100 : 0;
+
+        $data['periode_sebelumnya'] = $dataPeriodePrev['nilai_format'];
+        $data['selisih'] = $selisih;
+        $data['persentase_perubahan'] = round($persentasePerubahan, 2);
+        $data['trend'] = $selisih >= 0 ? 'naik' : 'turun';
+      }
+    }
+
+    return $data;
+  }
+
+  public function dataPeriodeSebelumnya(DashboardWidget $widget): ?array
+  {
+    $konfigurasi = $this->konfigurasiSumber($widget->sumber_data);
+    if (!$konfigurasi) {
+      return null;
+    }
+
+    $query = $this->builderUntuk($widget->sumber_data);
+
+    // Parse periode sebelumnya berdasarkan bandingkan_dengan
+    $datePeriode = $this->parsePeriodeSebelumnya($widget->bandingkan_dengan);
+    if (!$datePeriode) {
+      return null;
+    }
+
+    // Terapkan filter date range ke periode sebelumnya
+    $query->whereBetween('created_at', [$datePeriode['from'], $datePeriode['to']]);
+
+    // Terapkan filter lainnya (excluding date filters)
+    $this->terapkanFilter($query, $widget, $konfigurasi);
+
+    // Execute query sesuai tipe
+    $tipeQuery = $widget->tipe_query;
+    $nilai = match ($tipeQuery) {
+      'sum' => $widget->kolom_agregasi ? (float) $query->sum($widget->kolom_agregasi) : 0,
+      'avg' => $widget->kolom_agregasi ? (float) $query->avg($widget->kolom_agregasi) : 0,
+      'min' => $widget->kolom_agregasi ? (float) $query->min($widget->kolom_agregasi) : 0,
+      'max' => $widget->kolom_agregasi ? (float) $query->max($widget->kolom_agregasi) : 0,
+      default => $query->count(),
+    };
+
+    return [
+      'nilai' => $nilai,
+      'nilai_format' => $this->formatNilai($nilai, $tipeQuery),
+    ];
+  }
+
+  private function parsePeriodeSebelumnya(?string $bandingkan): ?array
+  {
+    if (!$bandingkan) {
+      return null;
+    }
+
+    $today = now();
+
+    return match ($bandingkan) {
+      'hari_sebelumnya' => [
+        'from' => $today->copy()->subDays(1)->startOfDay(),
+        'to' => $today->copy()->subDays(1)->endOfDay(),
+      ],
+      'minggu_lalu' => [
+        'from' => $today->copy()->subWeeks(1)->startOfWeek(),
+        'to' => $today->copy()->subWeeks(1)->endOfWeek(),
+      ],
+      'bulan_lalu' => [
+        'from' => $today->copy()->subMonths(1)->startOfMonth(),
+        'to' => $today->copy()->subMonths(1)->endOfMonth(),
+      ],
+      'tahun_lalu' => [
+        'from' => $today->copy()->subYears(1)->startOfYear(),
+        'to' => $today->copy()->subYears(1)->endOfYear(),
+      ],
+      default => null,
+    };
+  }
+
+  public function warnaThreshold(float $persentase, DashboardWidget $widget): string
+  {
+    if ($persentase >= 100) {
+      return $widget->warna_threshold_hijau ?: '90ddd52';
+    } elseif ($persentase >= 75) {
+      return $widget->warna_threshold_kuning ?: 'ffc107';
+    } else {
+      return $widget->warna_threshold_merah ?: 'dc3545';
+    }
+  }
+
+  public function bandingkanPeriodeTersedia(): array
+  {
+    return [
+      'hari_sebelumnya' => 'Hari Sebelumnya',
+      'minggu_lalu' => 'Minggu Lalu',
+      'bulan_lalu' => 'Bulan Lalu',
+      'tahun_lalu' => 'Tahun Lalu',
+    ];
+  }
+
+  public function cacheKeyWidget(DashboardWidget $widget): string
+  {
+    return 'dashboard_widget_' . $widget->id . '_' . now()->format('YmdH');
+  }
+
+  public function dataWidgetCached(DashboardWidget $widget, int $cacheMinutes = 5): array
+  {
+    $cacheKey = $this->cacheKeyWidget($widget);
+
+    return cache()->remember($cacheKey, now()->addMinutes($cacheMinutes), function () use ($widget) {
+      return $this->dataWidgetDenganKPI($widget);
+    });
+  }
+
+  public function buatUlangCacheWidget(DashboardWidget $widget): void
+  {
+    cache()->forget($this->cacheKeyWidget($widget));
+  }
+
+  public function buatUlangCacheSemuaWidget(): void
+  {
+    DashboardWidget::query()
+      ->where('is_active', true)
+      ->chunk(10, function ($widgets) {
+        foreach ($widgets as $widget) {
+          $this->buatUlangCacheWidget($widget);
+        }
+      });
+  }
+
   private function konfigurasiSumber(string $sumberData): ?array
   {
     return $this->konfigurasiSumberSemua()[$sumberData] ?? null;

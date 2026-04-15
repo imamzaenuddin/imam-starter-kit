@@ -28,6 +28,13 @@ class DashboardWidget extends Model
         'warna',
         'icon',
         'batas_data',
+        'bandingkan_periode',
+        'bandingkan_dengan',
+        'kpi_target',
+        'tampilkan_progress_bar',
+        'warna_threshold_hijau',
+        'warna_threshold_kuning',
+        'warna_threshold_merah',
         'urutan',
         'is_active',
     ];
@@ -37,6 +44,9 @@ class DashboardWidget extends Model
         'urutan' => 'integer',
         'chart_tinggi' => 'integer',
         'chart_warna' => 'array',
+        'bandingkan_periode' => 'boolean',
+        'tampilkan_progress_bar' => 'boolean',
+        'kpi_target' => 'integer',
         'is_active' => 'boolean',
     ];
 

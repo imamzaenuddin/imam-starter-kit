@@ -77,38 +77,59 @@ class LevelMenuSeeder extends Seeder
       'is_active' => true,
     ]);
 
+    $mImportExport = Menu::firstOrCreate(['nama' => 'Import Export Master', 'parent_id' => $administrasi->id], [
+      'url'       => '/admin/import-export',
+      'icon'      => 'bx bx-transfer',
+      'urutan'    => 16,
+      'is_active' => true,
+    ]);
+
+    $mPengaturanAplikasi = Menu::firstOrCreate(['nama' => 'Pengaturan Aplikasi', 'parent_id' => $administrasi->id], [
+      'url'       => '/admin/pengaturan-aplikasi',
+      'icon'      => 'bx bx-slider-alt',
+      'urutan'    => 17,
+      'is_active' => true,
+    ]);
+
     $mBahasa = Menu::firstOrCreate(['nama' => 'Bahasa', 'parent_id' => $administrasi->id], [
       'url'       => '/admin/bahasa',
-      'icon'      => 'bx bx-translate',
-      'urutan'    => 16,
+      'icon'      => 'bx bx-flag',
+      'urutan'    => 18,
       'is_active' => true,
     ]);
 
     $mPengaturanEmail = Menu::firstOrCreate(['nama' => 'Pengaturan Email', 'parent_id' => $administrasi->id], [
       'url'       => '/admin/pengaturan-email',
       'icon'      => 'bx bx-envelope',
-      'urutan'    => 17,
+      'urutan'    => 19,
       'is_active' => true,
     ]);
 
     $mUsers = Menu::firstOrCreate(['nama' => 'Kelola User', 'parent_id' => $administrasi->id], [
       'url'       => '/admin/users',
       'icon'      => 'bx bx-user-pin',
-      'urutan'    => 18,
+      'urutan'    => 20,
       'is_active' => true,
     ]);
 
     $mMedia = Menu::firstOrCreate(['nama' => 'Kelola Media', 'parent_id' => $administrasi->id], [
       'url'       => '/admin/media',
       'icon'      => 'bx bx-images',
-      'urutan'    => 19,
+      'urutan'    => 21,
       'is_active' => true,
     ]);
 
     $mBackupRestore = Menu::firstOrCreate(['nama' => 'Backup & Restore', 'parent_id' => $administrasi->id], [
       'url'       => '/admin/backup-restore',
       'icon'      => 'bx bx-data',
-      'urutan'    => 20,
+      'urutan'    => 22,
+      'is_active' => true,
+    ]);
+
+    $mPemeliharaan = Menu::firstOrCreate(['nama' => 'Pemeliharaan', 'parent_id' => $administrasi->id], [
+      'url'       => '/admin/pemeliharaan',
+      'icon'      => 'bx bx-wrench',
+      'urutan'    => 23,
       'is_active' => true,
     ]);
 
@@ -135,10 +156,17 @@ class LevelMenuSeeder extends Seeder
       'is_active' => true,
     ]);
 
+    $lMonitoringLogin = Menu::firstOrCreate(['nama' => 'Monitoring Login', 'parent_id' => $laporan->id], [
+      'url'       => '/laporan/login-attempts',
+      'icon'      => 'bx bx-shield-quarter',
+      'urutan'    => 32,
+      'is_active' => true,
+    ]);
+
     $lChatAi = Menu::firstOrCreate(['nama' => 'Chat Asisten Analitik', 'parent_id' => $laporan->id], [
       'url'       => '/laporan/chat-ai',
       'icon'      => 'bx bx-bot',
-      'urutan'    => 32,
+      'urutan'    => 33,
       'is_active' => true,
     ]);
 
@@ -163,7 +191,7 @@ class LevelMenuSeeder extends Seeder
     }
 
     // Admin: kelola anggota & laporan, tanpa menu administrasi sistem
-    foreach ([$administrasi, $mLevel, $mMenu, $mMapping, $mIdentitas, $mDashboard, $mBahasa, $mPengaturanEmail, $mUsers, $mMedia, $mBackupRestore, $mAnggota, $laporan, $lAktivitas, $lChatAi] as $m) {
+    foreach ([$administrasi, $mLevel, $mMenu, $mMapping, $mIdentitas, $mDashboard, $mImportExport, $mPengaturanAplikasi, $mBahasa, $mPengaturanEmail, $mUsers, $mMedia, $mBackupRestore, $mPemeliharaan, $mAnggota, $laporan, $lAktivitas, $lMonitoringLogin, $lChatAi] as $m) {
       $akses = match ($m->id) {
         $mUsers->id => [
           'dapat_lihat' => true,
@@ -183,7 +211,7 @@ class LevelMenuSeeder extends Seeder
           'dapat_restore' => false,
           'dapat_hapus_backup' => false,
         ],
-        $mBackupRestore->id => [
+        $mBackupRestore->id, $mPemeliharaan->id => [
           'dapat_lihat' => false,
           'dapat_buat' => false,
           'dapat_ubah'  => false,
@@ -201,7 +229,7 @@ class LevelMenuSeeder extends Seeder
           'dapat_restore' => false,
           'dapat_hapus_backup' => false,
         ],
-        $administrasi->id, $mLevel->id, $mMenu->id, $mMapping->id, $mIdentitas->id, $mDashboard->id, $mBahasa->id => [
+        $administrasi->id, $mLevel->id, $mMenu->id, $mMapping->id, $mIdentitas->id, $mDashboard->id, $mImportExport->id, $mPengaturanAplikasi->id, $mBahasa->id, $mPemeliharaan->id => [
           'dapat_lihat' => false,
           'dapat_buat' => false,
           'dapat_ubah'  => false,
@@ -243,6 +271,24 @@ class LevelMenuSeeder extends Seeder
         'dapat_restore' => false,
         'dapat_hapus_backup' => false,
       ],
+      $lMonitoringLogin->id => [
+        'dapat_lihat' => true,
+        'dapat_buat' => false,
+        'dapat_ubah'  => false,
+        'dapat_hapus' => false,
+        'dapat_backup' => false,
+        'dapat_restore' => false,
+        'dapat_hapus_backup' => false,
+      ],
+      $lMonitoringLogin->id => [
+        'dapat_lihat' => true,
+        'dapat_buat' => false,
+        'dapat_ubah'  => false,
+        'dapat_hapus' => false,
+        'dapat_backup' => false,
+        'dapat_restore' => false,
+        'dapat_hapus_backup' => false,
+      ],
       $lChatAi->id => [
         'dapat_lihat' => true,
         'dapat_buat' => false,
@@ -257,21 +303,21 @@ class LevelMenuSeeder extends Seeder
     // ============================
     // 4. USER DEMO
     // ============================
-    User::firstOrCreate(['email' => 'superadmin@sio.id'], [
+    User::firstOrCreate(['email' => 'superadmin@admin.id'], [
       'name'     => 'Super Admin',
       'level_id' => $superadmin->id,
       'is_active' => true,
       'password' => Hash::make('password'),
     ]);
 
-    User::firstOrCreate(['email' => 'admin@sio.id'], [
+    User::firstOrCreate(['email' => 'admin@admin.id'], [
       'name'     => 'Admin Umum',
       'level_id' => $admin->id,
       'is_active' => true,
       'password' => Hash::make('password'),
     ]);
 
-    User::firstOrCreate(['email' => 'anggota@sio.id'], [
+    User::firstOrCreate(['email' => 'anggota@admin.id'], [
       'name'     => 'Budi Santoso',
       'level_id' => $anggota->id,
       'is_active' => true,

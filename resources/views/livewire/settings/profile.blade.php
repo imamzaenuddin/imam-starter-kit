@@ -212,31 +212,32 @@ new class extends Component {
         $this->dispatch('profil-detail-disimpan');
     }
 
-    public function simpanFotoUpload(): void
+    public function simpanPasFoto(): void
     {
-        $this->validate([
-            'foto_upload' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
-        ]);
+        $path = null;
 
-        $path = $this->foto_upload->store('profil', 'public');
+        if ($this->foto_upload) {
+            $this->validate([
+                'foto_upload' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            ]);
+
+            $path = $this->foto_upload->store('profil', 'public');
+        } elseif ($this->foto_kamera_base64) {
+            $this->validate([
+                'foto_kamera_base64' => ['required', 'string', 'starts_with:data:image/'],
+            ]);
+
+            $path = $this->simpanDariBase64($this->foto_kamera_base64);
+        } else {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'foto_upload' => __('messages.profile_photo_input_required'),
+            ]);
+        }
 
         $this->simpanFotoProfilPath($path);
-        $this->reset('foto_upload');
+        $this->reset('foto_upload', 'foto_kamera_base64');
         $this->sinkronFotoProfilPreview();
-        $this->dispatch('foto-upload-disimpan');
-    }
-
-    public function simpanFotoKamera(): void
-    {
-        $this->validate([
-            'foto_kamera_base64' => ['required', 'string', 'starts_with:data:image/'],
-        ]);
-
-        $path = $this->simpanDariBase64($this->foto_kamera_base64);
-
-        $this->simpanFotoProfilPath($path);
-        $this->sinkronFotoProfilPreview();
-        $this->dispatch('foto-kamera-disimpan');
+        $this->dispatch('pas-foto-disimpan');
     }
 
     private function simpanDariBase64(string $data): string
@@ -270,6 +271,9 @@ new class extends Component {
 
         $user->foto_profil = $path;
         $user->save();
+
+        // Refresh user auth agar komponen/layout memakai foto terbaru pada request berikutnya.
+        Auth::setUser($user->fresh());
 
         if (! empty($fotoLama) && $fotoLama !== $path && Storage::disk('public')->exists($fotoLama)) {
             Storage::disk('public')->delete($fotoLama);
@@ -474,10 +478,10 @@ new class extends Component {
             </div>
 
             <div class="col-12 col-xl-6">
-                <div class="card mb-4">
+                <div class="card" x-data="kameraPasFoto($wire)">
                     <div class="card-header">
                         <h5 class="card-title mb-0">{{ __('messages.profile_photo_upload_title') }}</h5>
-                        <small class="text-muted">{{ __('messages.profile_photo_upload_subtitle') }}</small>
+                        <small class="text-muted">{{ __('messages.profile_photo_unified_subtitle') }}</small>
                     </div>
                     <div class="card-body">
                         <div class="d-flex align-items-center gap-3 mb-3">
@@ -488,61 +492,51 @@ new class extends Component {
                             </div>
                         </div>
 
-                        <form wire:submit="simpanFotoUpload">
+                        <form wire:submit="simpanPasFoto">
                             <div class="mb-3">
-                                <input type="file" wire:model="foto_upload" class="form-control" accept="image/jpeg,image/jpg,image/png,image/webp">
+                                <label class="form-label">{{ __('messages.profile_photo_upload_title') }}</label>
+                                <input type="file" wire:model="foto_upload" class="form-control" accept="image/jpeg,image/jpg,image/png,image/webp" @change="pilihUpload($event)">
                                 @error('foto_upload') <small class="text-danger">{{ $message }}</small> @enderror
                             </div>
 
-                            <div class="d-flex align-items-center gap-3">
-                                <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="simpanFotoUpload">
-                                    <span wire:loading.remove wire:target="simpanFotoUpload">{{ __('messages.profile_save_photo') }}</span>
-                                    <span wire:loading wire:target="simpanFotoUpload" style="display:none">{{ __('messages.saving') }}</span>
-                                </button>
-                                <x-action-message on="foto-upload-disimpan">{{ __('messages.saved') }}</x-action-message>
+                            <div class="position-relative rounded overflow-hidden border mb-3" style="height:260px;background:#0f172a;">
+                                <video x-ref="video" autoplay playsinline class="w-100 h-100" style="object-fit:cover;"></video>
+                                <div class="position-absolute top-50 start-50 translate-middle" style="width:62%;height:78%;border:3px dashed #ffffff;box-shadow:0 0 0 9999px rgba(15,23,42,.35);border-radius:12px;"></div>
+                                <div class="position-absolute" style="left:19%;right:19%;top:72%;border-top:2px solid rgba(255,255,255,.8);"></div>
+                                <small class="position-absolute bottom-0 start-0 end-0 text-center text-white py-1" style="background:rgba(15,23,42,.65);font-size:.75rem;">{{ __('messages.profile_camera_frame_hint') }}</small>
                             </div>
-                        </form>
-                    </div>
-                </div>
 
-                <div class="card" x-data="kameraPasFoto($wire)">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">{{ __('messages.profile_photo_camera_title') }}</h5>
-                        <small class="text-muted">{{ __('messages.profile_photo_camera_subtitle') }}</small>
-                    </div>
-                    <div class="card-body">
-                        <div class="position-relative rounded overflow-hidden border mb-3" style="height:260px;background:#0f172a;">
-                            <video x-ref="video" autoplay playsinline class="w-100 h-100" style="object-fit:cover;"></video>
-                            <div class="position-absolute top-50 start-50 translate-middle" style="width:62%;height:78%;border:3px dashed #ffffff;box-shadow:0 0 0 9999px rgba(15,23,42,.35);border-radius:12px;"></div>
-                            <div class="position-absolute" style="left:19%;right:19%;top:72%;border-top:2px solid rgba(255,255,255,.8);"></div>
-                            <small class="position-absolute bottom-0 start-0 end-0 text-center text-white py-1" style="background:rgba(15,23,42,.65);font-size:.75rem;">{{ __('messages.profile_camera_frame_hint') }}</small>
-                        </div>
-
-                        <div class="d-flex flex-wrap gap-2 mb-3">
-                            <button type="button" class="btn btn-outline-primary" @click="mulaiKamera()">{{ __('messages.profile_start_camera') }}</button>
-                            <button type="button" class="btn btn-outline-secondary" @click="ambilFoto()">{{ __('messages.profile_take_photo') }}</button>
-                            <button type="button" class="btn btn-outline-danger" @click="hentikanKamera()">{{ __('messages.profile_stop_camera') }}</button>
-                        </div>
-
-                        <template x-if="fotoData">
-                            <div class="mb-3">
-                                <div class="fw-semibold mb-2">{{ __('messages.profile_camera_preview') }}</div>
-                                <img :src="fotoData" alt="Preview Kamera" class="rounded" style="width:88px;height:110px;object-fit:cover;border:1px solid #d9dee3;">
+                            <div class="d-flex flex-wrap gap-2 mb-3">
+                                <button type="button" class="btn btn-outline-primary" @click="mulaiKamera()">{{ __('messages.profile_start_camera') }}</button>
+                                <button type="button" class="btn btn-outline-secondary" @click="ambilFoto()">{{ __('messages.profile_take_photo') }}</button>
+                                <button type="button" class="btn btn-outline-info" @click="gantiKamera()" :disabled="!bisaGantiKamera">{{ __('messages.profile_switch_camera') }}</button>
+                                <button type="button" class="btn btn-outline-danger" @click="hentikanKamera()">{{ __('messages.profile_stop_camera') }}</button>
                             </div>
-                        </template>
 
-                        <canvas x-ref="canvas" class="d-none"></canvas>
+                            <div class="mb-3 d-flex flex-wrap gap-2">
+                                <span class="badge bg-label-info" x-show="sumberFoto === 'upload'" style="display:none">{{ __('messages.profile_photo_source_upload') }}</span>
+                                <span class="badge bg-label-success" x-show="sumberFoto === 'camera'" style="display:none">{{ __('messages.profile_photo_source_camera') }}</span>
+                                <span class="badge bg-label-secondary" x-show="sumberFoto === 'none'">{{ __('messages.profile_photo_source_none') }}</span>
+                                <span class="badge bg-label-primary" x-show="bisaGantiKamera" style="display:none" x-text="kameraLabel()"></span>
+                            </div>
 
-                        <form wire:submit="simpanFotoKamera">
+                            <template x-if="fotoData">
+                                <div class="mb-3">
+                                    <div class="fw-semibold mb-2">{{ __('messages.profile_camera_preview') }}</div>
+                                    <img :src="fotoData" alt="Preview Kamera" class="rounded" style="width:88px;height:110px;object-fit:cover;border:1px solid #d9dee3;">
+                                </div>
+                            </template>
+
+                            <canvas x-ref="canvas" class="d-none"></canvas>
                             <input type="hidden" wire:model="foto_kamera_base64">
                             @error('foto_kamera_base64') <small class="text-danger d-block mb-2">{{ $message }}</small> @enderror
 
                             <div class="d-flex align-items-center gap-3">
-                                <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="simpanFotoKamera">
-                                    <span wire:loading.remove wire:target="simpanFotoKamera">{{ __('messages.profile_use_camera_photo') }}</span>
-                                    <span wire:loading wire:target="simpanFotoKamera" style="display:none">{{ __('messages.saving') }}</span>
+                                <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="simpanPasFoto">
+                                    <span wire:loading.remove wire:target="simpanPasFoto">{{ __('messages.profile_save_profile_photo') }}</span>
+                                    <span wire:loading wire:target="simpanPasFoto" style="display:none">{{ __('messages.saving') }}</span>
                                 </button>
-                                <x-action-message on="foto-kamera-disimpan">{{ __('messages.saved') }}</x-action-message>
+                                <x-action-message on="pas-foto-disimpan">{{ __('messages.saved') }}</x-action-message>
                             </div>
                         </form>
                     </div>
@@ -559,11 +553,31 @@ new class extends Component {
     return {
       stream: null,
       fotoData: '',
+      sumberFoto: 'none',
+      cameraFacing: 'user',
+      bisaGantiKamera: false,
+
+      kameraLabel() {
+        return this.cameraFacing === 'user'
+          ? @js(__('messages.profile_camera_front'))
+          : @js(__('messages.profile_camera_back'));
+      },
+
+      async deteksiKamera() {
+        try {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          const videoInputs = devices.filter((d) => d.kind === 'videoinput');
+          this.bisaGantiKamera = videoInputs.length > 1;
+        } catch (_e) {
+          this.bisaGantiKamera = false;
+        }
+      },
 
       async mulaiKamera() {
         try {
+          await this.deteksiKamera();
           this.hentikanKamera();
-          this.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+          this.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: this.cameraFacing }, audio: false });
           this.$refs.video.srcObject = this.stream;
           await this.$refs.video.play();
         } catch (_e) {
@@ -575,6 +589,27 @@ new class extends Component {
         if (!this.stream) return;
         this.stream.getTracks().forEach((track) => track.stop());
         this.stream = null;
+      },
+
+      async gantiKamera() {
+        if (!this.bisaGantiKamera) {
+          return;
+        }
+
+        this.cameraFacing = this.cameraFacing === 'user' ? 'environment' : 'user';
+        await this.mulaiKamera();
+      },
+
+      pilihUpload(event) {
+        const files = event?.target?.files || [];
+        if (files.length > 0) {
+          this.sumberFoto = 'upload';
+          this.fotoData = '';
+          this.hentikanKamera();
+          wire.set('foto_kamera_base64', null);
+        } else {
+          this.sumberFoto = 'none';
+        }
       },
 
       ambilFoto() {
@@ -600,6 +635,9 @@ new class extends Component {
         ctx.drawImage(video, cropX, cropY, cropLebar, cropTinggi, 0, 0, canvas.width, canvas.height);
 
         this.fotoData = canvas.toDataURL('image/jpeg', 0.92);
+        this.sumberFoto = 'camera';
+        this.hentikanKamera();
+        wire.set('foto_upload', null);
         wire.set('foto_kamera_base64', this.fotoData);
       },
     }

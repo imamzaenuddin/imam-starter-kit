@@ -40,3 +40,89 @@
 - Folder sumber aktif: D:/TMP/sneat-bootstrap-laravel-livewire-starter-kit
 - Nama target branding: imam-starter-kit
 - Catatan: jika ingin nama folder fisik juga sama, ubah nama folder root menjadi D:/TMP/imam-starter-kit lalu buka ulang workspace.
+
+## Contoh Materi Penggunaan KPI di Dashboard
+
+### Tujuan Pembelajaran
+
+1. Peserta memahami konsep KPI dan perbedaannya dengan metrik biasa.
+2. Peserta dapat membuat widget KPI di menu Dashboard.
+3. Peserta dapat membaca tren naik atau turun dari perbandingan periode.
+4. Peserta dapat menentukan ambang warna untuk monitoring cepat.
+
+### Konsep Dasar
+
+1. KPI adalah indikator kinerja utama yang terukur.
+2. Setiap KPI harus memiliki komponen berikut:
+   - Nama indikator
+   - Target numerik
+   - Periode evaluasi
+   - Sumber data yang jelas
+3. Rumus pencapaian KPI:
+   - Persentase KPI = (Nilai Aktual / Target) x 100%
+
+### Contoh KPI Organisasi
+
+1. KPI Keanggotaan Aktif
+   - Target: 1.000 anggota aktif
+   - Aktual bulan ini: 820
+   - Pencapaian: 82%
+2. KPI Kegiatan Bulanan
+   - Target: 12 kegiatan
+   - Aktual bulan ini: 9
+   - Pencapaian: 75%
+3. KPI Respons Laporan
+   - Target: maksimal 2 hari
+   - Aktual rata-rata: 1,5 hari
+   - Status: tercapai
+
+### Praktik Konfigurasi di Dashboard
+
+1. Buka halaman Kelola Dashboard.
+2. Klik Tambah Widget.
+3. Isi konfigurasi dasar:
+   - Nama Widget: Total Anggota Aktif
+   - Sumber Data: users
+   - Tipe Query: count
+   - Tipe Tampilan: statistik
+4. Isi konfigurasi KPI:
+   - Target KPI: 1000
+   - Tampilkan Progress Bar: aktif
+   - Bandingkan Periode: aktif
+   - Bandingkan Dengan: bulan_lalu
+5. Atur warna threshold:
+   - Hijau: capaian >= 100%
+   - Kuning: capaian >= 75%
+   - Merah: capaian < 75%
+6. Simpan widget dan cek hasil di dashboard utama.
+
+### Cara Membaca Hasil
+
+1. Nilai utama menunjukkan capaian saat ini.
+2. Progress bar menunjukkan persentase terhadap target.
+3. Tren naik atau turun menunjukkan perubahan terhadap periode pembanding.
+4. Interpretasi warna:
+   - Hijau: aman atau melebihi target
+   - Kuning: perlu perhatian
+   - Merah: perlu tindakan segera
+
+### Studi Kasus Singkat
+
+1. KPI: Kegiatan Bulanan
+   - Target: 12
+   - Aktual: 7
+   - Bulan lalu: 10
+2. Interpretasi:
+   - Pencapaian: 58,3% (merah)
+   - Tren: turun 30% dari bulan lalu
+   - Tindakan: tambah agenda, revisi PIC, dan monitor mingguan
+
+### Tugas Latihan Peserta
+
+1. Buat 3 widget KPI:
+   - Anggota aktif
+   - Jumlah kegiatan
+   - Laporan selesai
+2. Tetapkan target realistis untuk tiap KPI.
+3. Aktifkan perbandingan periode.
+4. Presentasikan analisis: status, tren, dan rencana aksi.

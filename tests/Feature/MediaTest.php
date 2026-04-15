@@ -8,6 +8,7 @@ use App\Services\MediaService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class MediaTest extends TestCase
@@ -26,7 +27,7 @@ class MediaTest extends TestCase
         $this->service = app(MediaService::class);
     }
 
-    /** @test */
+    #[Test]
     public function user_can_upload_file(): void
     {
         $this->actingAs($this->user);
@@ -44,7 +45,7 @@ class MediaTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function upload_file_requires_valid_category(): void
     {
         $this->actingAs($this->user);
@@ -56,7 +57,7 @@ class MediaTest extends TestCase
         $this->assertEquals('lainnya', $media->kategori);
     }
 
-    /** @test */
+    #[Test]
     public function user_can_download_own_file(): void
     {
         $this->actingAs($this->user);
@@ -69,7 +70,7 @@ class MediaTest extends TestCase
         $this->assertNotNull($response);
     }
 
-    /** @test */
+    #[Test]
     public function user_cannot_download_others_file(): void
     {
         $otherUser = User::factory()->create();
@@ -82,7 +83,7 @@ class MediaTest extends TestCase
         $this->service->download($media, $this->user->id);
     }
 
-    /** @test */
+    #[Test]
     public function user_can_delete_own_file(): void
     {
         $this->actingAs($this->user);
@@ -98,7 +99,7 @@ class MediaTest extends TestCase
         $this->assertDatabaseMissing('m_media', ['id' => $mediaId]);
     }
 
-    /** @test */
+    #[Test]
     public function user_cannot_delete_others_file(): void
     {
         $otherUser = User::factory()->create();
@@ -111,7 +112,7 @@ class MediaTest extends TestCase
         $this->service->delete($media, $this->user->id);
     }
 
-    /** @test */
+    #[Test]
     public function path_traversal_attempt_blocked(): void
     {
         $this->expectException(\Exception::class);
@@ -125,7 +126,7 @@ class MediaTest extends TestCase
         $method->invoke($this->service, 'uploads/user_1/../../../etc/passwd');
     }
 
-    /** @test */
+    #[Test]
     public function user_can_list_own_files(): void
     {
         $this->actingAs($this->user);
@@ -141,7 +142,7 @@ class MediaTest extends TestCase
         $this->assertGreaterThanOrEqual(2, $media->total());
     }
 
-    /** @test */
+    #[Test]
     public function file_category_filter_works(): void
     {
         $this->actingAs($this->user);
@@ -155,7 +156,7 @@ class MediaTest extends TestCase
         $this->assertTrue($logoFiles->total() >= 1);
     }
 
-    /** @test */
+    #[Test]
     public function total_user_file_size_calculated_correctly(): void
     {
         $this->actingAs($this->user);
@@ -171,7 +172,7 @@ class MediaTest extends TestCase
         $this->assertGreaterThanOrEqual(300, $totalSize);
     }
 
-    /** @test */
+    #[Test]
     public function image_detection_works(): void
     {
         $this->actingAs($this->user);
@@ -182,7 +183,7 @@ class MediaTest extends TestCase
         $this->assertTrue($media->isImage());
     }
 
-    /** @test */
+    #[Test]
     public function document_detection_works(): void
     {
         $this->actingAs($this->user);

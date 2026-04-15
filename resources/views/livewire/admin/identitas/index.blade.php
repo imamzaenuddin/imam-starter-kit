@@ -289,7 +289,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                 ->when($this->search, fn ($q) => $q->where('nama_aplikasi', 'like', '%'.$this->search.'%'))
                 ->orderByDesc('is_active')
                 ->orderByDesc('id')
-                ->paginate(10),
+                ->paginate((int) config('app_runtime.pagination_default', 10)),
         ];
     }
 };

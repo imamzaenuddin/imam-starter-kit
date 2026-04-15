@@ -11,6 +11,8 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Volt\Component;
+use App\Services\LoginAttemptService;
+use App\Services\TwoFactorService;
 
 new #[Layout('components.layouts.auth')] class extends Component {
     #[Validate('required|string|email')]
@@ -49,15 +51,31 @@ new #[Layout('components.layouts.auth')] class extends Component {
         if (! Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
             RateLimiter::hit($this->throttleKey());
 
+            app(LoginAttemptService::class)->catat(
+                'gagal',
+                $this->email,
+                request(),
+                null,
+                'Email atau password tidak valid'
+            );
+
             throw ValidationException::withMessages([
                 'email' => __('auth.failed'),
             ]);
         }
 
         RateLimiter::clear($this->throttleKey());
-        Session::regenerate();
+        $user = Auth::user();
 
-        if ($this->modeMaintenanceAktif() && ! $this->isSuperadmin(Auth::user())) {
+        if ($this->modeMaintenanceAktif() && ! $user?->isSuperadmin()) {
+            app(LoginAttemptService::class)->catat(
+                'gagal',
+                $this->email,
+                request(),
+                $user,
+                'Mode maintenance aktif untuk non-superadmin'
+            );
+
             Auth::logout();
             Session::invalidate();
             Session::regenerateToken();
@@ -66,6 +84,32 @@ new #[Layout('components.layouts.auth')] class extends Component {
                 'email' => __('messages.maintenance_login_blocked'),
             ]);
         }
+
+        if ($this->wajibTwoFactor($user)) {
+            app(TwoFactorService::class)->kirimKodeLogin($user);
+
+            Auth::logout();
+            Session::invalidate();
+            Session::regenerateToken();
+
+            session()->put('two_factor_user_id', $user->id);
+            session()->put('two_factor_remember', $this->remember);
+
+            $this->redirectRoute('two-factor.challenge', navigate: true);
+
+            return;
+        }
+
+        Session::regenerate();
+        app(TwoFactorService::class)->catatLoginBerhasil($user);
+
+        app(LoginAttemptService::class)->catat(
+            'sukses',
+            $this->email,
+            request(),
+            $user,
+            'Login berhasil'
+        );
 
         $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
     }
@@ -82,6 +126,17 @@ new #[Layout('components.layouts.auth')] class extends Component {
         event(new Lockout(request()));
 
         $seconds = RateLimiter::availableIn($this->throttleKey());
+
+        app(LoginAttemptService::class)->catat(
+            'lockout',
+            $this->email,
+            request(),
+            null,
+            'Terlalu banyak percobaan login',
+            [
+                'detik_tersisa' => $seconds,
+            ]
+        );
 
         throw ValidationException::withMessages([
             'email' => __('auth.throttle', [
@@ -105,12 +160,23 @@ new #[Layout('components.layouts.auth')] class extends Component {
             return false;
         }
 
+        // Hanya maintenance jika ada records tapi semua non-aktif
+        // DB kosong = setup awal, bukan maintenance
+        if (! \App\Models\Identitas::query()->exists()) {
+            return false;
+        }
+
         return ! \App\Models\Identitas::query()->where('is_active', true)->exists();
     }
 
     protected function isSuperadmin(?\App\Models\User $user): bool
     {
-        return $user && strtolower((string) optional($user->level)->nama_level) === 'superadmin';
+        return (bool) $user?->isSuperadmin();
+    }
+
+    protected function wajibTwoFactor(?\App\Models\User $user): bool
+    {
+        return app(TwoFactorService::class)->wajibSaatLogin($user, $this->email);
     }
 };
 ?>
@@ -119,6 +185,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
     $namaAplikasi = $identitas?->nama_aplikasi ?? 'Sistem Informasi Organisasi';
     $emailHelpdesk = $identitas?->email;
     $maintenanceAktif = \Illuminate\Support\Facades\Schema::hasTable('m_identitas')
+        && \App\Models\Identitas::query()->exists()
         && ! \App\Models\Identitas::query()->where('is_active', true)->exists();
 @endphp
 

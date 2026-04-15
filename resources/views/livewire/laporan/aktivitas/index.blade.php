@@ -139,7 +139,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                 ->orderBy('name')
                 ->get(),
 
-            'logs' => $this->queryLogAktivitas()->paginate(15),
+            'logs' => $this->queryLogAktivitas()->paginate((int) config('app_runtime.pagination_default', 10)),
         ];
     }
 

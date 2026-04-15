@@ -99,7 +99,7 @@ new #[Layout('components.layouts.app')] class extends Component {
             'menus'    => Menu::with('parent')
                 ->when($this->search, fn ($q) => $q->where('nama', 'like', '%' . $this->search . '%'))
                 ->orderBy('urutan')
-                ->paginate(15),
+            ->paginate((int) config('app_runtime.pagination_default', 10)),
             'parents'  => Menu::whereNull('parent_id')->active()->orderBy('urutan')->get(),
         ];
     }

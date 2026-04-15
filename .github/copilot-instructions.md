@@ -324,8 +324,8 @@ npm run dev
 
 ## 9. AKUN DEMO (setelah seeding)
 
-| Email               | Password   | Level                     |
-| ------------------- | ---------- | ------------------------- |
-| `superadmin@sio.id` | `password` | Superadmin (penuh)        |
-| `admin@sio.id`      | `password` | Admin (anggota + laporan) |
-| `anggota@sio.id`    | `password` | Anggota (laporan saja)    |
+| Email                 | Password   | Level                     |
+| --------------------- | ---------- | ------------------------- |
+| `superadmin@admin.id` | `password` | Superadmin (penuh)        |
+| `admin@admin.id`      | `password` | Admin (anggota + laporan) |
+| `anggota@admin.id`    | `password` | Anggota (laporan saja)    |

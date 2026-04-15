@@ -39,6 +39,13 @@ new #[Layout('components.layouts.app')] class extends Component {
     public int $batasData = 5;
     public int $urutan = 0;
     public bool $isActive = true;
+    public ?int $kpiTarget = null;
+    public bool $tampilkanProgressBar = false;
+    public bool $bandingkanPeriode = false;
+    public ?string $bandingkanDengan = null;
+    public string $warnaThresholdHijau = '90ddd52';
+    public string $warnaThresholdKuning = 'ffc107';
+    public string $warnaThresholdMerah = 'dc3545';
     public array $selectedLevels = [];
     public array $presetPaletChart = [
       'dashboard_palette_main' => ['#696cff', '#03c3ec', '#71dd37', '#ffab00'],
@@ -148,6 +155,13 @@ new #[Layout('components.layouts.app')] class extends Component {
         $this->batasData = $widget->batas_data;
         $this->urutan = $widget->urutan;
         $this->isActive = $widget->is_active;
+        $this->kpiTarget = $widget->kpi_target;
+        $this->tampilkanProgressBar = (bool) $widget->tampilkan_progress_bar;
+        $this->bandingkanPeriode = (bool) $widget->bandingkan_periode;
+        $this->bandingkanDengan = $widget->bandingkan_dengan;
+        $this->warnaThresholdHijau = $widget->warna_threshold_hijau ?: '90ddd52';
+        $this->warnaThresholdKuning = $widget->warna_threshold_kuning ?: 'ffc107';
+        $this->warnaThresholdMerah = $widget->warna_threshold_merah ?: 'dc3545';
         $this->selectedLevels = $widget->levels->pluck('id')->map(fn ($id) => (string) $id)->all();
 
         $this->sinkronkanPilihan();
@@ -186,6 +200,13 @@ new #[Layout('components.layouts.app')] class extends Component {
             'isActive' => 'boolean',
             'selectedLevels' => 'required|array|min:1',
             'selectedLevels.*' => 'exists:m_level,id',
+            'kpiTarget' => 'nullable|integer|min:1|max:999999',
+            'tampilkanProgressBar' => 'boolean',
+            'bandingkanPeriode' => 'boolean',
+            'bandingkanDengan' => ['nullable', 'string', Rule::in(array_keys($service->bandingkanPeriodeTersedia()))],
+            'warnaThresholdHijau' => 'nullable|regex:/^[a-fA-F0-9]{6}$/',
+            'warnaThresholdKuning' => 'nullable|regex:/^[a-fA-F0-9]{6}$/',
+            'warnaThresholdMerah' => 'nullable|regex:/^[a-fA-F0-9]{6}$/',
         ]);
 
         if (in_array($this->tipeTampilan, ['statistik', 'grafik'], true) && $this->tipeQuery !== 'count' && ! $this->kolomAgregasi) {
@@ -221,6 +242,13 @@ new #[Layout('components.layouts.app')] class extends Component {
             'batas_data' => in_array($data['tipeTampilan'], ['daftar', 'grafik'], true) ? $data['batasData'] : 5,
             'urutan' => $data['urutan'],
             'is_active' => $data['isActive'],
+            'kpi_target' => $data['kpiTarget'] ?: null,
+            'tampilkan_progress_bar' => (bool) $data['tampilkanProgressBar'],
+            'bandingkan_periode' => (bool) $data['bandingkanPeriode'],
+            'bandingkan_dengan' => $data['bandingkanPeriode'] ? ($data['bandingkanDengan'] ?: null) : null,
+            'warna_threshold_hijau' => $data['warnaThresholdHijau'] ?: '90ddd52',
+            'warna_threshold_kuning' => $data['warnaThresholdKuning'] ?: 'ffc107',
+            'warna_threshold_merah' => $data['warnaThresholdMerah'] ?: 'dc3545',
         ];
 
         $widget = $this->editId
@@ -271,7 +299,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                 ->when($this->search, fn ($query) => $query->where('nama_widget', 'like', '%' . $this->search . '%'))
                 ->orderBy('urutan')
                 ->orderBy('nama_widget')
-                ->paginate(10),
+              ->paginate((int) config('app_runtime.pagination_default', 10)),
             'levels' => Level::query()->where('is_active', true)->orderBy('nama_level')->get(),
             'opsiSumberData' => $service->sumberDataTersedia(),
             'opsiTampilan' => $service->tipeTampilanTersedia(),
@@ -300,6 +328,10 @@ new #[Layout('components.layouts.app')] class extends Component {
             'filterNilai',
             'selectedLevels',
             'editId',
+            'kpiTarget',
+            'tampilkanProgressBar',
+            'bandingkanPeriode',
+            'bandingkanDengan',
         ]);
 
         $this->sumberData = 'users';
@@ -315,6 +347,9 @@ new #[Layout('components.layouts.app')] class extends Component {
         $this->batasData = 5;
         $this->urutan = 0;
         $this->isActive = true;
+        $this->warnaThresholdHijau = '90ddd52';
+        $this->warnaThresholdKuning = 'ffc107';
+        $this->warnaThresholdMerah = 'dc3545';
         $this->resetValidation();
 
         $this->sinkronkanPilihan();
@@ -800,7 +835,87 @@ new #[Layout('components.layouts.app')] class extends Component {
                 </div>
               </div>
 
-              <div class="form-check">
+              <!-- KPI & Perbandingan Periode -->
+              <div class="row mt-4 pt-3 border-top">
+                <div class="col-12 mb-2">
+                  <h6 class="text-muted fw-semibold text-uppercase" style="font-size:.75rem;letter-spacing:.05em">
+                    KPI & {{ __('messages.widget_compare_period') }}
+                  </h6>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label fw-semibold">{{ __('messages.widget_kpi_target') }}</label>
+                  <input wire:model.number="kpiTarget" type="number" min="1" max="999999"
+                         class="form-control @error('kpiTarget') is-invalid @enderror"
+                         placeholder="{{ __('messages.dashboard_optional') }}">
+                  @error('kpiTarget') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label fw-semibold">{{ __('messages.widget_compare_period') }}</label>
+                  <select wire:model="bandingkanDengan" class="form-select @error('bandingkanDengan') is-invalid @enderror">
+                    <option value="">— {{ __('messages.no_filter') }} —</option>
+                    <option value="hari_sebelumnya">{{ __('messages.widget_compare_previous_day') }}</option>
+                    <option value="minggu_lalu">{{ __('messages.widget_compare_previous_week') }}</option>
+                    <option value="bulan_lalu">{{ __('messages.widget_compare_previous_month') }}</option>
+                    <option value="tahun_lalu">{{ __('messages.widget_compare_previous_year') }}</option>
+                  </select>
+                  @error('bandingkanDengan') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <div class="form-check">
+                    <input wire:model="tampilkanProgressBar" type="checkbox" class="form-check-input" id="progressBarCheck">
+                    <label class="form-check-label" for="progressBarCheck">{{ __('messages.widget_show_progress_bar') }}</label>
+                  </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <div class="form-check">
+                    <input wire:model="bandingkanPeriode" type="checkbox" class="form-check-input" id="bandingkanCheck">
+                    <label class="form-check-label" for="bandingkanCheck">{{ __('messages.widget_compare_period') }}</label>
+                  </div>
+                </div>
+              </div>
+
+              @if ($kpiTarget || $tampilkanProgressBar)
+                <div class="row">
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label fw-semibold">{{ __('messages.widget_color_threshold_green') }}</label>
+                    <div class="input-group">
+                      <span class="input-group-text p-1">
+                        <input wire:model="warnaThresholdHijau" type="color"
+                               class="form-control form-control-color border-0 p-0"
+                               style="width:32px;height:32px;cursor:pointer">
+                      </span>
+                      <input type="text" class="form-control" value="#{{ $warnaThresholdHijau }}" readonly>
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label fw-semibold">{{ __('messages.widget_color_threshold_yellow') }}</label>
+                    <div class="input-group">
+                      <span class="input-group-text p-1">
+                        <input wire:model="warnaThresholdKuning" type="color"
+                               class="form-control form-control-color border-0 p-0"
+                               style="width:32px;height:32px;cursor:pointer">
+                      </span>
+                      <input type="text" class="form-control" value="#{{ $warnaThresholdKuning }}" readonly>
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label fw-semibold">{{ __('messages.widget_color_threshold_red') }}</label>
+                    <div class="input-group">
+                      <span class="input-group-text p-1">
+                        <input wire:model="warnaThresholdMerah" type="color"
+                               class="form-control form-control-color border-0 p-0"
+                               style="width:32px;height:32px;cursor:pointer">
+                      </span>
+                      <input type="text" class="form-control" value="#{{ $warnaThresholdMerah }}" readonly>
+                    </div>
+                  </div>
+                </div>
+              @endif
+
+              <div class="form-check mt-3">
                 <input wire:model="isActive" type="checkbox" class="form-check-input" id="widgetAktifCheck">
                 <label class="form-check-label" for="widgetAktifCheck">{{ __('messages.widget_active_displayed') }}</label>
               </div>

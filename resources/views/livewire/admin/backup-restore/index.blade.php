@@ -193,7 +193,7 @@ new #[Layout('components.layouts.app')] class extends Component {
         $this->pastikanIzinAksiSensitif('restore', 'restore_database');
 
         $this->validate([
-            'fileRestore' => 'required|file|mimes:zip,gz|max:102400',
+            'fileRestore' => 'required|file|mimes:zip,gz|max:' . ((int) config('app_runtime.batas_upload_kb', 102400)),
             'passwordRestore' => 'required|string|current_password',
         ]);
 

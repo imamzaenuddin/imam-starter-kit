@@ -14,8 +14,8 @@ class LogAktivitasSeeder extends Seeder
             return;
         }
 
-        $superadmin = User::where('email', 'superadmin@sio.id')->first();
-        $admin = User::where('email', 'admin@sio.id')->first();
+        $superadmin = User::where('email', 'superadmin@admin.id')->first();
+        $admin = User::where('email', 'admin@admin.id')->first();
 
         $data = [
             [

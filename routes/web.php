@@ -31,6 +31,7 @@ Route::middleware(['auth'])->group(function () {
 
   Volt::route('settings/profile', 'settings.profile')->name('settings.profile');
   Volt::route('settings/password', 'settings.password')->name('settings.password');
+  Volt::route('settings/two-factor', 'settings.two-factor')->name('settings.two-factor');
 
   Route::prefix('api/wilayah')->name('api.wilayah.')->group(function () {
     Route::get('provinsi', function () {
@@ -143,16 +144,20 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('hak-akses', 'admin.hak-akses.index')->name('hak-akses');
     Volt::route('identitas', 'admin.identitas.index')->name('identitas');
     Volt::route('dashboard', 'admin.dashboard.index')->name('dashboard');
+    Volt::route('import-export', 'admin.import-export.index')->name('import-export');
+    Volt::route('pengaturan-aplikasi', 'admin.pengaturan-aplikasi.index')->name('pengaturan-aplikasi');
     Volt::route('bahasa', 'admin.bahasa.index')->name('bahasa');
     Volt::route('pengaturan-email', 'admin.pengaturan-email.index')->name('pengaturan-email');
     Volt::route('users', 'admin.users.index')->name('users');
     Volt::route('media', 'admin.media.index')->name('media');
     Volt::route('backup-restore', 'admin.backup-restore.index')->name('backup-restore');
+    Volt::route('pemeliharaan', 'admin.pemeliharaan.index')->name('pemeliharaan');
   });
 
   // Laporan
   Route::prefix('laporan')->name('laporan.')->group(function () {
     Volt::route('aktivitas', 'laporan.aktivitas.index')->name('aktivitas');
+    Volt::route('login-attempts', 'laporan.login-attempts.index')->name('login-attempts');
     Volt::route('chat-ai', 'laporan.chat-ai.index')->name('chat-ai');
     Route::post('chat-ai/ask', function (Request $request, ChatAiAnalisisService $service) {
       if (! $request->user()?->bisaMenu('/laporan/chat-ai', 'dapat_lihat')) {

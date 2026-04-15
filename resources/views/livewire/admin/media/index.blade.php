@@ -31,7 +31,7 @@ new #[Layout('components.layouts.app')] class extends Component {
         }
 
         return [
-            'media' => $query->paginate(15),
+            'media' => $query->paginate((int) config('app_runtime.pagination_default', 10)),
             'kategoriTersedia' => MediaService::kategoriTersedia(),
             'totalUkuran' => app(MediaService::class)->totalUkuranUser(auth()->id()),
             'totalUkuranFormat' => $this->formatUkuran((int) app(MediaService::class)->totalUkuranUser(auth()->id())),
@@ -57,7 +57,7 @@ new #[Layout('components.layouts.app')] class extends Component {
     {
         // Validasi input
         $this->validate([
-            'file' => 'required|file|max:10240', // Max 10MB
+            'file' => 'required|file|max:' . ((int) config('app_runtime.batas_upload_kb', 10240)),
             'kategori' => 'required|in:' . implode(',', MediaService::kategoriTersedia()),
         ]);
 

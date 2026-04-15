@@ -98,7 +98,7 @@ new #[Layout('components.layouts.app')] class extends Component {
             'levels' => Level::query()
                 ->when($this->search, fn ($q) => $q->where('nama_level', 'like', '%' . $this->search . '%'))
                 ->orderBy('nama_level')
-                ->paginate(10),
+            ->paginate((int) config('app_runtime.pagination_default', 10)),
         ];
     }
 };
