@@ -91,45 +91,52 @@ class LevelMenuSeeder extends Seeder
       'is_active' => true,
     ]);
 
+    $mPengaturanChatAi = Menu::firstOrCreate(['nama' => 'Pengaturan Chat AI', 'parent_id' => $administrasi->id], [
+      'url'       => '/admin/pengaturan-chat-ai',
+      'icon'      => 'bx bx-bot',
+      'urutan'    => 18,
+      'is_active' => true,
+    ]);
+
     $mBahasa = Menu::firstOrCreate(['nama' => 'Bahasa', 'parent_id' => $administrasi->id], [
       'url'       => '/admin/bahasa',
       'icon'      => 'bx bx-flag',
-      'urutan'    => 18,
+      'urutan'    => 19,
       'is_active' => true,
     ]);
 
     $mPengaturanEmail = Menu::firstOrCreate(['nama' => 'Pengaturan Email', 'parent_id' => $administrasi->id], [
       'url'       => '/admin/pengaturan-email',
       'icon'      => 'bx bx-envelope',
-      'urutan'    => 19,
+      'urutan'    => 20,
       'is_active' => true,
     ]);
 
     $mUsers = Menu::firstOrCreate(['nama' => 'Kelola User', 'parent_id' => $administrasi->id], [
       'url'       => '/admin/users',
       'icon'      => 'bx bx-user-pin',
-      'urutan'    => 20,
+      'urutan'    => 21,
       'is_active' => true,
     ]);
 
     $mMedia = Menu::firstOrCreate(['nama' => 'Kelola Media', 'parent_id' => $administrasi->id], [
       'url'       => '/admin/media',
       'icon'      => 'bx bx-images',
-      'urutan'    => 21,
+      'urutan'    => 22,
       'is_active' => true,
     ]);
 
     $mBackupRestore = Menu::firstOrCreate(['nama' => 'Backup & Restore', 'parent_id' => $administrasi->id], [
       'url'       => '/admin/backup-restore',
       'icon'      => 'bx bx-data',
-      'urutan'    => 22,
+      'urutan'    => 23,
       'is_active' => true,
     ]);
 
     $mPemeliharaan = Menu::firstOrCreate(['nama' => 'Pemeliharaan', 'parent_id' => $administrasi->id], [
       'url'       => '/admin/pemeliharaan',
       'icon'      => 'bx bx-wrench',
-      'urutan'    => 23,
+      'urutan'    => 24,
       'is_active' => true,
     ]);
 
@@ -191,7 +198,7 @@ class LevelMenuSeeder extends Seeder
     }
 
     // Admin: kelola anggota & laporan, tanpa menu administrasi sistem
-    foreach ([$administrasi, $mLevel, $mMenu, $mMapping, $mIdentitas, $mDashboard, $mImportExport, $mPengaturanAplikasi, $mBahasa, $mPengaturanEmail, $mUsers, $mMedia, $mBackupRestore, $mPemeliharaan, $mAnggota, $laporan, $lAktivitas, $lMonitoringLogin, $lChatAi] as $m) {
+    foreach ([$administrasi, $mLevel, $mMenu, $mMapping, $mIdentitas, $mDashboard, $mImportExport, $mPengaturanAplikasi, $mPengaturanChatAi, $mBahasa, $mPengaturanEmail, $mUsers, $mMedia, $mBackupRestore, $mPemeliharaan, $mAnggota, $laporan, $lAktivitas, $lMonitoringLogin, $lChatAi] as $m) {
       $akses = match ($m->id) {
         $mUsers->id => [
           'dapat_lihat' => true,
@@ -229,7 +236,7 @@ class LevelMenuSeeder extends Seeder
           'dapat_restore' => false,
           'dapat_hapus_backup' => false,
         ],
-        $administrasi->id, $mLevel->id, $mMenu->id, $mMapping->id, $mIdentitas->id, $mDashboard->id, $mImportExport->id, $mPengaturanAplikasi->id, $mBahasa->id, $mPemeliharaan->id => [
+        $administrasi->id, $mLevel->id, $mMenu->id, $mMapping->id, $mIdentitas->id, $mDashboard->id, $mImportExport->id, $mPengaturanAplikasi->id, $mPengaturanChatAi->id, $mBahasa->id, $mPemeliharaan->id => [
           'dapat_lihat' => false,
           'dapat_buat' => false,
           'dapat_ubah'  => false,

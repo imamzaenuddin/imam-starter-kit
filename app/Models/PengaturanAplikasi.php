@@ -17,6 +17,7 @@ class PengaturanAplikasi extends Model
         'otp_inactive_days',
         'otp_failed_attempts',
         'otp_failed_window_minutes',
+        'chat_ai_konteks',
         'is_active',
     ];
 
@@ -26,6 +27,7 @@ class PengaturanAplikasi extends Model
         'otp_inactive_days' => 'integer',
         'otp_failed_attempts' => 'integer',
         'otp_failed_window_minutes' => 'integer',
+        'chat_ai_konteks' => 'array',
         'is_active' => 'boolean',
     ];
 }

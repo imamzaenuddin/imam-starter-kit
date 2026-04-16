@@ -146,6 +146,7 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('dashboard', 'admin.dashboard.index')->name('dashboard');
     Volt::route('import-export', 'admin.import-export.index')->name('import-export');
     Volt::route('pengaturan-aplikasi', 'admin.pengaturan-aplikasi.index')->name('pengaturan-aplikasi');
+    Volt::route('pengaturan-chat-ai', 'admin.pengaturan-chat-ai.index')->name('pengaturan-chat-ai');
     Volt::route('bahasa', 'admin.bahasa.index')->name('bahasa');
     Volt::route('pengaturan-email', 'admin.pengaturan-email.index')->name('pengaturan-email');
     Volt::route('users', 'admin.users.index')->name('users');
@@ -168,7 +169,7 @@ Route::middleware(['auth'])->group(function () {
         'pertanyaan' => 'required|string|min:3|max:1000',
       ]);
 
-      $hasil = $service->analisa($data['pertanyaan']);
+      $hasil = $service->analisa($data['pertanyaan'], $request->user());
 
       if ($request->user()) {
         $service->simpanRiwayat($request->user(), $data['pertanyaan'], (string) $hasil['jawaban'], (string) $hasil['sumber']);
@@ -177,6 +178,11 @@ Route::middleware(['auth'])->group(function () {
       return response()->json([
         'jawaban' => $hasil['jawaban'],
         'sumber' => $hasil['sumber'],
+        'ringkasan_redaksi' => $hasil['ringkasan_redaksi'] ?? [
+          'ada_redaksi' => false,
+          'jumlah_sumber_teredaksi' => 0,
+          'kolom_disensor' => [],
+        ],
         'waktu' => now()->format('d/m/Y H:i:s'),
       ]);
     })->name('chat-ai.ask');

@@ -26,6 +26,7 @@ class PengaturanAplikasiService
       'otp_inactive_days' => 30,
       'otp_failed_attempts' => 3,
       'otp_failed_window_minutes' => 15,
+      'chat_ai_konteks' => ['total_pengguna', 'total_level', 'level_aktif', 'total_menu', 'menu_aktif', 'aktivitas_7_hari', 'modul_teratas'],
     ];
   }
 
@@ -56,6 +57,9 @@ class PengaturanAplikasiService
         'otp_inactive_days' => (int) ($pengaturan->otp_inactive_days ?? $default['otp_inactive_days']),
         'otp_failed_attempts' => (int) ($pengaturan->otp_failed_attempts ?? $default['otp_failed_attempts']),
         'otp_failed_window_minutes' => (int) ($pengaturan->otp_failed_window_minutes ?? $default['otp_failed_window_minutes']),
+        'chat_ai_konteks' => is_array($pengaturan->chat_ai_konteks) && count($pengaturan->chat_ai_konteks) > 0
+          ? $pengaturan->chat_ai_konteks
+          : $default['chat_ai_konteks'],
       ]);
     });
   }
@@ -77,6 +81,7 @@ class PengaturanAplikasiService
       'otp_inactive_days' => $data['otp_inactive_days'],
       'otp_failed_attempts' => $data['otp_failed_attempts'],
       'otp_failed_window_minutes' => $data['otp_failed_window_minutes'],
+      'chat_ai_konteks' => $data['chat_ai_konteks'] ?? $this->konfigurasiDefault()['chat_ai_konteks'],
       'is_active' => true,
     ]);
 

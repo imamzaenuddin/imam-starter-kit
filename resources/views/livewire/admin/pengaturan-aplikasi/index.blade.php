@@ -99,6 +99,7 @@ new #[Layout('components.layouts.app')] class extends Component {
         $this->otpInactiveDays = $konfigurasi['otp_inactive_days'];
         $this->otpFailedAttempts = $konfigurasi['otp_failed_attempts'];
         $this->otpFailedWindowMinutes = $konfigurasi['otp_failed_window_minutes'];
+        $this->chatAiKonteks = $konfigurasi['chat_ai_konteks'] ?? [];
 
         app(LogAktivitasService::class)->catatManual(
             __('messages.pengaturan_aplikasi_module'),
@@ -117,6 +118,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                 'id' => 'Bahasa Indonesia',
                 'en' => 'English',
             ],
+            'chatAiKonteksTersedia' => app(ChatAiAnalisisService::class)->konteksAktifTersedia(),
         ];
     }
 

@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             IdentitasSeeder::class,
             LogAktivitasSeeder::class,
             DashboardWidgetSeeder::class,
+            ChatAiSeeder::class,
         ]);
     }
 }

@@ -25,12 +25,17 @@ new #[Layout('components.layouts.app')] class extends Component {
             'pertanyaan' => 'required|string|min:3|max:1000',
         ]);
 
-        $hasil = app(ChatAiAnalisisService::class)->analisa($data['pertanyaan']);
+        $hasil = app(ChatAiAnalisisService::class)->analisa($data['pertanyaan'], auth()->user());
 
         $this->riwayat[] = [
             'pertanyaan' => $data['pertanyaan'],
             'jawaban' => $hasil['jawaban'],
             'sumber' => $hasil['sumber'],
+            'ringkasan_redaksi' => $hasil['ringkasan_redaksi'] ?? [
+                'ada_redaksi' => false,
+                'jumlah_sumber_teredaksi' => 0,
+                'kolom_disensor' => [],
+            ],
             'waktu' => now()->format('d/m/Y H:i:s'),
         ];
 
@@ -101,6 +106,17 @@ new #[Layout('components.layouts.app')] class extends Component {
                         {{ __('messages.source') }}: {{ $item['sumber'] === 'api-ai' ? __('messages.ai_model') : __('messages.local_analysis_engine') }}
                         • {{ $item['waktu'] }}
                     </small>
+                    @if (data_get($item, 'ringkasan_redaksi.ada_redaksi'))
+                        <div class="mt-2">
+                            <span class="badge bg-label-warning me-1">{{ __('messages.chat_ai_redaksi_badge') }}</span>
+                            <small class="text-muted">
+                                {{ __('messages.chat_ai_redaksi_info', [
+                                    'jumlah' => data_get($item, 'ringkasan_redaksi.jumlah_sumber_teredaksi', 0),
+                                    'kolom' => collect(data_get($item, 'ringkasan_redaksi.kolom_disensor', []))->implode(', '),
+                                ]) }}
+                            </small>
+                        </div>
+                    @endif
                 </div>
             @empty
                 <div class="text-center py-4 text-muted">
