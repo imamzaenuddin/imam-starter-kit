@@ -153,6 +153,8 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('media', 'admin.media.index')->name('media');
     Volt::route('backup-restore', 'admin.backup-restore.index')->name('backup-restore');
     Volt::route('pemeliharaan', 'admin.pemeliharaan.index')->name('pemeliharaan');
+    Volt::route('form-generator-wizard', 'admin.form-generator.wizard')->name('form-generator.wizard');
+    Volt::route('form-generator/{slug}', 'admin.form-generator.runtime')->name('form-generator.runtime');
   });
 
   // Laporan
