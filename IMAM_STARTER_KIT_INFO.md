@@ -52,6 +52,7 @@ Mulai versi ini, proyek menerapkan Arsitektur Modular menggunakan `nwidart/larav
    - Mengecek apakah modul yang relevan sudah ada.
    - Jika belum, usulkan atau jalankan `php artisan module:make` untuk membuatnya.
    - Menempatkan semua Controller, Model, View, dan Route di dalam direktori `Modules/<NamaModul>/`.
+4. **UI/UX Konfirmasi Dialog:** Semua pesan konfirmasi aksi (hapus, reset, eksekusi, dll) pada antarmuka pengguna (UI) **WAJIB** menggunakan SweetAlert (`Swal.fire`). Dilarang keras menggunakan *native* `confirm()` Javascript atau atribut `wire:confirm` bawaan Livewire. Selalu gunakan *Translations* Laravel (contoh: `{{ __('messages.confirm_delete') }}`) untuk teks SweetAlert agar mendukung *multi-language*.
 
 ## Contoh Materi Penggunaan KPI di Dashboard
 

@@ -106,6 +106,36 @@ new #[Layout('components.layouts.app')] class extends Component {
         $this->fields = array_values($this->fields);
     }
 
+    public function hapusForm(int $id): void
+    {
+        if (! auth()->user()?->bisaMenu('/admin/form-generator-wizard', 'dapat_hapus')) {
+            abort(403);
+        }
+
+        $generator = \App\Models\FormGenerator::find($id);
+        if ($generator) {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($generator) {
+                // Hapus data entry terkait form ini
+                $generator->dataEntri()->delete();
+
+                // Hapus menu terkait
+                \App\Models\Menu::where('url', $generator->menu_url)->delete();
+
+                // Hapus field terkait
+                $generator->fields()->delete();
+
+                // Hapus form
+                $generator->delete();
+            });
+
+            // Hapus cache menu seluruh user agar menu yang terhapus hilang dari sidebar
+            \App\Models\User::pluck('id')->each(fn($idUser) => \Illuminate\Support\Facades\Cache::forget("menu_user_{$idUser}"));
+
+            // Refresh komponen
+            $this->redirect(route('admin.form-generator.wizard'));
+        }
+    }
+
     private function tambahFieldAudit(): void
     {
         $this->fields[] = [
@@ -262,6 +292,7 @@ new #[Layout('components.layouts.app')] class extends Component {
             'opsiParentMenu' => $service->parentMenuTersedia(),
             'opsiLevel' => $service->levelTersedia(),
             'prefixDinamis' => $prefixDinamis,
+            'daftarForm' => \App\Models\FormGenerator::with('fields')->orderBy('id', 'desc')->get(),
         ];
     }
 };
@@ -363,6 +394,63 @@ new #[Layout('components.layouts.app')] class extends Component {
                     <span wire:loading.remove wire:target="analisaImport,fileImport"><i class="bx bx-right-arrow-alt me-1"></i>Lanjut Mapping</span>
                     <span wire:loading wire:target="analisaImport,fileImport" style="display:none"><span class="spinner-border spinner-border-sm me-1"></span>Memproses...</span>
                 </button>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header border-bottom">
+                <h5 class="card-title mb-0"><i class="bx bx-list-ul me-2"></i>{{ __('messages.dynamic_form_list') }}</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>{{ __('messages.module_name_col') }}</th>
+                            <th>{{ __('messages.menu_url_col') }}</th>
+                            <th>{{ __('messages.module_type_col') }}</th>
+                            <th>{{ __('messages.total_fields_col') }}</th>
+                            <th class="text-center">{{ __('messages.action') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($daftarForm as $index => $form)
+                            <tr>
+                                <td>{{ $index + 1 }}</td>
+                                <td>
+                                    <strong>{{ $form->nama_modul }}</strong>
+                                    <div class="small text-muted"><i class="{{ $form->icon }}"></i> Menu: {{ $form->nama_menu }}</div>
+                                </td>
+                                <td><a href="{{ $form->menu_url }}" target="_blank" class="text-primary">{{ $form->menu_url }}</a></td>
+                                <td>
+                                    <span class="badge {{ $form->tipe_modul === 'master' ? 'bg-label-primary' : 'bg-label-warning' }}">
+                                        {{ ucfirst($form->tipe_modul) }}
+                                    </span>
+                                </td>
+                                <td>{{ $form->fields->count() }} Field</td>
+                                <td class="text-center">
+                                    @if(auth()->user()?->bisaMenu('/admin/form-generator-wizard', 'dapat_hapus'))
+                                    <button type="button" class="btn btn-sm btn-danger" 
+                                            @click="Swal.fire({
+                                                title: '{{ __('messages.confirm_delete') }}',
+                                                text: '{{ __('messages.confirm_delete_dynamic_form') }}',
+                                                icon: 'warning',
+                                                showCancelButton: true,
+                                                confirmButtonText: '{{ __('messages.yes_delete') }}',
+                                                cancelButtonText: '{{ __('messages.cancel') }}',
+                                            }).then(r => r.isConfirmed && $wire.hapusForm({{ $form->id }}))">
+                                        <i class="bx bx-trash me-1"></i>{{ __('messages.delete') }}
+                                    </button>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">{{ __('messages.no_dynamic_form_data') }}</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
     @endif

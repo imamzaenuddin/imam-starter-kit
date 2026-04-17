@@ -421,8 +421,14 @@ new #[Layout('components.layouts.app')] class extends Component {
                                 </button>
                                 <button
                                     class="btn btn-sm btn-icon btn-text-danger"
-                                    wire:click="hapus({{ $item->id }})"
-                                    wire:confirm="{{ __('messages.pengaturan_chat_ai_konfirmasi_hapus', ['nama' => $item->nama]) }}"
+                                    @click="Swal.fire({
+                                        title: '{{ __('messages.confirm_delete') }}',
+                                        text: '{{ __('messages.pengaturan_chat_ai_konfirmasi_hapus', ['nama' => addslashes($item->nama)]) }}',
+                                        icon: 'warning',
+                                        showCancelButton: true,
+                                        confirmButtonText: '{{ __('messages.yes_delete') }}',
+                                        cancelButtonText: '{{ __('messages.cancel') }}',
+                                    }).then(r => r.isConfirmed && $wire.hapus({{ $item->id }}))"
                                     title="{{ __('messages.delete') }}"
                                 >
                                     <i class="bx bx-trash"></i>

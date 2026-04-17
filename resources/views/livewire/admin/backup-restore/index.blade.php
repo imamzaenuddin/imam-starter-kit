@@ -694,7 +694,14 @@ new #[Layout('components.layouts.app')] class extends Component {
                         <h5 class="modal-title">{{ __('messages.backup_delete_confirm_title') }}</h5>
                         <button type="button" class="btn-close" wire:click="$set('showModalHapus', false)"></button>
                     </div>
-                    <form wire:submit="hapusBackupTerpilih">
+                    <form @submit.prevent="Swal.fire({
+                                title: '{{ __('messages.confirm_delete') }}',
+                                text: '{{ __('messages.backup_delete_confirm_prompt') }}',
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonText: '{{ __('messages.yes_delete') }}',
+                                cancelButtonText: '{{ __('messages.cancel') }}',
+                            }).then(r => r.isConfirmed && $wire.hapusBackupTerpilih())">
                         <div class="modal-body">
                             <p class="mb-3">{{ __('messages.backup_delete_confirm_text') }}: <strong>{{ $namaFileHapus }}</strong></p>
                             <div class="mb-0">
@@ -711,7 +718,6 @@ new #[Layout('components.layouts.app')] class extends Component {
                             <button type="button" class="btn btn-outline-secondary" wire:click="$set('showModalHapus', false)">{{ __('messages.cancel') }}</button>
                             <button type="submit"
                                     class="btn btn-danger"
-                                    wire:confirm="{{ __('messages.backup_delete_confirm_prompt') }}"
                                     wire:loading.attr="disabled"
                                     wire:target="hapusBackupTerpilih">
                                 <span wire:loading.remove wire:target="hapusBackupTerpilih">{{ __('messages.backup_delete_now') }}</span>

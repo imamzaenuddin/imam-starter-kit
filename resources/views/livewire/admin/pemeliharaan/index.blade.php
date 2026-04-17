@@ -603,10 +603,17 @@ new #[Layout('components.layouts.app')] class extends Component {
 
                         @if(auth()->user()?->bisaMenu('/admin/pemeliharaan', 'dapat_ubah'))
                             <button
-                                wire:click="jalankanMigration"
+                                type="button"
+                                @click="Swal.fire({
+                                    title: 'Konfirmasi',
+                                    text: '{{ __('messages.pemeliharaan_migration_confirm') }}',
+                                    icon: 'warning',
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Ya, Lanjutkan',
+                                    cancelButtonText: 'Batal',
+                                }).then(r => r.isConfirmed && $wire.jalankanMigration())"
                                 wire:loading.attr="disabled"
                                 wire:target="jalankanMigration"
-                                wire:confirm="{{ __('messages.pemeliharaan_migration_confirm') }}"
                                 class="btn btn-primary btn-sm"
                             >
                                 <span wire:loading.remove wire:target="jalankanMigration">
@@ -762,10 +769,17 @@ new #[Layout('components.layouts.app')] class extends Component {
 
                     @if(auth()->user()?->bisaMenu('/admin/pemeliharaan', 'dapat_ubah'))
                         <button
-                            wire:click="bersihkanCache"
+                            type="button"
+                            @click="Swal.fire({
+                                title: 'Konfirmasi',
+                                text: '{{ __('messages.pemeliharaan_cache_confirm') }}',
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonText: 'Ya, Lanjutkan',
+                                cancelButtonText: 'Batal',
+                            }).then(r => r.isConfirmed && $wire.bersihkanCache())"
                             wire:loading.attr="disabled"
                             wire:target="bersihkanCache"
-                            wire:confirm="{{ __('messages.pemeliharaan_cache_confirm') }}"
                             class="btn btn-primary btn-sm mb-3"
                         >
                             <span wire:loading.remove wire:target="bersihkanCache">

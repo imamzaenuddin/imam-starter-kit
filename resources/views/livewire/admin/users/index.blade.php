@@ -289,8 +289,14 @@ new #[Layout('components.layouts.app')] class extends Component {
                   <i class="bx bx-edit-alt"></i>
                 </button>
                 <button class="btn btn-sm btn-icon btn-text-danger"
-                        wire:click="hapus({{ $user->id }})"
-                        wire:confirm="{{ __('messages.confirm_delete_user', ['nama' => $user->name]) }}"
+                        @click="Swal.fire({
+                          title: '{{ __('messages.confirm_delete') }}',
+                          text: '{{ __('messages.confirm_delete_user', ['nama' => addslashes($user->name)]) }}',
+                          icon: 'warning',
+                          showCancelButton: true,
+                          confirmButtonText: '{{ __('messages.yes_delete') }}',
+                          cancelButtonText: '{{ __('messages.cancel') }}',
+                        }).then(r => r.isConfirmed && $wire.hapus({{ $user->id }}))"
                         title="{{ __('messages.delete') }}">
                   <i class="bx bx-trash"></i>
                 </button>

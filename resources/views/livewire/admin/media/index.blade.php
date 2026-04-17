@@ -319,8 +319,14 @@ new #[Layout('components.layouts.app')] class extends Component {
                                                 <a
                                                     class="dropdown-item text-danger"
                                                     href="javascript:void(0);"
-                                                    wire:click="hapus({{ $item->id }})"
-                                                    wire:confirm="{{ __('messages.media_confirm_delete') }}"
+                                                    @click="Swal.fire({
+                                                        title: '{{ __('messages.confirm_delete') }}',
+                                                        text: '{{ __('messages.media_confirm_delete') }}',
+                                                        icon: 'warning',
+                                                        showCancelButton: true,
+                                                        confirmButtonText: '{{ __('messages.yes_delete') }}',
+                                                        cancelButtonText: '{{ __('messages.cancel') }}',
+                                                    }).then(r => r.isConfirmed && $wire.hapus({{ $item->id }}))"
                                                 >
                                                     <i class="bx bx-trash me-1"></i>
                                                     {{ __('messages.delete') }}

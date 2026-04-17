@@ -277,7 +277,15 @@ new #[Layout('components.layouts.app')] class extends Component {
                                 <button class="btn btn-sm btn-icon btn-text-primary" wire:click="edit({{ $item->id }})" title="Edit">
                                     <i class="bx bx-edit-alt"></i>
                                 </button>
-                                <button class="btn btn-sm btn-icon btn-text-danger" wire:click="hapus({{ $item->id }})" wire:confirm="Hapus data ini?" title="Hapus">
+                                <button class="btn btn-sm btn-icon btn-text-danger" 
+                                        @click="Swal.fire({
+                                            title: '{{ __('messages.confirm_delete') }}',
+                                            text: 'Hapus data ini?',
+                                            icon: 'warning',
+                                            showCancelButton: true,
+                                            confirmButtonText: '{{ __('messages.yes_delete') }}',
+                                            cancelButtonText: '{{ __('messages.cancel') }}',
+                                        }).then(r => r.isConfirmed && $wire.hapus({{ $item->id }}))" title="Hapus">
                                     <i class="bx bx-trash"></i>
                                 </button>
                             </td>
