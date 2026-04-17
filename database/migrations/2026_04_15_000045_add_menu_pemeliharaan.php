@@ -19,9 +19,9 @@ return new class extends Migration
         $mPemeliharaan = Menu::firstOrCreate(
             ['nama' => 'Pemeliharaan', 'parent_id' => $administrasi->id],
             [
-                'url'       => '/admin/pemeliharaan',
-                'icon'      => 'bx bx-wrench',
-                'urutan'    => 23,
+                'url' => '/admin/pemeliharaan',
+                'icon' => 'bx bx-wrench',
+                'urutan' => 23,
                 'is_active' => true,
             ]
         );
@@ -31,12 +31,12 @@ return new class extends Migration
         if ($superadmin) {
             $superadmin->menus()->syncWithoutDetaching([
                 $mPemeliharaan->id => [
-                    'dapat_lihat'        => true,
-                    'dapat_buat'         => true,
-                    'dapat_ubah'         => true,
-                    'dapat_hapus'        => true,
-                    'dapat_backup'       => false,
-                    'dapat_restore'      => false,
+                    'dapat_lihat' => true,
+                    'dapat_buat' => true,
+                    'dapat_ubah' => true,
+                    'dapat_hapus' => true,
+                    'dapat_backup' => false,
+                    'dapat_restore' => false,
                     'dapat_hapus_backup' => false,
                 ],
             ]);

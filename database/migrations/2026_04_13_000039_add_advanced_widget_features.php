@@ -4,10 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
-        if (Schema::hasTable('m_dashboard_widget') && !Schema::hasColumn('m_dashboard_widget', 'bandingkan_periode')) {
+        if (Schema::hasTable('m_dashboard_widget') && ! Schema::hasColumn('m_dashboard_widget', 'bandingkan_periode')) {
             Schema::table('m_dashboard_widget', function (Blueprint $table) {
                 $table->boolean('bandingkan_periode')->default(false)->after('batas_data');
                 $table->string('bandingkan_dengan')->nullable()->after('bandingkan_periode');

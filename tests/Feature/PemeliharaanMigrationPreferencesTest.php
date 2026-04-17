@@ -10,7 +10,7 @@ uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 function buatUserDenganIzinPemeliharaan(string $email): User
 {
     $level = Level::create([
-        'nama_level' => 'Level Test ' . uniqid(),
+        'nama_level' => 'Level Test '.uniqid(),
         'deskripsi' => 'Level untuk test pemeliharaan',
         'is_active' => true,
     ]);

@@ -21,7 +21,7 @@ class MediaService
         ?string $deskripsi = null
     ): Media {
         // Validasi kategori
-        if (!in_array($kategori, ['logo', 'profil', 'dokumen', 'lainnya'])) {
+        if (! in_array($kategori, ['logo', 'profil', 'dokumen', 'lainnya'])) {
             $kategori = 'lainnya';
         }
 
@@ -68,7 +68,7 @@ class MediaService
         }
 
         // Verifikasi file masih ada
-        if (!$media->fileExists()) {
+        if (! $media->fileExists()) {
             throw new \Exception(__('messages.media_file_not_found'));
         }
 
@@ -144,6 +144,7 @@ class MediaService
     public function tersediaQuota(int $userId, int $maxBytes = 104857600): bool
     {
         $maxBytes = $maxBytes ?? (100 * 1024 * 1024); // Default 100MB
+
         return $this->totalUkuranUser($userId) < $maxBytes;
     }
 
@@ -172,7 +173,7 @@ class MediaService
      */
     protected function generateNamaFile(string $extension): string
     {
-        return Str::random(32) . '.' . $extension;
+        return Str::random(32).'.'.$extension;
     }
 
     /**

@@ -6,7 +6,6 @@ use App\Models\FormGenerator;
 use App\Models\Level;
 use App\Models\Menu;
 use App\Models\User;
-use App\Services\MenuService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -28,7 +27,7 @@ class FormGeneratorService
             return [];
         }
 
-        $header = array_map(fn($h) => trim((string) $h), $headerRaw);
+        $header = array_map(fn ($h) => trim((string) $h), $headerRaw);
         $samples = [];
         $maksimalBarisSampel = 30;
 
@@ -41,7 +40,7 @@ class FormGeneratorService
         $hasil = [];
 
         foreach ($header as $index => $namaKolom) {
-            $namaField = $this->normalisasiNamaField($namaKolom ?: ('field_' . ($index + 1)));
+            $namaField = $this->normalisasiNamaField($namaKolom ?: ('field_'.($index + 1)));
             $sampleKolom = [];
 
             foreach ($samples as $sample) {
@@ -107,12 +106,12 @@ class FormGeneratorService
     {
         return DB::transaction(function () use ($payload, $aktor) {
             $slug = Str::slug((string) $payload['slug']);
-            $url = '/admin/form-generator/' . $slug;
+            $url = '/admin/form-generator/'.$slug;
 
             $generator = FormGenerator::query()->where('slug', $slug)->first();
 
             if (! $generator) {
-                $generator = new FormGenerator();
+                $generator = new FormGenerator;
                 $generator->slug = $slug;
                 $generator->created_by = $aktor->id;
             }
@@ -157,7 +156,7 @@ class FormGeneratorService
                 ]
             );
 
-            $levelDipilih = collect($payload['level_ids'] ?? [])->map(fn($id) => (int) $id)->filter()->values();
+            $levelDipilih = collect($payload['level_ids'] ?? [])->map(fn ($id) => (int) $id)->filter()->values();
 
             if ($levelDipilih->isEmpty()) {
                 $superadmin = Level::query()->whereRaw('LOWER(nama_level) = ?', ['superadmin'])->first();
@@ -196,11 +195,11 @@ class FormGeneratorService
         $slug = Str::slug($nama, '_');
 
         if ($slug === '') {
-            $slug = 'field_' . Str::random(5);
+            $slug = 'field_'.Str::random(5);
         }
 
         if (is_numeric(substr($slug, 0, 1))) {
-            $slug = 'f_' . $slug;
+            $slug = 'f_'.$slug;
         }
 
         return strtolower($slug);
@@ -220,22 +219,22 @@ class FormGeneratorService
             return 'boolean';
         }
 
-        $semuaInteger = collect($samples)->every(fn($val) => preg_match('/^-?\d+$/', (string) $val) === 1);
+        $semuaInteger = collect($samples)->every(fn ($val) => preg_match('/^-?\d+$/', (string) $val) === 1);
         if ($semuaInteger) {
             return 'integer';
         }
 
-        $semuaDecimal = collect($samples)->every(fn($val) => is_numeric((string) $val));
+        $semuaDecimal = collect($samples)->every(fn ($val) => is_numeric((string) $val));
         if ($semuaDecimal) {
             return 'decimal';
         }
 
-        $semuaDate = collect($samples)->every(fn($val) => strtotime((string) $val) !== false);
+        $semuaDate = collect($samples)->every(fn ($val) => strtotime((string) $val) !== false);
         if ($semuaDate) {
             return 'date';
         }
 
-        $rataPanjang = collect($samples)->avg(fn($val) => mb_strlen((string) $val));
+        $rataPanjang = collect($samples)->avg(fn ($val) => mb_strlen((string) $val));
         if ($rataPanjang > 80) {
             return 'text';
         }

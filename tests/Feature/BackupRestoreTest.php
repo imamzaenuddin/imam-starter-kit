@@ -16,7 +16,7 @@ function buatLevelDenganAksiSensitif(string $namaLevel, bool $backup, bool $rest
 {
     $level = Level::firstOrCreate(
         ['nama_level' => $namaLevel],
-        ['deskripsi' => $namaLevel . ' level', 'is_active' => true]
+        ['deskripsi' => $namaLevel.' level', 'is_active' => true]
     );
 
     $menu = Menu::firstOrCreate(

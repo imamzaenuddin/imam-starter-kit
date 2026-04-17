@@ -6,19 +6,19 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-  public function up(): void
-  {
-    Schema::create('levels', function (Blueprint $table) {
-      $table->id();
-      $table->string('nama_level', 50)->unique();
-      $table->string('deskripsi', 255)->nullable();
-      $table->boolean('is_active')->default(true);
-      $table->timestamps();
-    });
-  }
+    public function up(): void
+    {
+        Schema::create('levels', function (Blueprint $table) {
+            $table->id();
+            $table->string('nama_level', 50)->unique();
+            $table->string('deskripsi', 255)->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->timestamps();
+        });
+    }
 
-  public function down(): void
-  {
-    Schema::dropIfExists('levels');
-  }
+    public function down(): void
+    {
+        Schema::dropIfExists('levels');
+    }
 };

@@ -13,14 +13,14 @@ class MenuService
      * Ambil hierarki menu yang diizinkan bagi level user yang sedang login.
      * Hasil di-cache per user agar tidak query berulang setiap request.
      *
-     * @return Collection<int, Menu>   Koleksi menu root beserta children-nya
+     * @return Collection<int, Menu> Koleksi menu root beserta children-nya
      */
     public function menuTersedia(): Collection
     {
         $user = Auth::user();
 
         if (! $user || ! $user->level_id) {
-            return new Collection();
+            return new Collection;
         }
 
         $cacheKey = "menu_user_{$user->id}";
@@ -47,14 +47,14 @@ class MenuService
                 ->get();
         });
 
-        return $result instanceof Collection ? $result : new Collection();
+        return $result instanceof Collection ? $result : new Collection;
     }
 
     /**
      * Cek izin spesifik user pada URL menu tertentu.
      *
-     * @param  string  $url    URL menu (nilai kolom `url` di tabel menus)
-     * @param  string  $izin   Kolom pivot: dapat_lihat|dapat_buat|dapat_ubah|dapat_hapus
+     * @param  string  $url  URL menu (nilai kolom `url` di tabel menus)
+     * @param  string  $izin  Kolom pivot: dapat_lihat|dapat_buat|dapat_ubah|dapat_hapus
      */
     public function boleh(string $url, string $izin = 'dapat_lihat'): bool
     {
@@ -94,6 +94,6 @@ class MenuService
         // Hapus cache semua user yang memiliki level ini
         \App\Models\User::where('level_id', $levelId)
             ->pluck('id')
-            ->each(fn($id) => Cache::forget("menu_user_{$id}"));
+            ->each(fn ($id) => Cache::forget("menu_user_{$id}"));
     }
 }

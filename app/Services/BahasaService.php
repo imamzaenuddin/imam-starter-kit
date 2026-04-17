@@ -14,7 +14,7 @@ class BahasaService
         $paths = [lang_path()];
 
         return collect($paths)
-            ->filter(fn(string $path) => File::isDirectory($path))
+            ->filter(fn (string $path) => File::isDirectory($path))
             ->unique()
             ->values()
             ->all();
@@ -25,9 +25,9 @@ class BahasaService
         return collect($this->sumberBahasaTersedia())
             ->flatMap(function (string $path) {
                 return collect(File::directories($path))
-                    ->map(fn(string $dir) => basename($dir));
+                    ->map(fn (string $dir) => basename($dir));
             })
-            ->filter(fn(string $kode) => preg_match('/^[a-z]{2}([_-][A-Z]{2})?$/', $kode) === 1)
+            ->filter(fn (string $kode) => preg_match('/^[a-z]{2}([_-][A-Z]{2})?$/', $kode) === 1)
             ->unique()
             ->sort()
             ->values()

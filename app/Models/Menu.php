@@ -37,7 +37,7 @@ class Menu extends Model
         if (is_file($lokasiJsonBaru)) {
             $isiJson = json_decode((string) file_get_contents($lokasiJsonBaru), true);
             $namaIcon = array_keys($isiJson['icons'] ?? []);
-            $classIconBaru = array_map(fn($nama) => 'bx-' . $nama, $namaIcon);
+            $classIconBaru = array_map(fn ($nama) => 'bx-'.$nama, $namaIcon);
         }
 
         return $classIcon = collect([...$classFontLama, ...$classIconBaru])->unique()->values()->all();
@@ -52,7 +52,7 @@ class Menu extends Model
         }
 
         return collect(preg_split('/\s+/', $icon) ?: [])
-            ->first(fn($item) => preg_match('/^(?:bx|bxs|bxl)-[a-z0-9-]+$/i', (string) $item) === 1);
+            ->first(fn ($item) => preg_match('/^(?:bx|bxs|bxl)-[a-z0-9-]+$/i', (string) $item) === 1);
     }
 
     public static function iconTersedia(?string $icon): bool
@@ -78,7 +78,7 @@ class Menu extends Model
         $namaClass = static::namaClassIcon($icon);
 
         if (! $namaClass) {
-            return trim($kelasTambahan . ' ' . $icon);
+            return trim($kelasTambahan.' '.$icon);
         }
 
         $classFontLama = [];
@@ -90,14 +90,14 @@ class Menu extends Model
         }
 
         if (in_array($namaClass, $classFontLama, true)) {
-            return trim($kelasTambahan . ' ' . $icon);
+            return trim($kelasTambahan.' '.$icon);
         }
 
         if (str_starts_with($namaClass, 'bx-')) {
-            return trim($kelasTambahan . ' iconify-bx iconify-' . $namaClass);
+            return trim($kelasTambahan.' iconify-bx iconify-'.$namaClass);
         }
 
-        return trim($kelasTambahan . ' ' . $icon);
+        return trim($kelasTambahan.' '.$icon);
     }
 
     /** Menu induk (self-referential) */

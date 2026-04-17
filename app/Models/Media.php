@@ -79,7 +79,7 @@ class Media extends Model
      */
     public function getStoragePathAttribute(): string
     {
-        return $this->disk . '/' . $this->path_relatif;
+        return $this->disk.'/'.$this->path_relatif;
     }
 
     /**
@@ -109,7 +109,7 @@ class Media extends Model
             $unit++;
         }
 
-        return round($size, 2) . ' ' . $units[$unit];
+        return round($size, 2).' '.$units[$unit];
     }
 
     /**

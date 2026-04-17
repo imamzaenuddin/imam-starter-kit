@@ -20,9 +20,9 @@ class PemeliharaanService
         $bootstrapVersion = $this->versiNpm('bootstrap');
 
         return [
-            'laravel'   => $laravelVersion,
-            'php'       => $phpVersion,
-            'livewire'  => $livewireVersion,
+            'laravel' => $laravelVersion,
+            'php' => $phpVersion,
+            'livewire' => $livewireVersion,
             'bootstrap' => $bootstrapVersion,
         ];
     }
@@ -41,7 +41,7 @@ class PemeliharaanService
                 ->select('migration', 'batch')
                 ->get()
                 ->keyBy('migration')
-                ->map(fn($item) => ['batch' => (int) $item->batch])
+                ->map(fn ($item) => ['batch' => (int) $item->batch])
                 ->all();
         }
 
@@ -68,10 +68,10 @@ class PemeliharaanService
         }
 
         // Pending diurutkan ascending agar sesuai urutan eksekusi migration.
-        usort($pending, fn($a, $b) => strcmp($a['nama'], $b['nama']));
+        usort($pending, fn ($a, $b) => strcmp($a['nama'], $b['nama']));
 
         // Run diurutkan descending agar migration terbaru ada di atas.
-        usort($run, fn($a, $b) => strcmp($b['nama'], $a['nama']));
+        usort($run, fn ($a, $b) => strcmp($b['nama'], $a['nama']));
 
         $total = count($pending) + count($run);
         $runAsli = count($run);
@@ -124,6 +124,7 @@ class PemeliharaanService
     public function jalankanMigration(): string
     {
         Artisan::call('migrate', ['--force' => true]);
+
         return Artisan::output();
     }
 
@@ -136,11 +137,11 @@ class PemeliharaanService
         $hasil = [];
 
         $perintah = [
-            'config:clear'      => 'Cache konfigurasi',
-            'cache:clear'       => 'Cache aplikasi',
-            'route:clear'       => 'Cache route',
-            'view:clear'        => 'Cache view',
-            'event:clear'       => 'Cache event',
+            'config:clear' => 'Cache konfigurasi',
+            'cache:clear' => 'Cache aplikasi',
+            'route:clear' => 'Cache route',
+            'view:clear' => 'Cache view',
+            'event:clear' => 'Cache event',
         ];
 
         foreach ($perintah as $cmd => $label) {
@@ -148,17 +149,17 @@ class PemeliharaanService
                 Artisan::call($cmd);
                 $output = trim(Artisan::output());
                 $hasil[] = [
-                    'label'   => $label,
-                    'perintah' => 'php artisan ' . $cmd,
-                    'output'  => $output ?: 'Selesai.',
-                    'sukses'  => true,
+                    'label' => $label,
+                    'perintah' => 'php artisan '.$cmd,
+                    'output' => $output ?: 'Selesai.',
+                    'sukses' => true,
                 ];
             } catch (\Throwable $e) {
                 $hasil[] = [
-                    'label'   => $label,
-                    'perintah' => 'php artisan ' . $cmd,
-                    'output'  => $e->getMessage(),
-                    'sukses'  => false,
+                    'label' => $label,
+                    'perintah' => 'php artisan '.$cmd,
+                    'output' => $e->getMessage(),
+                    'sukses' => false,
                 ];
             }
         }
@@ -175,11 +176,11 @@ class PemeliharaanService
         $dbTerhubung = $this->cekKoneksiDb();
 
         return [
-            'db_terhubung'       => $dbTerhubung,
-            'pending_migration'  => $pendingMigration,
-            'storage_writable'   => is_writable(storage_path()),
-            'env'                => app()->environment(),
-            'debug_mode'         => config('app.debug'),
+            'db_terhubung' => $dbTerhubung,
+            'pending_migration' => $pendingMigration,
+            'storage_writable' => is_writable(storage_path()),
+            'env' => app()->environment(),
+            'debug_mode' => config('app.debug'),
         ];
     }
 
@@ -230,6 +231,7 @@ class PemeliharaanService
     {
         try {
             DB::connection()->getPdo();
+
             return true;
         } catch (\Throwable) {
             return false;

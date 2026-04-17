@@ -34,7 +34,7 @@ test('import csv level berhasil', function () {
 
     file_put_contents(
         $file,
-        "nama_level,deskripsi,is_active\n" .
+        "nama_level,deskripsi,is_active\n".
             "Staff,Staff Operasional,1\n"
     );
 
@@ -52,8 +52,8 @@ test('import csv menu dengan parent berhasil', function () {
 
     file_put_contents(
         $file,
-        "nama,url,icon,parent_nama,urutan,is_active\n" .
-            "Master Data,,, ,10,1\n" .
+        "nama,url,icon,parent_nama,urutan,is_active\n".
+            "Master Data,,, ,10,1\n".
             "Data Anggota,/anggota,bx bx-group,Master Data,11,1\n"
     );
 
@@ -76,7 +76,7 @@ test('import csv menampilkan error per baris', function () {
 
     file_put_contents(
         $file,
-        "nama_level,deskripsi,is_active\n" .
+        "nama_level,deskripsi,is_active\n".
             ",Tanpa Nama,1\n"
     );
 

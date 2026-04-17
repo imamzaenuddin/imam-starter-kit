@@ -10,325 +10,325 @@ use Illuminate\Support\Facades\Hash;
 
 class LevelMenuSeeder extends Seeder
 {
-  public function run(): void
-  {
-    // ============================
-    // 1. LEVELS
-    // ============================
-    $superadmin = Level::firstOrCreate(['nama_level' => 'Superadmin'], [
-      'deskripsi' => 'Akses penuh ke semua fitur sistem',
-      'is_active'  => true,
-    ]);
+    public function run(): void
+    {
+        // ============================
+        // 1. LEVELS
+        // ============================
+        $superadmin = Level::firstOrCreate(['nama_level' => 'Superadmin'], [
+            'deskripsi' => 'Akses penuh ke semua fitur sistem',
+            'is_active' => true,
+        ]);
 
-    $admin = Level::firstOrCreate(['nama_level' => 'Admin'], [
-      'deskripsi' => 'Akses pengelolaan data umum',
-      'is_active'  => true,
-    ]);
+        $admin = Level::firstOrCreate(['nama_level' => 'Admin'], [
+            'deskripsi' => 'Akses pengelolaan data umum',
+            'is_active' => true,
+        ]);
 
-    $anggota = Level::firstOrCreate(['nama_level' => 'Anggota'], [
-      'deskripsi' => 'Akses baca data yang diizinkan',
-      'is_active'  => true,
-    ]);
+        $anggota = Level::firstOrCreate(['nama_level' => 'Anggota'], [
+            'deskripsi' => 'Akses baca data yang diizinkan',
+            'is_active' => true,
+        ]);
 
-    // ============================
-    // 2. MENUS
-    // ============================
+        // ============================
+        // 2. MENUS
+        // ============================
 
-    // --- Sistem (parent) ---
-    $administrasi = Menu::firstOrCreate(['nama' => 'Sistem', 'parent_id' => null], [
-      'url'       => null,
-      'icon'      => 'bx bx-buildings',
-      'urutan'    => 10,
-      'is_active' => true,
-    ]);
+        // --- Sistem (parent) ---
+        $administrasi = Menu::firstOrCreate(['nama' => 'Sistem', 'parent_id' => null], [
+            'url' => null,
+            'icon' => 'bx bx-buildings',
+            'urutan' => 10,
+            'is_active' => true,
+        ]);
 
-    $mLevel = Menu::firstOrCreate(['nama' => 'Kelola Level', 'parent_id' => $administrasi->id], [
-      'url'       => '/admin/levels',
-      'icon'      => 'bx bx-shield',
-      'urutan'    => 11,
-      'is_active' => true,
-    ]);
+        $mLevel = Menu::firstOrCreate(['nama' => 'Kelola Level', 'parent_id' => $administrasi->id], [
+            'url' => '/admin/levels',
+            'icon' => 'bx bx-shield',
+            'urutan' => 11,
+            'is_active' => true,
+        ]);
 
-    $mMenu = Menu::firstOrCreate(['nama' => 'Kelola Menu', 'parent_id' => $administrasi->id], [
-      'url'       => '/admin/menus',
-      'icon'      => 'bx bx-menu',
-      'urutan'    => 12,
-      'is_active' => true,
-    ]);
+        $mMenu = Menu::firstOrCreate(['nama' => 'Kelola Menu', 'parent_id' => $administrasi->id], [
+            'url' => '/admin/menus',
+            'icon' => 'bx bx-menu',
+            'urutan' => 12,
+            'is_active' => true,
+        ]);
 
-    $mMapping = Menu::firstOrCreate(['nama' => 'Hak Akses', 'parent_id' => $administrasi->id], [
-      'url'       => '/admin/hak-akses',
-      'icon'      => 'bx bx-key',
-      'urutan'    => 13,
-      'is_active' => true,
-    ]);
+        $mMapping = Menu::firstOrCreate(['nama' => 'Hak Akses', 'parent_id' => $administrasi->id], [
+            'url' => '/admin/hak-akses',
+            'icon' => 'bx bx-key',
+            'urutan' => 13,
+            'is_active' => true,
+        ]);
 
-    $mIdentitas = Menu::firstOrCreate(['nama' => 'Identitas', 'parent_id' => $administrasi->id], [
-      'url'       => '/admin/identitas',
-      'icon'      => 'bx bx-id-card',
-      'urutan'    => 14,
-      'is_active' => true,
-    ]);
+        $mIdentitas = Menu::firstOrCreate(['nama' => 'Identitas', 'parent_id' => $administrasi->id], [
+            'url' => '/admin/identitas',
+            'icon' => 'bx bx-id-card',
+            'urutan' => 14,
+            'is_active' => true,
+        ]);
 
-    $mDashboard = Menu::firstOrCreate(['nama' => 'Kelola Dashboard', 'parent_id' => $administrasi->id], [
-      'url'       => '/admin/dashboard',
-      'icon'      => 'bx bx-layout',
-      'urutan'    => 15,
-      'is_active' => true,
-    ]);
+        $mDashboard = Menu::firstOrCreate(['nama' => 'Kelola Dashboard', 'parent_id' => $administrasi->id], [
+            'url' => '/admin/dashboard',
+            'icon' => 'bx bx-layout',
+            'urutan' => 15,
+            'is_active' => true,
+        ]);
 
-    $mImportExport = Menu::firstOrCreate(['nama' => 'Import Export Master', 'parent_id' => $administrasi->id], [
-      'url'       => '/admin/import-export',
-      'icon'      => 'bx bx-transfer',
-      'urutan'    => 16,
-      'is_active' => true,
-    ]);
+        $mImportExport = Menu::firstOrCreate(['nama' => 'Import Export Master', 'parent_id' => $administrasi->id], [
+            'url' => '/admin/import-export',
+            'icon' => 'bx bx-transfer',
+            'urutan' => 16,
+            'is_active' => true,
+        ]);
 
-    $mPengaturanAplikasi = Menu::firstOrCreate(['nama' => 'Pengaturan Aplikasi', 'parent_id' => $administrasi->id], [
-      'url'       => '/admin/pengaturan-aplikasi',
-      'icon'      => 'bx bx-slider-alt',
-      'urutan'    => 17,
-      'is_active' => true,
-    ]);
+        $mPengaturanAplikasi = Menu::firstOrCreate(['nama' => 'Pengaturan Aplikasi', 'parent_id' => $administrasi->id], [
+            'url' => '/admin/pengaturan-aplikasi',
+            'icon' => 'bx bx-slider-alt',
+            'urutan' => 17,
+            'is_active' => true,
+        ]);
 
-    $mPengaturanChatAi = Menu::firstOrCreate(['nama' => 'Pengaturan Chat AI', 'parent_id' => $administrasi->id], [
-      'url'       => '/admin/pengaturan-chat-ai',
-      'icon'      => 'bx bx-bot',
-      'urutan'    => 18,
-      'is_active' => true,
-    ]);
+        $mPengaturanChatAi = Menu::firstOrCreate(['nama' => 'Pengaturan Chat AI', 'parent_id' => $administrasi->id], [
+            'url' => '/admin/pengaturan-chat-ai',
+            'icon' => 'bx bx-bot',
+            'urutan' => 18,
+            'is_active' => true,
+        ]);
 
-    $mBahasa = Menu::firstOrCreate(['nama' => 'Bahasa', 'parent_id' => $administrasi->id], [
-      'url'       => '/admin/bahasa',
-      'icon'      => 'bx bx-flag',
-      'urutan'    => 19,
-      'is_active' => true,
-    ]);
+        $mBahasa = Menu::firstOrCreate(['nama' => 'Bahasa', 'parent_id' => $administrasi->id], [
+            'url' => '/admin/bahasa',
+            'icon' => 'bx bx-flag',
+            'urutan' => 19,
+            'is_active' => true,
+        ]);
 
-    $mPengaturanEmail = Menu::firstOrCreate(['nama' => 'Pengaturan Email', 'parent_id' => $administrasi->id], [
-      'url'       => '/admin/pengaturan-email',
-      'icon'      => 'bx bx-envelope',
-      'urutan'    => 20,
-      'is_active' => true,
-    ]);
+        $mPengaturanEmail = Menu::firstOrCreate(['nama' => 'Pengaturan Email', 'parent_id' => $administrasi->id], [
+            'url' => '/admin/pengaturan-email',
+            'icon' => 'bx bx-envelope',
+            'urutan' => 20,
+            'is_active' => true,
+        ]);
 
-    $mUsers = Menu::firstOrCreate(['nama' => 'Kelola User', 'parent_id' => $administrasi->id], [
-      'url'       => '/admin/users',
-      'icon'      => 'bx bx-user-pin',
-      'urutan'    => 21,
-      'is_active' => true,
-    ]);
+        $mUsers = Menu::firstOrCreate(['nama' => 'Kelola User', 'parent_id' => $administrasi->id], [
+            'url' => '/admin/users',
+            'icon' => 'bx bx-user-pin',
+            'urutan' => 21,
+            'is_active' => true,
+        ]);
 
-    $mMedia = Menu::firstOrCreate(['nama' => 'Kelola Media', 'parent_id' => $administrasi->id], [
-      'url'       => '/admin/media',
-      'icon'      => 'bx bx-images',
-      'urutan'    => 22,
-      'is_active' => true,
-    ]);
+        $mMedia = Menu::firstOrCreate(['nama' => 'Kelola Media', 'parent_id' => $administrasi->id], [
+            'url' => '/admin/media',
+            'icon' => 'bx bx-images',
+            'urutan' => 22,
+            'is_active' => true,
+        ]);
 
-    $mBackupRestore = Menu::firstOrCreate(['nama' => 'Backup & Restore', 'parent_id' => $administrasi->id], [
-      'url'       => '/admin/backup-restore',
-      'icon'      => 'bx bx-data',
-      'urutan'    => 23,
-      'is_active' => true,
-    ]);
+        $mBackupRestore = Menu::firstOrCreate(['nama' => 'Backup & Restore', 'parent_id' => $administrasi->id], [
+            'url' => '/admin/backup-restore',
+            'icon' => 'bx bx-data',
+            'urutan' => 23,
+            'is_active' => true,
+        ]);
 
-    $mPemeliharaan = Menu::firstOrCreate(['nama' => 'Pemeliharaan', 'parent_id' => $administrasi->id], [
-      'url'       => '/admin/pemeliharaan',
-      'icon'      => 'bx bx-wrench',
-      'urutan'    => 24,
-      'is_active' => true,
-    ]);
+        $mPemeliharaan = Menu::firstOrCreate(['nama' => 'Pemeliharaan', 'parent_id' => $administrasi->id], [
+            'url' => '/admin/pemeliharaan',
+            'icon' => 'bx bx-wrench',
+            'urutan' => 24,
+            'is_active' => true,
+        ]);
 
-    // --- Anggota (parent) ---
-    $mAnggota = Menu::firstOrCreate(['nama' => 'Anggota', 'parent_id' => null], [
-      'url'       => '/anggota',
-      'icon'      => 'bx bx-group',
-      'urutan'    => 20,
-      'is_active' => true,
-    ]);
+        // --- Anggota (parent) ---
+        $mAnggota = Menu::firstOrCreate(['nama' => 'Anggota', 'parent_id' => null], [
+            'url' => '/anggota',
+            'icon' => 'bx bx-group',
+            'urutan' => 20,
+            'is_active' => true,
+        ]);
 
-    // --- Laporan (parent) ---
-    $laporan = Menu::firstOrCreate(['nama' => 'Laporan', 'parent_id' => null], [
-      'url'       => null,
-      'icon'      => 'bx bx-bar-chart-alt-2',
-      'urutan'    => 30,
-      'is_active' => true,
-    ]);
+        // --- Laporan (parent) ---
+        $laporan = Menu::firstOrCreate(['nama' => 'Laporan', 'parent_id' => null], [
+            'url' => null,
+            'icon' => 'bx bx-bar-chart-alt-2',
+            'urutan' => 30,
+            'is_active' => true,
+        ]);
 
-    $lAktivitas = Menu::firstOrCreate(['nama' => 'Laporan Aktivitas', 'parent_id' => $laporan->id], [
-      'url'       => '/laporan/aktivitas',
-      'icon'      => 'bx bx-list-ul',
-      'urutan'    => 31,
-      'is_active' => true,
-    ]);
+        $lAktivitas = Menu::firstOrCreate(['nama' => 'Laporan Aktivitas', 'parent_id' => $laporan->id], [
+            'url' => '/laporan/aktivitas',
+            'icon' => 'bx bx-list-ul',
+            'urutan' => 31,
+            'is_active' => true,
+        ]);
 
-    $lMonitoringLogin = Menu::firstOrCreate(['nama' => 'Monitoring Login', 'parent_id' => $laporan->id], [
-      'url'       => '/laporan/login-attempts',
-      'icon'      => 'bx bx-shield-quarter',
-      'urutan'    => 32,
-      'is_active' => true,
-    ]);
+        $lMonitoringLogin = Menu::firstOrCreate(['nama' => 'Monitoring Login', 'parent_id' => $laporan->id], [
+            'url' => '/laporan/login-attempts',
+            'icon' => 'bx bx-shield-quarter',
+            'urutan' => 32,
+            'is_active' => true,
+        ]);
 
-    $lChatAi = Menu::firstOrCreate(['nama' => 'Chat Asisten Analitik', 'parent_id' => $laporan->id], [
-      'url'       => '/laporan/chat-ai',
-      'icon'      => 'bx bx-bot',
-      'urutan'    => 33,
-      'is_active' => true,
-    ]);
+        $lChatAi = Menu::firstOrCreate(['nama' => 'Chat Asisten Analitik', 'parent_id' => $laporan->id], [
+            'url' => '/laporan/chat-ai',
+            'icon' => 'bx bx-bot',
+            'urutan' => 33,
+            'is_active' => true,
+        ]);
 
-    // ============================
-    // 3. MAPPING LEVEL ↔ MENU
-    // ============================
+        // ============================
+        // 3. MAPPING LEVEL ↔ MENU
+        // ============================
 
-    // Superadmin: akses penuh ke semua menu
-    $semuaMenu = Menu::all();
-    foreach ($semuaMenu as $m) {
-      $superadmin->menus()->syncWithoutDetaching([
-        $m->id => [
-          'dapat_lihat' => true,
-          'dapat_buat'  => true,
-          'dapat_ubah'  => true,
-          'dapat_hapus' => true,
-          'dapat_backup' => true,
-          'dapat_restore' => true,
-          'dapat_hapus_backup' => true,
-        ],
-      ]);
+        // Superadmin: akses penuh ke semua menu
+        $semuaMenu = Menu::all();
+        foreach ($semuaMenu as $m) {
+            $superadmin->menus()->syncWithoutDetaching([
+                $m->id => [
+                    'dapat_lihat' => true,
+                    'dapat_buat' => true,
+                    'dapat_ubah' => true,
+                    'dapat_hapus' => true,
+                    'dapat_backup' => true,
+                    'dapat_restore' => true,
+                    'dapat_hapus_backup' => true,
+                ],
+            ]);
+        }
+
+        // Admin: kelola anggota & laporan, tanpa menu administrasi sistem
+        foreach ([$administrasi, $mLevel, $mMenu, $mMapping, $mIdentitas, $mDashboard, $mImportExport, $mPengaturanAplikasi, $mPengaturanChatAi, $mBahasa, $mPengaturanEmail, $mUsers, $mMedia, $mBackupRestore, $mPemeliharaan, $mAnggota, $laporan, $lAktivitas, $lMonitoringLogin, $lChatAi] as $m) {
+            $akses = match ($m->id) {
+                $mUsers->id => [
+                    'dapat_lihat' => true,
+                    'dapat_buat' => true,
+                    'dapat_ubah' => true,
+                    'dapat_hapus' => true,
+                    'dapat_backup' => false,
+                    'dapat_restore' => false,
+                    'dapat_hapus_backup' => false,
+                ],
+                $mMedia->id => [
+                    'dapat_lihat' => true,
+                    'dapat_buat' => true,
+                    'dapat_ubah' => true,
+                    'dapat_hapus' => true,
+                    'dapat_backup' => false,
+                    'dapat_restore' => false,
+                    'dapat_hapus_backup' => false,
+                ],
+                $mBackupRestore->id, $mPemeliharaan->id => [
+                    'dapat_lihat' => false,
+                    'dapat_buat' => false,
+                    'dapat_ubah' => false,
+                    'dapat_hapus' => false,
+                    'dapat_backup' => false,
+                    'dapat_restore' => false,
+                    'dapat_hapus_backup' => false,
+                ],
+                $mPengaturanEmail->id => [
+                    'dapat_lihat' => true,
+                    'dapat_buat' => false,
+                    'dapat_ubah' => true,
+                    'dapat_hapus' => false,
+                    'dapat_backup' => false,
+                    'dapat_restore' => false,
+                    'dapat_hapus_backup' => false,
+                ],
+                $administrasi->id, $mLevel->id, $mMenu->id, $mMapping->id, $mIdentitas->id, $mDashboard->id, $mImportExport->id, $mPengaturanAplikasi->id, $mPengaturanChatAi->id, $mBahasa->id, $mPemeliharaan->id => [
+                    'dapat_lihat' => false,
+                    'dapat_buat' => false,
+                    'dapat_ubah' => false,
+                    'dapat_hapus' => false,
+                    'dapat_backup' => false,
+                    'dapat_restore' => false,
+                    'dapat_hapus_backup' => false,
+                ],
+                default => [
+                    'dapat_lihat' => true,
+                    'dapat_buat' => true,
+                    'dapat_ubah' => true,
+                    'dapat_hapus' => false,
+                    'dapat_backup' => false,
+                    'dapat_restore' => false,
+                    'dapat_hapus_backup' => false,
+                ],
+            };
+            $admin->menus()->syncWithoutDetaching([$m->id => $akses]);
+        }
+
+        // Anggota: hanya baca laporan aktivitas
+        $anggota->menus()->syncWithoutDetaching([
+            $laporan->id => [
+                'dapat_lihat' => true,
+                'dapat_buat' => false,
+                'dapat_ubah' => false,
+                'dapat_hapus' => false,
+                'dapat_backup' => false,
+                'dapat_restore' => false,
+                'dapat_hapus_backup' => false,
+            ],
+            $lAktivitas->id => [
+                'dapat_lihat' => true,
+                'dapat_buat' => false,
+                'dapat_ubah' => false,
+                'dapat_hapus' => false,
+                'dapat_backup' => false,
+                'dapat_restore' => false,
+                'dapat_hapus_backup' => false,
+            ],
+            $lMonitoringLogin->id => [
+                'dapat_lihat' => true,
+                'dapat_buat' => false,
+                'dapat_ubah' => false,
+                'dapat_hapus' => false,
+                'dapat_backup' => false,
+                'dapat_restore' => false,
+                'dapat_hapus_backup' => false,
+            ],
+            $lMonitoringLogin->id => [
+                'dapat_lihat' => true,
+                'dapat_buat' => false,
+                'dapat_ubah' => false,
+                'dapat_hapus' => false,
+                'dapat_backup' => false,
+                'dapat_restore' => false,
+                'dapat_hapus_backup' => false,
+            ],
+            $lChatAi->id => [
+                'dapat_lihat' => true,
+                'dapat_buat' => false,
+                'dapat_ubah' => false,
+                'dapat_hapus' => false,
+                'dapat_backup' => false,
+                'dapat_restore' => false,
+                'dapat_hapus_backup' => false,
+            ],
+        ]);
+
+        // ============================
+        // 4. USER DEMO
+        // ============================
+        User::firstOrCreate(['email' => 'superadmin@admin.id'], [
+            'name' => 'Super Admin',
+            'level_id' => $superadmin->id,
+            'is_active' => true,
+            'password' => Hash::make('password'),
+        ]);
+
+        User::firstOrCreate(['email' => 'admin@admin.id'], [
+            'name' => 'Admin Umum',
+            'level_id' => $admin->id,
+            'is_active' => true,
+            'password' => Hash::make('password'),
+        ]);
+
+        User::firstOrCreate(['email' => 'anggota@admin.id'], [
+            'name' => 'Budi Santoso',
+            'level_id' => $anggota->id,
+            'is_active' => true,
+            'password' => Hash::make('password'),
+        ]);
     }
-
-    // Admin: kelola anggota & laporan, tanpa menu administrasi sistem
-    foreach ([$administrasi, $mLevel, $mMenu, $mMapping, $mIdentitas, $mDashboard, $mImportExport, $mPengaturanAplikasi, $mPengaturanChatAi, $mBahasa, $mPengaturanEmail, $mUsers, $mMedia, $mBackupRestore, $mPemeliharaan, $mAnggota, $laporan, $lAktivitas, $lMonitoringLogin, $lChatAi] as $m) {
-      $akses = match ($m->id) {
-        $mUsers->id => [
-          'dapat_lihat' => true,
-          'dapat_buat' => true,
-          'dapat_ubah'  => true,
-          'dapat_hapus' => true,
-          'dapat_backup' => false,
-          'dapat_restore' => false,
-          'dapat_hapus_backup' => false,
-        ],
-        $mMedia->id => [
-          'dapat_lihat' => true,
-          'dapat_buat' => true,
-          'dapat_ubah'  => true,
-          'dapat_hapus' => true,
-          'dapat_backup' => false,
-          'dapat_restore' => false,
-          'dapat_hapus_backup' => false,
-        ],
-        $mBackupRestore->id, $mPemeliharaan->id => [
-          'dapat_lihat' => false,
-          'dapat_buat' => false,
-          'dapat_ubah'  => false,
-          'dapat_hapus' => false,
-          'dapat_backup' => false,
-          'dapat_restore' => false,
-          'dapat_hapus_backup' => false,
-        ],
-        $mPengaturanEmail->id => [
-          'dapat_lihat' => true,
-          'dapat_buat' => false,
-          'dapat_ubah'  => true,
-          'dapat_hapus' => false,
-          'dapat_backup' => false,
-          'dapat_restore' => false,
-          'dapat_hapus_backup' => false,
-        ],
-        $administrasi->id, $mLevel->id, $mMenu->id, $mMapping->id, $mIdentitas->id, $mDashboard->id, $mImportExport->id, $mPengaturanAplikasi->id, $mPengaturanChatAi->id, $mBahasa->id, $mPemeliharaan->id => [
-          'dapat_lihat' => false,
-          'dapat_buat' => false,
-          'dapat_ubah'  => false,
-          'dapat_hapus' => false,
-          'dapat_backup' => false,
-          'dapat_restore' => false,
-          'dapat_hapus_backup' => false,
-        ],
-        default => [
-          'dapat_lihat' => true,
-          'dapat_buat' => true,
-          'dapat_ubah'  => true,
-          'dapat_hapus' => false,
-          'dapat_backup' => false,
-          'dapat_restore' => false,
-          'dapat_hapus_backup' => false,
-        ],
-      };
-      $admin->menus()->syncWithoutDetaching([$m->id => $akses]);
-    }
-
-    // Anggota: hanya baca laporan aktivitas
-    $anggota->menus()->syncWithoutDetaching([
-      $laporan->id => [
-        'dapat_lihat' => true,
-        'dapat_buat' => false,
-        'dapat_ubah'  => false,
-        'dapat_hapus' => false,
-        'dapat_backup' => false,
-        'dapat_restore' => false,
-        'dapat_hapus_backup' => false,
-      ],
-      $lAktivitas->id => [
-        'dapat_lihat' => true,
-        'dapat_buat' => false,
-        'dapat_ubah'  => false,
-        'dapat_hapus' => false,
-        'dapat_backup' => false,
-        'dapat_restore' => false,
-        'dapat_hapus_backup' => false,
-      ],
-      $lMonitoringLogin->id => [
-        'dapat_lihat' => true,
-        'dapat_buat' => false,
-        'dapat_ubah'  => false,
-        'dapat_hapus' => false,
-        'dapat_backup' => false,
-        'dapat_restore' => false,
-        'dapat_hapus_backup' => false,
-      ],
-      $lMonitoringLogin->id => [
-        'dapat_lihat' => true,
-        'dapat_buat' => false,
-        'dapat_ubah'  => false,
-        'dapat_hapus' => false,
-        'dapat_backup' => false,
-        'dapat_restore' => false,
-        'dapat_hapus_backup' => false,
-      ],
-      $lChatAi->id => [
-        'dapat_lihat' => true,
-        'dapat_buat' => false,
-        'dapat_ubah'  => false,
-        'dapat_hapus' => false,
-        'dapat_backup' => false,
-        'dapat_restore' => false,
-        'dapat_hapus_backup' => false,
-      ],
-    ]);
-
-    // ============================
-    // 4. USER DEMO
-    // ============================
-    User::firstOrCreate(['email' => 'superadmin@admin.id'], [
-      'name'     => 'Super Admin',
-      'level_id' => $superadmin->id,
-      'is_active' => true,
-      'password' => Hash::make('password'),
-    ]);
-
-    User::firstOrCreate(['email' => 'admin@admin.id'], [
-      'name'     => 'Admin Umum',
-      'level_id' => $admin->id,
-      'is_active' => true,
-      'password' => Hash::make('password'),
-    ]);
-
-    User::firstOrCreate(['email' => 'anggota@admin.id'], [
-      'name'     => 'Budi Santoso',
-      'level_id' => $anggota->id,
-      'is_active' => true,
-      'password' => Hash::make('password'),
-    ]);
-  }
 }

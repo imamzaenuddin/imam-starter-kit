@@ -84,6 +84,7 @@ class NotifikasiService
 
         if ($notifikasi) {
             $notifikasi->tandaiBaca();
+
             return true;
         }
 

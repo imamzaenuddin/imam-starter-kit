@@ -22,7 +22,7 @@ Artisan::command('backup:jalan {tipe=full} {--retensi=}', function (BackupRestor
     }
 
     $hasil = $service->buatBackup($tipe);
-    $this->info('Backup berhasil: ' . $hasil['nama_file']);
+    $this->info('Backup berhasil: '.$hasil['nama_file']);
 
     $retensi = $this->option('retensi');
     $retensiHari = is_numeric($retensi)
@@ -30,14 +30,14 @@ Artisan::command('backup:jalan {tipe=full} {--retensi=}', function (BackupRestor
         : (int) config('backup.retensi_hari', 30);
 
     $terhapus = $service->hapusBackupKadaluarsa($retensiHari);
-    $this->info('Retensi backup: ' . $terhapus . ' file lama dihapus.');
+    $this->info('Retensi backup: '.$terhapus.' file lama dihapus.');
 
     return 0;
 })->purpose('Menjalankan backup database (full/transaksi/master) + retensi file lama');
 
 $konfigurasiBackup = app(PengaturanBackupService::class)->konfigurasiScheduler();
 
-Schedule::command('backup:jalan ' . ($konfigurasiBackup['jadwal_harian_tipe'] ?? 'transaksi'))
+Schedule::command('backup:jalan '.($konfigurasiBackup['jadwal_harian_tipe'] ?? 'transaksi'))
     ->dailyAt((string) ($konfigurasiBackup['jadwal_harian_jam'] ?? '01:00'))
     ->withoutOverlapping()
     ->onSuccess(function () {
@@ -60,7 +60,7 @@ $hariMap = [
 $hariMingguan = strtolower((string) ($konfigurasiBackup['jadwal_mingguan_hari'] ?? 'sunday'));
 $hariMingguanIndex = $hariMap[$hariMingguan] ?? 0;
 
-Schedule::command('backup:jalan ' . ($konfigurasiBackup['jadwal_mingguan_tipe'] ?? 'full'))
+Schedule::command('backup:jalan '.($konfigurasiBackup['jadwal_mingguan_tipe'] ?? 'full'))
     ->weeklyOn($hariMingguanIndex, (string) ($konfigurasiBackup['jadwal_mingguan_jam'] ?? '02:00'))
     ->withoutOverlapping()
     ->onSuccess(function () {

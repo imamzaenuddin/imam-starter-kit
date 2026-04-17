@@ -116,4 +116,4 @@ test('kode 2fa expired setelah cache dihapus', function () {
     $valid = $service->verifyKode($user, '123456');
 
     expect($valid)->toBeFalse();
-});;
+});

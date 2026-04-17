@@ -58,7 +58,7 @@ class LogAktivitas extends Model
      */
     public function scopeByIp($query, string $ip)
     {
-        return $query->where('ip_address', 'like', '%' . $ip . '%');
+        return $query->where('ip_address', 'like', '%'.$ip.'%');
     }
 
     /**
@@ -80,6 +80,7 @@ class LogAktivitas extends Model
         if ($toDate) {
             $query->whereDate('created_at', '<=', $toDate);
         }
+
         return $query;
     }
 
@@ -89,13 +90,13 @@ class LogAktivitas extends Model
     public function scopeSearch($query, string $keyword)
     {
         return $query->where(function ($q) use ($keyword) {
-            $q->where('aktivitas', 'like', '%' . $keyword . '%')
-                ->orWhere('modul', 'like', '%' . $keyword . '%')
-                ->orWhere('url', 'like', '%' . $keyword . '%')
-                ->orWhere('ip_address', 'like', '%' . $keyword . '%')
+            $q->where('aktivitas', 'like', '%'.$keyword.'%')
+                ->orWhere('modul', 'like', '%'.$keyword.'%')
+                ->orWhere('url', 'like', '%'.$keyword.'%')
+                ->orWhere('ip_address', 'like', '%'.$keyword.'%')
                 ->orWhereHas('user', function ($uq) use ($keyword) {
-                    $uq->where('name', 'like', '%' . $keyword . '%')
-                        ->orWhere('email', 'like', '%' . $keyword . '%');
+                    $uq->where('name', 'like', '%'.$keyword.'%')
+                        ->orWhere('email', 'like', '%'.$keyword.'%');
                 });
         });
     }

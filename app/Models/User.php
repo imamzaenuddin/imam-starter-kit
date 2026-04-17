@@ -59,7 +59,7 @@ class User extends Authenticatable
             'two_factor_enabled' => 'boolean',
             'two_factor_confirmed_at' => 'datetime',
             'last_login_at' => 'datetime',
-            'password'          => 'hashed',
+            'password' => 'hashed',
         ];
     }
 
@@ -72,8 +72,8 @@ class User extends Authenticatable
     /**
      * Cek apakah user punya izin tertentu pada sebuah menu.
      *
-     * @param  string  $menuUrl   URL atau nama route menu
-     * @param  string  $izin      'dapat_lihat'|'dapat_buat'|'dapat_ubah'|'dapat_hapus'
+     * @param  string  $menuUrl  URL atau nama route menu
+     * @param  string  $izin  'dapat_lihat'|'dapat_buat'|'dapat_ubah'|'dapat_hapus'
      */
     public function bisaMenu(string $menuUrl, string $izin = 'dapat_lihat'): bool
     {
@@ -120,7 +120,7 @@ class User extends Authenticatable
     {
         return Str::of($this->name)
             ->explode(' ')
-            ->map(fn(string $name) => Str::of($name)->substr(0, 1))
+            ->map(fn (string $name) => Str::of($name)->substr(0, 1))
             ->implode('');
     }
 
@@ -131,7 +131,7 @@ class User extends Authenticatable
             $url = Storage::url($this->foto_profil);
             $versi = Storage::disk('public')->lastModified($this->foto_profil);
 
-            return $url . '?v=' . $versi;
+            return $url.'?v='.$versi;
         }
 
         return asset('assets/img/avatars/1.png');

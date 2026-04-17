@@ -14,7 +14,9 @@ use Tests\TestCase;
 class MediaTest extends TestCase
 {
     use RefreshDatabase;
+
     protected User $user;
+
     protected MediaService $service;
 
     protected function setUp(): void
@@ -131,8 +133,8 @@ class MediaTest extends TestCase
     {
         $this->actingAs($this->user);
 
-        UploadedFile::fake()->image('test1.jpg')->store('uploads/user_' . $this->user->id . '/profil', 'public');
-        UploadedFile::fake()->image('test2.jpg')->store('uploads/user_' . $this->user->id . '/profil', 'public');
+        UploadedFile::fake()->image('test1.jpg')->store('uploads/user_'.$this->user->id.'/profil', 'public');
+        UploadedFile::fake()->image('test2.jpg')->store('uploads/user_'.$this->user->id.'/profil', 'public');
 
         $this->service->upload(UploadedFile::fake()->image('test1.jpg'), $this->user->id, 'profil');
         $this->service->upload(UploadedFile::fake()->image('test2.jpg'), $this->user->id, 'profil');

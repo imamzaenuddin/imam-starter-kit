@@ -21,7 +21,7 @@ class LogAktivitasService
             'user_id' => $user->id,
             'modul' => $modul,
             'aktivitas' => $aktivitas,
-            'url' => $url ?: '/' . ltrim((string) request()->path(), '/'),
+            'url' => $url ?: '/'.ltrim((string) request()->path(), '/'),
             'metode' => request()->method(),
             'ip_address' => request()->ip(),
             'user_agent' => Str::limit((string) request()->userAgent(), 1000, ''),
@@ -38,7 +38,7 @@ class LogAktivitasService
         }
 
         $routeName = $request->route()?->getName();
-        $path = '/' . ltrim($request->path(), '/');
+        $path = '/'.ltrim($request->path(), '/');
 
         LogAktivitas::create([
             'user_id' => $user->id,
@@ -99,10 +99,10 @@ class LogAktivitasService
             : Str::title(str_replace(['/', '-'], ' ', trim($path, '/')) ?: 'Beranda');
 
         return match ($request->method()) {
-            'POST' => 'Menambahkan data pada ' . $target,
-            'PUT', 'PATCH' => 'Memperbarui data pada ' . $target,
-            'DELETE' => 'Menghapus data pada ' . $target,
-            default => 'Mengakses halaman ' . $target,
+            'POST' => 'Menambahkan data pada '.$target,
+            'PUT', 'PATCH' => 'Memperbarui data pada '.$target,
+            'DELETE' => 'Menghapus data pada '.$target,
+            default => 'Mengakses halaman '.$target,
         };
     }
 }
