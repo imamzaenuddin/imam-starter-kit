@@ -122,6 +122,20 @@ Getting started is super simple! Follow the steps below:
 
 ---
 
+## 🏗️ Arsitektur Modular & Aturan Pengembangan
+
+Starter kit ini menggunakan `nwidart/laravel-modules` untuk memisahkan antara core system dan fitur aplikasi.
+
+**Aturan Penting:**
+1. **Folder Bawaan (`app/`, `resources/views/`, `routes/`)**: Dikhususkan HANYA untuk modifikasi core starter kit (seperti layout utama, auth, konfigurasi global).
+2. **Folder Modul (`Modules/`)**: SEMUA fitur aplikasi spesifik (seperti Modul HRD, Modul Keuangan, dsb) **WAJIB** dibuat di dalam folder ini.
+
+**Perintah Dasar Modul:**
+- Membuat modul baru: `php artisan module:make NamaModul`
+- Membuat controller di modul: `php artisan module:make-controller NamaController NamaModul`
+
+---
+
 ## 🧑‍💻 Available Commands
 
 **Development Mode (Hot Reload):**

@@ -41,6 +41,18 @@
 - Nama target branding: imam-starter-kit
 - Catatan: jika ingin nama folder fisik juga sama, ubah nama folder root menjadi D:/TMP/imam-starter-kit lalu buka ulang workspace.
 
+## Aturan Pengembangan (Untuk Tim & AI)
+
+Mulai versi ini, proyek menerapkan Arsitektur Modular menggunakan `nwidart/laravel-modules`.
+
+**INSTRUKSI KETAT UNTUK AI DAN DEVELOPER:**
+1. **Core vs Aplikasi:** Jangan campurkan kode aplikasi ke dalam direktori core bawaan Laravel (`app/`, `resources/views/`, `routes/`). Direktori bawaan hanya untuk update atau perbaikan Starter Kit.
+2. **Wajib Modul:** Semua fitur, entitas, dan logika bisnis aplikasi baru **HARUS** dibuat sebagai Modul terpisah di dalam direktori `Modules/` menggunakan perintah `php artisan module:make <NamaModul>`.
+3. **Konteks AI:** Saat diminta membuat fitur baru, AI harus selalu:
+   - Mengecek apakah modul yang relevan sudah ada.
+   - Jika belum, usulkan atau jalankan `php artisan module:make` untuk membuatnya.
+   - Menempatkan semua Controller, Model, View, dan Route di dalam direktori `Modules/<NamaModul>/`.
+
 ## Contoh Materi Penggunaan KPI di Dashboard
 
 ### Tujuan Pembelajaran

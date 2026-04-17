@@ -37,6 +37,7 @@ new #[Layout('components.layouts.app')] class extends Component {
     public array $fiturLogin = [];
     public array $statistikLogin = [];
     public bool $isActive = true;
+    public bool $isSingkatanLocked = false;
 
     /** Preset warna cepat untuk tema aplikasi */
     public array $warnaPreset = [
@@ -58,6 +59,10 @@ new #[Layout('components.layouts.app')] class extends Component {
             abort(403);
         }
 
+        $this->isSingkatanLocked = \Illuminate\Support\Facades\Schema::hasTable('form_generators') 
+            ? \Illuminate\Support\Facades\DB::table('form_generators')->exists() 
+            : false;
+
         $this->resetForm();
         $this->showModal = true;
     }
@@ -67,6 +72,10 @@ new #[Layout('components.layouts.app')] class extends Component {
         if (! auth()->user()?->bisaMenu('/admin/identitas', 'dapat_ubah')) {
             abort(403);
         }
+
+        $this->isSingkatanLocked = \Illuminate\Support\Facades\Schema::hasTable('form_generators') 
+            ? \Illuminate\Support\Facades\DB::table('form_generators')->exists() 
+            : false;
 
         $data = Identitas::findOrFail($id);
 
@@ -129,9 +138,14 @@ new #[Layout('components.layouts.app')] class extends Component {
             'isActive' => 'boolean',
         ]);
 
+        $singkatan = $data['singkatanAplikasi'] ?: null;
+        if ($this->editId && $this->isSingkatanLocked) {
+            $singkatan = Identitas::findOrFail($this->editId)->singkatan_aplikasi;
+        }
+
         $payload = [
             'nama_aplikasi' => $data['namaAplikasi'],
-            'singkatan_aplikasi' => $data['singkatanAplikasi'] ?: null,
+            'singkatan_aplikasi' => $singkatan,
             'versi' => $data['versi'],
             'icon' => $data['icon'] ?: null,
             'main_color' => $data['mainColor'] ?: '#696cff',
@@ -425,9 +439,13 @@ new #[Layout('components.layouts.app')] class extends Component {
                                     @error('namaAplikasi') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="form-label fw-semibold">{{ __('messages.app_abbreviation') }}</label>
-                                    <input wire:model="singkatanAplikasi" type="text" class="form-control @error('singkatanAplikasi') is-invalid @enderror" placeholder="{{ __('messages.identity_app_abbreviation_placeholder') }}">
+                                    <label class="form-label fw-semibold">
+                                        {{ __('messages.app_abbreviation') }}
+                                        @if($isSingkatanLocked) <i class="bx bx-lock-alt text-warning" title="Dikunci karena form dinamis sudah dibuat"></i> @endif
+                                    </label>
+                                    <input wire:model="singkatanAplikasi" type="text" class="form-control @error('singkatanAplikasi') is-invalid @enderror" placeholder="{{ __('messages.identity_app_abbreviation_placeholder') }}" @if($isSingkatanLocked) readonly @endif>
                                     @error('singkatanAplikasi') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    @if($isSingkatanLocked) <div class="form-text text-warning"><small>Dikunci: Form dinamis aktif.</small></div> @endif
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label fw-semibold">{{ __('messages.version') }} <span class="text-danger">*</span></label>

@@ -107,7 +107,16 @@ class FormGeneratorService
     {
         return DB::transaction(function () use ($payload, $aktor) {
             $slug = Str::slug((string) $payload['slug']);
-            $url = '/admin/form-generator/' . $slug;
+            
+            $prefixDinamis = \Illuminate\Support\Facades\Cache::rememberForever('prefix_form_dinamis', function () {
+                if (\Illuminate\Support\Facades\Schema::hasTable('m_identitas')) {
+                    $singkatan = \Illuminate\Support\Facades\DB::table('m_identitas')->where('is_active', true)->value('singkatan_aplikasi');
+                    return \Illuminate\Support\Str::slug($singkatan ?: 'form-generator') ?: 'form-generator';
+                }
+                return 'form-generator';
+            });
+
+            $url = '/admin/' . $prefixDinamis . '/' . $slug;
 
             $generator = FormGenerator::query()->where('slug', $slug)->first();
 

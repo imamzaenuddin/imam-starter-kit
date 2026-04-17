@@ -27,5 +27,6 @@ class IdentitasService
     public function hapusCache(): void
     {
         Cache::forget('identitas_aktif');
+        Cache::forget('prefix_form_dinamis');
     }
 }

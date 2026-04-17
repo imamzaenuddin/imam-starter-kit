@@ -153,8 +153,16 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('media', 'admin.media.index')->name('media');
     Volt::route('backup-restore', 'admin.backup-restore.index')->name('backup-restore');
     Volt::route('pemeliharaan', 'admin.pemeliharaan.index')->name('pemeliharaan');
+    $prefixDinamis = \Illuminate\Support\Facades\Cache::rememberForever('prefix_form_dinamis', function () {
+        if (\Illuminate\Support\Facades\Schema::hasTable('m_identitas')) {
+            $singkatan = \Illuminate\Support\Facades\DB::table('m_identitas')->where('is_active', true)->value('singkatan_aplikasi');
+            return \Illuminate\Support\Str::slug($singkatan ?: 'form-generator') ?: 'form-generator';
+        }
+        return 'form-generator';
+    });
+
     Volt::route('form-generator-wizard', 'admin.form-generator.wizard')->name('form-generator.wizard');
-    Volt::route('form-generator/{slug}', 'admin.form-generator.runtime')->name('form-generator.runtime');
+    Volt::route($prefixDinamis . '/{slug}', 'admin.form-generator.runtime')->name('form-generator.runtime');
   });
 
   // Laporan

@@ -52,17 +52,82 @@ new #[Layout('components.layouts.app')] class extends Component {
             'namaModul' => 'required|string|min:3|max:120',
             'slug' => 'required|string|min:3|max:120',
             'namaMenu' => 'required|string|min:3|max:120',
-            'fileImport' => 'required|file|mimes:csv,txt|max:4096',
+            'fileImport' => 'nullable|file|mimes:csv,txt|max:4096',
         ]);
 
-        $this->fields = app(FormGeneratorService::class)->inferensiCsv($this->fileImport->getRealPath());
+        if ($this->fileImport) {
+            $this->fields = app(FormGeneratorService::class)->inferensiCsv($this->fileImport->getRealPath());
 
-        if (empty($this->fields)) {
-            $this->addError('fileImport', 'File CSV tidak valid atau tidak memiliki header.');
-            return;
+            if (empty($this->fields)) {
+                $this->addError('fileImport', 'File CSV tidak valid atau tidak memiliki header.');
+                return;
+            }
+        } else {
+            if (empty($this->fields)) {
+                $this->tambahFieldAudit();
+            }
         }
 
         $this->step = 2;
+    }
+
+    public function tambahField(): void
+    {
+        $newField = [
+            'nama_field' => '',
+            'label_field' => '',
+            'tipe_data' => 'string',
+            'tipe_input' => 'text',
+            'opsi_pilihan' => '',
+            'is_required' => false,
+            'is_tampil_form' => true,
+            'is_tampil_list' => true,
+        ];
+
+        // Cari index dari field audit untuk menyisipkan field baru di atasnya
+        $auditIndex = -1;
+        foreach ($this->fields as $index => $field) {
+            if (in_array($field['nama_field'], ['created_by', 'updated_by'])) {
+                $auditIndex = $index;
+                break;
+            }
+        }
+
+        if ($auditIndex !== -1) {
+            array_splice($this->fields, $auditIndex, 0, [$newField]);
+        } else {
+            $this->fields[] = $newField;
+        }
+    }
+
+    public function hapusField(int $index): void
+    {
+        unset($this->fields[$index]);
+        $this->fields = array_values($this->fields);
+    }
+
+    private function tambahFieldAudit(): void
+    {
+        $this->fields[] = [
+            'nama_field' => 'created_by',
+            'label_field' => 'Dibuat Oleh',
+            'tipe_data' => 'integer',
+            'tipe_input' => 'number',
+            'opsi_pilihan' => '',
+            'is_required' => false,
+            'is_tampil_form' => false,
+            'is_tampil_list' => false,
+        ];
+        $this->fields[] = [
+            'nama_field' => 'updated_by',
+            'label_field' => 'Diubah Oleh',
+            'tipe_data' => 'integer',
+            'tipe_input' => 'number',
+            'opsi_pilihan' => '',
+            'is_required' => false,
+            'is_tampil_form' => false,
+            'is_tampil_list' => false,
+        ];
     }
 
     public function keReview(): void
@@ -184,10 +249,19 @@ new #[Layout('components.layouts.app')] class extends Component {
     {
         $service = app(FormGeneratorService::class);
 
+        $prefixDinamis = \Illuminate\Support\Facades\Cache::rememberForever('prefix_form_dinamis', function () {
+            if (\Illuminate\Support\Facades\Schema::hasTable('m_identitas')) {
+                $singkatan = \Illuminate\Support\Facades\DB::table('m_identitas')->where('is_active', true)->value('singkatan_aplikasi');
+                return \Illuminate\Support\Str::slug($singkatan ?: 'form-generator') ?: 'form-generator';
+            }
+            return 'form-generator';
+        });
+
         return [
             'opsiInput' => $service->tipeInputTersedia(),
             'opsiParentMenu' => $service->parentMenuTersedia(),
             'opsiLevel' => $service->levelTersedia(),
+            'prefixDinamis' => $prefixDinamis,
         ];
     }
 };
@@ -277,16 +351,16 @@ new #[Layout('components.layouts.app')] class extends Component {
                         <div class="form-text">Jika kosong, otomatis diberikan ke Superadmin.</div>
                     </div>
                     <div class="col-12">
-                        <label class="form-label">File CSV Sampel</label>
+                        <label class="form-label">File CSV Sampel (Opsional)</label>
                         <input type="file" class="form-control @error('fileImport') is-invalid @enderror" wire:model="fileImport" accept=".csv,.txt">
-                        <div class="form-text">Header CSV akan dipakai untuk menghasilkan field form dinamis.</div>
+                        <div class="form-text">Header CSV akan dipakai untuk menghasilkan field form dinamis. Kosongkan jika ingin membuat field secara manual.</div>
                         @error('fileImport') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
                 </div>
             </div>
             <div class="card-footer">
                 <button class="btn btn-primary" wire:click="analisaImport" wire:loading.attr="disabled" wire:target="analisaImport,fileImport">
-                    <span wire:loading.remove wire:target="analisaImport,fileImport"><i class="bx bx-analyse me-1"></i>Analisa Field CSV</span>
+                    <span wire:loading.remove wire:target="analisaImport,fileImport"><i class="bx bx-right-arrow-alt me-1"></i>Lanjut Mapping</span>
                     <span wire:loading wire:target="analisaImport,fileImport" style="display:none"><span class="spinner-border spinner-border-sm me-1"></span>Memproses...</span>
                 </button>
             </div>
@@ -297,6 +371,9 @@ new #[Layout('components.layouts.app')] class extends Component {
         <div class="card">
             <div class="card-header"><h5 class="card-title mb-0">Step 2 - Mapping Input Berdasarkan Field</h5></div>
             <div class="card-body">
+                <div class="mb-3">
+                    <button class="btn btn-sm btn-success" wire:click="tambahField"><i class="bx bx-plus me-1"></i>Tambah Field Baru</button>
+                </div>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
@@ -309,6 +386,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                                 <th class="text-center">Wajib</th>
                                 <th class="text-center">Form</th>
                                 <th class="text-center">List</th>
+                                <th class="text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -338,6 +416,9 @@ new #[Layout('components.layouts.app')] class extends Component {
                                     <td class="text-center"><input type="checkbox" class="form-check-input" wire:model="fields.{{ $i }}.is_required"></td>
                                     <td class="text-center"><input type="checkbox" class="form-check-input" wire:model="fields.{{ $i }}.is_tampil_form"></td>
                                     <td class="text-center"><input type="checkbox" class="form-check-input" wire:model="fields.{{ $i }}.is_tampil_list"></td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-icon btn-danger" wire:click="hapusField({{ $i }})"><i class="bx bx-trash"></i></button>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -359,7 +440,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                 <p class="mb-1"><strong>Tipe Modul:</strong> <span class="badge {{ $tipeModul === 'master' ? 'bg-label-primary' : 'bg-label-warning' }}">{{ $tipeModul === 'master' ? 'Master Data' : 'Transaksi' }}</span></p>
                 <p class="mb-1"><strong>Slug:</strong> {{ $slug }}</p>
                 <p class="mb-1"><strong>Menu:</strong> {{ $namaMenu }} ({{ $icon }})</p>
-                <p class="mb-3"><strong>URL Runtime:</strong> /admin/form-generator/{{ \Illuminate\Support\Str::slug($slug) }}</p>
+                <p class="mb-3"><strong>URL Runtime:</strong> /admin/{{ $prefixDinamis }}/{{ \Illuminate\Support\Str::slug($slug) }}</p>
 
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
