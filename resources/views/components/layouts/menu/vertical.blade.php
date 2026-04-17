@@ -1,6 +1,7 @@
 @php
     /** @var \Illuminate\Database\Eloquent\Collection $menus */
     $menus = app(\App\Services\MenuService::class)->menuTersedia();
+  $renderIcon = fn (?string $icon, string $kelasTambahan = 'menu-icon tf-icons') => \App\Models\Menu::classIconRender($icon, $kelasTambahan);
 
     /**
      * Helper: tentukan apakah suatu menu (atau child-nya) sedang aktif.
@@ -56,7 +57,7 @@
         <li class="menu-item {{ $aktif ? 'active open' : '' }}">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
             @if ($menu->icon)
-              <i class="menu-icon tf-icons {{ $menu->icon }}"></i>
+              <i class="{{ $renderIcon($menu->icon) }}"></i>
             @else
               <i class="menu-icon tf-icons bx bx-layer"></i>
             @endif
@@ -70,7 +71,7 @@
                    href="{{ $child->url ? url($child->url) : 'javascript:void(0);' }}"
                    {{ $child->url ? 'wire:navigate' : '' }}>
                   @if ($child->icon)
-                    <i class="menu-icon tf-icons {{ $child->icon }}"></i>
+                    <i class="{{ $renderIcon($child->icon) }}"></i>
                   @endif
                   <div class="text-truncate">{{ $terjemahMenu($child->nama) }}</div>
                 </a>
@@ -86,7 +87,7 @@
              href="{{ $menu->url ? url($menu->url) : 'javascript:void(0);' }}"
              {{ $menu->url ? 'wire:navigate' : '' }}>
             @if ($menu->icon)
-              <i class="menu-icon tf-icons {{ $menu->icon }}"></i>
+              <i class="{{ $renderIcon($menu->icon) }}"></i>
             @else
               <i class="menu-icon tf-icons bx bx-circle"></i>
             @endif

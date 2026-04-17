@@ -243,7 +243,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                       <div class="d-flex align-items-center gap-2 text-muted">
                         <i class="bx bx-subdirectory-right"></i>
                         @if ($child->icon)
-                          <i class="{{ $child->icon }}"></i>
+                          <i class="{{ \App\Models\Menu::classIconRender($child->icon) }}"></i>
                         @endif
                         {{ $child->nama }}
                       </div>

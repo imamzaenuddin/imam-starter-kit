@@ -8,6 +8,7 @@
 
 use App\Models\Menu;
 use App\Services\LogAktivitasService;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 use Livewire\WithPagination;
@@ -56,6 +57,12 @@ new #[Layout('components.layouts.app')] class extends Component {
             'isActive' => 'boolean',
         ]);
 
+          if (! Menu::iconTersedia($data['icon'] ?? null)) {
+            throw ValidationException::withMessages([
+              'icon' => 'Class icon tidak tersedia di versi Boxicons proyek ini. Gunakan contoh seperti bx bx-home, bx bx-home-circle, atau bx bx-building-house.',
+            ]);
+          }
+
         $payload = [
             'nama'      => $data['nama'],
             'url'       => $data['url'] ?: null,
@@ -101,6 +108,8 @@ new #[Layout('components.layouts.app')] class extends Component {
                 ->orderBy('urutan')
             ->paginate((int) config('app_runtime.pagination_default', 10)),
             'parents'  => Menu::whereNull('parent_id')->active()->orderBy('urutan')->get(),
+        'iconValid' => Menu::iconTersedia($this->icon),
+        'iconPreviewClass' => Menu::classIconRender($this->icon),
         ];
     }
 };
@@ -149,7 +158,7 @@ new #[Layout('components.layouts.app')] class extends Component {
               <td><code>{{ $menu->url ?? '-' }}</code></td>
               <td>
                 @if ($menu->icon)
-                  <i class="{{ $menu->icon }}"></i>
+                  <i class="{{ \App\Models\Menu::classIconRender($menu->icon) }}"></i>
                   <small class="text-muted ms-1">{{ $menu->icon }}</small>
                 @else
                   <span class="text-muted">-</span>
@@ -229,7 +238,20 @@ new #[Layout('components.layouts.app')] class extends Component {
                 <label class="form-label fw-semibold">{{ __('messages.icon') }}
                   <a href="https://boxicons.com" target="_blank" class="ms-1" style="font-size:.75rem">(Boxicons)</a>
                 </label>
-                <input wire:model="icon" type="text" class="form-control" placeholder="{{ __('messages.menu_icon_placeholder') }}">
+                <input wire:model.live.debounce.300ms="icon" type="text" class="form-control @error('icon') is-invalid @enderror" placeholder="{{ __('messages.menu_icon_placeholder') }}">
+                @error('icon') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                <div class="form-text">Gunakan class icon Boxicons lokal. Contoh: bx bx-home, bx bx-home-alt-3, bx bx-widget, bx bx-building-house.</div>
+                @if ($icon)
+                  <div class="border rounded p-3 mt-2 d-flex align-items-center gap-2">
+                    @if ($iconValid)
+                      <i class="{{ $iconPreviewClass }} bx-sm"></i>
+                      <span class="text-muted small">Preview: {{ $icon }}</span>
+                    @else
+                      <i class="bx bx-error-circle text-danger bx-sm"></i>
+                      <span class="text-danger small">Class icon tidak ditemukan di Boxicons versi proyek ini.</span>
+                    @endif
+                  </div>
+                @endif
               </div>
 
               <div class="mb-3">
