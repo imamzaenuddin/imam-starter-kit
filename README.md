@@ -12,7 +12,7 @@
 </h1>
 
 <p align="center">
-   🚀 Starter kit Laravel 12 + Livewire Volt + Bootstrap 5 untuk pengembangan aplikasi organisasi.
+   🚀 Starter kit Laravel 12 + Livewire Volt + Bootstrap 5 untuk Pengembangan dan Pembuatan Aplikasi
 </p>
 
 <p align="center">
