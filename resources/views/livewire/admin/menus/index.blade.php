@@ -78,13 +78,16 @@ new #[Layout('components.layouts.app')] class extends Component {
           app(LogAktivitasService::class)->catatManual(__('messages.menu_module_name'), __('messages.menu_log_update', ['nama' => $menu->nama]), '/admin/menus', [
             'menu_id' => $menu->id,
           ]);
+          session()->flash('sukses', 'Menu berhasil diperbarui.');
         } else {
           $menu = Menu::create($payload);
           app(LogAktivitasService::class)->catatManual(__('messages.menu_module_name'), __('messages.menu_log_add', ['nama' => $menu->nama]), '/admin/menus', [
             'menu_id' => $menu->id,
           ]);
+          session()->flash('sukses', 'Menu baru berhasil ditambahkan.');
         }
 
+        \Illuminate\Support\Facades\Cache::flush();
         $this->showModal = false;
         $this->reset(['nama', 'url', 'icon', 'parentId', 'urutan', 'isActive', 'editId']);
         $this->resetPage();
@@ -97,26 +100,159 @@ new #[Layout('components.layouts.app')] class extends Component {
         'menu_id' => $menu->id,
       ]);
       $menu->delete();
-        $this->resetPage();
+      $this->resetPage();
+      \Illuminate\Support\Facades\Cache::flush();
+      session()->flash('sukses', 'Menu berhasil dihapus.');
+    }
+
+    public function updateMenuStructure(array $structure): void
+    {
+        \Illuminate\Support\Facades\DB::transaction(function () use ($structure) {
+            foreach ($structure as $parentIndex => $parentData) {
+                $parentId = (int) $parentData['id'];
+                
+                // Update parent item
+                Menu::where('id', $parentId)->update([
+                    'parent_id' => null,
+                    'urutan'    => $parentData['urutan'],
+                ]);
+                
+                // Update children
+                if (!empty($parentData['children'])) {
+                    foreach ($parentData['children'] as $childData) {
+                        Menu::where('id', (int) $childData['id'])->update([
+                            'parent_id' => $parentId,
+                            'urutan'    => $childData['urutan'],
+                        ]);
+                    }
+                }
+            }
+        });
+
+        // Clear menu cache to update sidebar immediately
+        \Illuminate\Support\Facades\Cache::flush();
+        
+        session()->flash('sukses', 'Struktur dan urutan menu berhasil diperbarui.');
     }
 
     public function with(): array
     {
-        return [
-            'menus'    => Menu::with('parent')
-                ->when($this->search, fn ($q) => $q->where('nama', 'like', '%' . $this->search . '%'))
+        if ($this->search === '') {
+            $menus = Menu::with(['children' => function($q) {
+                $q->orderBy('urutan');
+            }])
+            ->whereNull('parent_id')
+            ->orderBy('urutan')
+            ->get();
+        } else {
+            $menus = Menu::with('parent')
+                ->where('nama', 'like', '%' . $this->search . '%')
                 ->orderBy('urutan')
-            ->paginate((int) config('app_runtime.pagination_default', 10)),
+                ->paginate((int) config('app_runtime.pagination_default', 10));
+        }
+
+        return [
+            'menus'    => $menus,
             'parents'  => Menu::whereNull('parent_id')->active()->orderBy('urutan')->get(),
-        'iconValid' => Menu::iconTersedia($this->icon),
-        'iconPreviewClass' => Menu::classIconRender($this->icon),
+            'iconValid' => Menu::iconTersedia($this->icon),
+            'iconPreviewClass' => Menu::classIconRender($this->icon),
         ];
     }
 };
 ?>
 @section('title', __('messages.admin_manage_menu_title'))
 
-<div>
+@section('page-style')
+<style>
+  .menu-tree-container {
+    padding: 1.5rem;
+  }
+  .menu-list {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+  }
+  .menu-item {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #fff;
+    margin-bottom: 0.75rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .menu-item:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+  }
+  .menu-item-content {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+  }
+  .drag-handle {
+    cursor: grab;
+    color: #94a3b8;
+    font-size: 1.25rem;
+    padding: 0.25rem;
+    margin-right: 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.15s ease;
+  }
+  .drag-handle:hover {
+    background-color: #f1f5f9;
+    color: #475569;
+  }
+  .drag-handle:active {
+    cursor: grabbing;
+  }
+  .menu-child-list {
+    list-style: none;
+    padding-left: 2.5rem;
+    margin-top: 0;
+    margin-bottom: 0;
+    position: relative;
+    min-height: 10px;
+  }
+  .menu-child-list::before {
+    content: '';
+    position: absolute;
+    left: 1.25rem;
+    top: 0;
+    bottom: 1rem;
+    width: 2px;
+    background-color: #e2e8f0;
+  }
+  .menu-child-list .menu-item {
+    position: relative;
+  }
+  .menu-child-list .menu-item::before {
+    content: '';
+    position: absolute;
+    left: -1.25rem;
+    top: 1.25rem;
+    width: 1.25rem;
+    height: 2px;
+    background-color: #e2e8f0;
+  }
+  .menu-child-list:empty {
+    min-height: 35px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    margin-left: 2.5rem;
+    margin-right: 1rem;
+    margin-bottom: 0.75rem;
+    background: #f8fafc;
+  }
+  .menu-child-list:empty::before {
+    display: none;
+  }
+  .menu-child-list .menu-child-list:empty {
+    display: none;
+  }
+</style>
+@endsection
+
+<div id="menu-manager-root">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
       <h4 class="fw-bold mb-1" style="color:#1e293b">{{ __('messages.admin_manage_menu_heading') }}</h4>
@@ -127,6 +263,26 @@ new #[Layout('components.layouts.app')] class extends Component {
     </button>
   </div>
 
+  @if (session('sukses'))
+    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+      <div class="d-flex align-items-center">
+        <i class="bx bx-check-circle me-2" style="font-size: 1.25rem;"></i>
+        <span>{{ session('sukses') }}</span>
+      </div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  @endif
+
+  @if (session('error'))
+    <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+      <div class="d-flex align-items-center">
+        <i class="bx bx-error-circle me-2" style="font-size: 1.25rem;"></i>
+        <span>{{ session('error') }}</span>
+      </div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  @endif
+
   <div class="card mb-4">
     <div class="card-body py-3">
       <input wire:model.live.debounce.300ms="search" type="search"
@@ -134,73 +290,189 @@ new #[Layout('components.layouts.app')] class extends Component {
     </div>
   </div>
 
-  <div class="card">
-    <div class="table-responsive">
-      <table class="table table-hover align-middle mb-0">
-        <thead class="table-light">
-          <tr>
-            <th>#</th>
-            <th>{{ __('messages.menu_name') }}</th>
-            <th>{{ __('messages.parent') }}</th>
-            <th>{{ __('messages.url') }}</th>
-            <th>{{ __('messages.icon') }}</th>
-            <th class="text-center">{{ __('messages.order') }}</th>
-            <th>{{ __('messages.status') }}</th>
-            <th class="text-center">{{ __('messages.action') }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          @forelse ($menus as $menu)
+  @if ($search !== '')
+    {{-- Flat Table for Search --}}
+    <div class="card">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
             <tr>
-              <td>{{ $menus->firstItem() + $loop->index }}</td>
-              <td class="fw-semibold">{{ $menu->nama }}</td>
-              <td class="text-muted">{{ $menu->parent?->nama ?? '-' }}</td>
-              <td><code>{{ $menu->url ?? '-' }}</code></td>
-              <td>
-                @if ($menu->icon)
-                  <i class="{{ \App\Models\Menu::classIconRender($menu->icon) }}"></i>
-                  <small class="text-muted ms-1">{{ $menu->icon }}</small>
-                @else
-                  <span class="text-muted">-</span>
-                @endif
-              </td>
-              <td class="text-center">{{ $menu->urutan }}</td>
-              <td>
-                @if ($menu->is_active)
-                  <span class="badge bg-label-success">{{ __('messages.active') }}</span>
-                @else
-                  <span class="badge bg-label-secondary">{{ __('messages.inactive') }}</span>
-                @endif
-              </td>
-              <td class="text-center">
-                <button class="btn btn-sm btn-icon btn-text-primary" wire:click="edit({{ $menu->id }})" title="{{ __('messages.edit') }}">
-                  <i class="bx bx-edit-alt"></i>
-                </button>
-                <button class="btn btn-sm btn-icon btn-text-danger"
-                        title="{{ __('messages.delete') }}"
-                        @click="Swal.fire({
-                          title: '{{ __('messages.confirm_delete') }}',
-                          text: '{{ __('messages.confirm_delete_menu', ['nama' => addslashes($menu->nama)]) }}',
-                          icon: 'warning',
-                          showCancelButton: true,
-                          confirmButtonText: '{{ __('messages.yes_delete') }}',
-                          cancelButtonText: '{{ __('messages.cancel') }}',
-                        }).then(r => r.isConfirmed && $wire.hapus({{ $menu->id }}))"
-                        >
-                  <i class="bx bx-trash"></i>
-                </button>
-              </td>
+              <th>#</th>
+              <th>{{ __('messages.menu_name') }}</th>
+              <th>{{ __('messages.parent') }}</th>
+              <th>{{ __('messages.url') }}</th>
+              <th>{{ __('messages.icon') }}</th>
+              <th class="text-center">{{ __('messages.order') }}</th>
+              <th>{{ __('messages.status') }}</th>
+              <th class="text-center">{{ __('messages.action') }}</th>
             </tr>
-          @empty
-            <tr>
-              <td colspan="8" class="text-center py-4 text-muted">{{ __('messages.no_menu_data') }}</td>
-            </tr>
-          @endforelse
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            @forelse ($menus as $menu)
+              <tr>
+                <td>{{ $menus->firstItem() + $loop->index }}</td>
+                <td class="fw-semibold">{{ $menu->nama }}</td>
+                <td class="text-muted">{{ $menu->parent?->nama ?? '-' }}</td>
+                <td><code>{{ $menu->url ?? '-' }}</code></td>
+                <td>
+                  @if ($menu->icon)
+                    <i class="{{ \App\Models\Menu::classIconRender($menu->icon) }}"></i>
+                    <small class="text-muted ms-1">{{ $menu->icon }}</small>
+                  @else
+                    <span class="text-muted">-</span>
+                  @endif
+                </td>
+                <td class="text-center">{{ $menu->urutan }}</td>
+                <td>
+                  @if ($menu->is_active)
+                    <span class="badge bg-label-success">{{ __('messages.active') }}</span>
+                  @else
+                    <span class="badge bg-label-secondary">{{ __('messages.inactive') }}</span>
+                  @endif
+                </td>
+                <td class="text-center">
+                  <button class="btn btn-sm btn-icon btn-text-primary" wire:click="edit({{ $menu->id }})" title="{{ __('messages.edit') }}">
+                    <i class="bx bx-edit-alt"></i>
+                  </button>
+                  <button class="btn btn-sm btn-icon btn-text-danger"
+                          title="{{ __('messages.delete') }}"
+                          @click="Swal.fire({
+                            title: '{{ __('messages.confirm_delete') }}',
+                            text: '{{ __('messages.confirm_delete_menu', ['nama' => addslashes($menu->nama)]) }}',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: '{{ __('messages.yes_delete') }}',
+                            cancelButtonText: '{{ __('messages.cancel') }}',
+                          }).then(r => r.isConfirmed && $wire.hapus({{ $menu->id }}))"
+                          >
+                    <i class="bx bx-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            @empty
+              <tr>
+                <td colspan="8" class="text-center py-4 text-muted">{{ __('messages.no_menu_data') }}</td>
+              </tr>
+            @endforelse
+          </tbody>
+        </table>
+      </div>
+      <div class="card-footer">{{ $menus->links() }}</div>
     </div>
-    <div class="card-footer">{{ $menus->links() }}</div>
-  </div>
+  @else
+    {{-- Drag & Drop Tree Layout --}}
+    <div class="card">
+      <div class="menu-tree-container">
+        <div class="alert alert-light border d-flex align-items-center mb-4 text-muted" style="font-size: 0.85rem; background-color: #f8fafc;">
+          <i class="bx bx-info-circle me-2 text-primary" style="font-size: 1.15rem;"></i>
+          <span>Seret gagang <i class="bx bx-grid-vertical"></i> untuk menyusun urutan menu secara dinamis. Anda dapat menaruh sub-menu di bawah menu utama (maksimal 2 tingkat kedalaman).</span>
+        </div>
+        
+        <ul class="menu-list menu-root-list" id="menu-root">
+          @forelse ($menus as $menu)
+            <li class="menu-item" data-id="{{ $menu->id }}">
+              <div class="menu-item-content d-flex align-items-center">
+                <div class="drag-handle">
+                  <i class="bx bx-grid-vertical"></i>
+                </div>
+                <div class="menu-item-info d-flex align-items-center flex-grow-1">
+                  @if ($menu->icon)
+                    <i class="{{ \App\Models\Menu::classIconRender($menu->icon) }} me-2 text-primary bx-sm"></i>
+                  @endif
+                  <span class="fw-semibold text-dark">{{ $menu->nama }}</span>
+                  @if ($menu->url)
+                    <code class="ms-2 px-2 py-0.5 rounded bg-light text-secondary" style="font-size: 0.75rem;">{{ $menu->url }}</code>
+                  @endif
+                  
+                  <span class="ms-auto me-3">
+                    @if ($menu->is_active)
+                      <span class="badge bg-label-success">{{ __('messages.active') }}</span>
+                    @else
+                      <span class="badge bg-label-secondary">{{ __('messages.inactive') }}</span>
+                    @endif
+                  </span>
+                </div>
+                <div class="menu-item-actions d-flex align-items-center gap-1">
+                  <button class="btn btn-sm btn-icon btn-text-primary" wire:click="edit({{ $menu->id }})" title="{{ __('messages.edit') }}">
+                    <i class="bx bx-edit-alt"></i>
+                  </button>
+                  <button class="btn btn-sm btn-icon btn-text-danger"
+                          title="{{ __('messages.delete') }}"
+                          @click="Swal.fire({
+                            title: '{{ __('messages.confirm_delete') }}',
+                            text: '{{ __('messages.confirm_delete_menu', ['nama' => addslashes($menu->nama)]) }}',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: '{{ __('messages.yes_delete') }}',
+                            cancelButtonText: '{{ __('messages.cancel') }}',
+                          }).then(r => r.isConfirmed && $wire.hapus({{ $menu->id }}))"
+                          >
+                    <i class="bx bx-trash"></i>
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Submenus container -->
+              <ul class="menu-child-list" data-parent-id="{{ $menu->id }}">
+                @foreach ($menu->children as $child)
+                  <li class="menu-item" data-id="{{ $child->id }}">
+                    <div class="menu-item-content d-flex align-items-center">
+                      <div class="drag-handle">
+                        <i class="bx bx-grid-vertical"></i>
+                      </div>
+                      <div class="menu-item-info d-flex align-items-center flex-grow-1">
+                        @if ($child->icon)
+                          <i class="{{ \App\Models\Menu::classIconRender($child->icon) }} me-2 text-primary bx-sm"></i>
+                        @endif
+                        <span class="fw-semibold text-dark">{{ $child->nama }}</span>
+                        @if ($child->url)
+                          <code class="ms-2 px-2 py-0.5 rounded bg-light text-secondary" style="font-size: 0.75rem;">{{ $child->url }}</code>
+                        @endif
+                        
+                        <span class="ms-auto me-3">
+                          @if ($child->is_active)
+                            <span class="badge bg-label-success">{{ __('messages.active') }}</span>
+                          @else
+                            <span class="badge bg-label-secondary">{{ __('messages.inactive') }}</span>
+                          @endif
+                        </span>
+                      </div>
+                      <div class="menu-item-actions d-flex align-items-center gap-1">
+                        <button class="btn btn-sm btn-icon btn-text-primary" wire:click="edit({{ $child->id }})" title="{{ __('messages.edit') }}">
+                          <i class="bx bx-edit-alt"></i>
+                        </button>
+                        <button class="btn btn-sm btn-icon btn-text-danger"
+                                title="{{ __('messages.delete') }}"
+                                @click="Swal.fire({
+                                  title: '{{ __('messages.confirm_delete') }}',
+                                  text: '{{ __('messages.confirm_delete_menu', ['nama' => addslashes($child->nama)]) }}',
+                                  icon: 'warning',
+                                  showCancelButton: true,
+                                  confirmButtonText: '{{ __('messages.yes_delete') }}',
+                                  cancelButtonText: '{{ __('messages.cancel') }}',
+                                }).then(r => r.isConfirmed && $wire.hapus({{ $child->id }}))"
+                                >
+                          <i class="bx bx-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {{-- Empty list inside sub-menu to block dragging deeper --}}
+                    <ul class="menu-child-list" data-parent-id="{{ $child->id }}"></ul>
+                  </li>
+                @endforeach
+              </ul>
+            </li>
+          @empty
+            <div class="text-center py-5 text-muted">
+              <i class="bx bx-folder-open display-4 mb-2"></i>
+              <p class="mb-0">{{ __('messages.no_menu_data') }}</p>
+            </div>
+          @endforelse
+        </ul>
+      </div>
+    </div>
+  @endif
 
   @if ($showModal)
     <div class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,.45)">
@@ -279,3 +551,122 @@ new #[Layout('components.layouts.app')] class extends Component {
     </div>
   @endif
 </div>
+
+@section('page-script')
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script>
+  window.initializeMenuSorting = function() {
+    if (window.menuSortableInstances) {
+      window.menuSortableInstances.forEach(inst => inst.destroy());
+    }
+    window.menuSortableInstances = [];
+    
+    const rootEl = document.getElementById('menu-root');
+    if (rootEl) {
+      const rootInst = Sortable.create(rootEl, {
+        group: 'nested-menus',
+        animation: 150,
+        handle: '.drag-handle',
+        fallbackOnBody: true,
+        swapThreshold: 0.65,
+        onMove(evt) {
+          const isDraggingToChildList = evt.to.classList.contains('menu-child-list');
+          if (isDraggingToChildList) {
+            // Prevent nested drag exceeding 2 levels
+            const hasChildren = evt.dragged.querySelector('.menu-child-list li') !== null;
+            if (hasChildren) return false;
+
+            const isParentAChildList = evt.to.parentElement.parentElement.classList.contains('menu-child-list');
+            if (isParentAChildList) return false;
+          }
+          return true;
+        },
+        onEnd() {
+          window.saveMenuStructure();
+        }
+      });
+      window.menuSortableInstances.push(rootInst);
+    }
+    
+    document.querySelectorAll('.menu-child-list').forEach(el => {
+      const childInst = Sortable.create(el, {
+        group: 'nested-menus',
+        animation: 150,
+        handle: '.drag-handle',
+        fallbackOnBody: true,
+        swapThreshold: 0.65,
+        onMove(evt) {
+          const isDraggingToChildList = evt.to.classList.contains('menu-child-list');
+          if (isDraggingToChildList) {
+            // Prevent nested drag exceeding 2 levels
+            const hasChildren = evt.dragged.querySelector('.menu-child-list li') !== null;
+            if (hasChildren) return false;
+
+            const isParentAChildList = evt.to.parentElement.parentElement.classList.contains('menu-child-list');
+            if (isParentAChildList) return false;
+          }
+          return true;
+        },
+        onEnd() {
+          window.saveMenuStructure();
+        }
+      });
+      window.menuSortableInstances.push(childInst);
+    });
+  };
+
+  window.saveMenuStructure = function() {
+    const structure = [];
+    document.querySelectorAll('#menu-root > li').forEach((parentLi, parentIndex) => {
+      const parentId = parentLi.getAttribute('data-id');
+      const children = [];
+      const childList = parentLi.querySelector(':scope > .menu-child-list');
+      if (childList) {
+        childList.querySelectorAll(':scope > li').forEach((childLi, childIndex) => {
+          children.push({
+            id: childLi.getAttribute('data-id'),
+            urutan: childIndex + 1
+          });
+        });
+      }
+      structure.push({
+        id: parentId,
+        urutan: parentIndex + 1,
+        children: children
+      });
+    });
+    
+    // Find our specific Livewire component wrapper
+    const wireEl = document.getElementById('menu-manager-root');
+    if (wireEl) {
+      const componentId = wireEl.getAttribute('wire:id') || wireEl.getAttribute('id');
+      if (typeof Livewire !== 'undefined' && Livewire.find) {
+        const component = Livewire.find(componentId);
+        if (component) {
+          component.updateMenuStructure(structure);
+        }
+      }
+    }
+  };
+
+  document.addEventListener('livewire:init', () => {
+    Livewire.hook('request', ({ respond }) => {
+      respond(({ status, response }) => {
+        setTimeout(() => {
+          window.initializeMenuSorting();
+        }, 50);
+      });
+    });
+  });
+
+  document.addEventListener('livewire:navigated', () => {
+    window.initializeMenuSorting();
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      window.initializeMenuSorting();
+    }, 50);
+  });
+</script>
+@endsection

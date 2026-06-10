@@ -217,6 +217,20 @@ Route::middleware(['auth'])->group(function () {
             ]);
         })->name('chat-ai.history.delete');
     });
+
+    // Manajemen Konten (Admin)
+    Route::prefix('manajemen-konten')->name('konten.')->group(function () {
+        Volt::route('berita', 'master.konten.berita')->name('berita');
+        Volt::route('slider', 'master.konten.slider')->name('slider');
+    });
 });
+
+// Google OAuth Routes
+Route::get('auth/google', [App\Http\Controllers\Auth\GoogleController::class, 'redirectToGoogle'])->name('auth.google');
+Route::get('auth/google/callback', [App\Http\Controllers\Auth\GoogleController::class, 'handleGoogleCallback'])->name('auth.google.callback');
+
+// Public: Berita & Artikel
+Volt::route('berita', 'publik.berita.index')->name('berita.index');
+Volt::route('berita/{slug}', 'publik.berita.detail')->name('berita.detail');
 
 require __DIR__.'/auth.php';

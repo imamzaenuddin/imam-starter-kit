@@ -37,6 +37,8 @@ class User extends Authenticatable
         'pekerjaan',
         'kewarganegaraan',
         'foto_profil',
+        'google_id',
+        'google_avatar',
         'level_id',
         'is_active',
         'two_factor_enabled',
@@ -132,6 +134,10 @@ class User extends Authenticatable
             $versi = Storage::disk('public')->lastModified($this->foto_profil);
 
             return $url.'?v='.$versi;
+        }
+
+        if (! empty($this->google_avatar)) {
+            return $this->google_avatar;
         }
 
         return asset('assets/img/avatars/1.png');

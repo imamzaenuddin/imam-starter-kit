@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             LogAktivitasSeeder::class,
             DashboardWidgetSeeder::class,
             ChatAiSeeder::class,
+            ImamStarterKitContentSeeder::class,
         ]);
     }
 }
