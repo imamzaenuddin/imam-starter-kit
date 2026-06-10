@@ -15,7 +15,7 @@
           <!--/ Navbar -->
 
           <!-- Layout container -->
-          <div class="layout-page">
+          <div class="layout-page" style="flex-direction: column;">
             <!-- Layout Content -->
             <x-layouts.menu.horizontal :title="$title ?? null"></x-layouts.menu.horizontal>
             <!--/ Layout Content -->
