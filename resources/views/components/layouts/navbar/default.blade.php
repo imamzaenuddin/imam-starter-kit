@@ -1,5 +1,13 @@
-<nav class="layout-navbar container-xxl navbar-detached navbar navbar-expand-xl align-items-center bg-navbar-theme"
+<nav class="layout-navbar {{ config('app.layout') === 'horizontal' ? 'navbar navbar-expand-xl' : 'container-xxl navbar-detached navbar navbar-expand-xl' }} align-items-center bg-navbar-theme"
     id="layout-navbar">
+    @if(config('app.layout') === 'horizontal')
+    <div class="container-xxl d-flex align-items-center justify-content-between w-100">
+        <div class="app-brand demo me-4">
+            <a href="{{ url('/') }}" class="app-brand-link">
+                <x-app-logo />
+            </a>
+        </div>
+    @endif
     @php
         $bahasaAktif = \App\Models\Bahasa::query()
             ->where('is_active', true)
@@ -151,4 +159,7 @@
             <!--/ User -->
         </ul>
     </div>
+    @if(config('app.layout') === 'horizontal')
+    </div>
+    @endif
 </nav>

@@ -87,7 +87,7 @@ new class extends Component {
 };
 ?>
 <div class="dropdown" x-init="$watch('$refs.toggle.getAttribute(\'aria-expanded\')', value => $dispatch('notifikasi-dropdown', { opened: value === 'true' }))" style="position: relative;">
-  <a href="javascript:void(0)" class="nav-link dropdown-toggle hide-arrow position-relative" id="notifikasiDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" @ref="toggle">
+  <a href="javascript:void(0)" class="nav-link dropdown-toggle hide-arrow position-relative" id="notifikasiDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" x-ref="toggle">
     <i class="bx bx-bell"></i>
     @if ($jumlahBelumDibaca > 0)
       <span class="badge bg-danger badge-center rounded-pill" style="position: absolute; top: 0; right: 0; padding: 0.25rem 0.5rem; font-size: 0.65rem;">
