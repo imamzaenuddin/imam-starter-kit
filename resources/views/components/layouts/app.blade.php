@@ -7,6 +7,16 @@
   <body>
 
     @if (config('app.layout') === 'horizontal')
+      <style>
+        .layout-horizontal .layout-page {
+          width: 100% !important;
+          flex-grow: 1 !important;
+        }
+        .layout-horizontal .content-wrapper {
+          width: 100% !important;
+          flex-grow: 1 !important;
+        }
+      </style>
       <div class="layout-wrapper layout-navbar-full layout-horizontal">
         <div class="layout-container">
 

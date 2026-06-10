@@ -167,12 +167,12 @@ new #[Layout('components.layouts.app')] class extends Component {
   .menu-tree-container {
     padding: 1.5rem;
   }
-  .menu-list {
+  .menu-drag-list {
     list-style: none;
     padding-left: 0;
     margin-bottom: 0;
   }
-  .menu-item {
+  .menu-drag-item {
     border: 1px solid #e2e8f0;
     border-radius: 8px;
     background: #fff;
@@ -180,11 +180,11 @@ new #[Layout('components.layouts.app')] class extends Component {
     transition: all 0.2s ease;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   }
-  .menu-item:hover {
+  .menu-drag-item:hover {
     border-color: #cbd5e1;
     box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
   }
-  .menu-item-content {
+  .menu-drag-item-content {
     display: flex;
     align-items: center;
     padding: 0.75rem 1rem;
@@ -205,7 +205,7 @@ new #[Layout('components.layouts.app')] class extends Component {
   .drag-handle:active {
     cursor: grabbing;
   }
-  .menu-child-list {
+  .menu-drag-child-list {
     list-style: none;
     padding-left: 2.5rem;
     margin-top: 0;
@@ -213,7 +213,7 @@ new #[Layout('components.layouts.app')] class extends Component {
     position: relative;
     min-height: 10px;
   }
-  .menu-child-list::before {
+  .menu-drag-child-list::before {
     content: '';
     position: absolute;
     left: 1.25rem;
@@ -222,10 +222,10 @@ new #[Layout('components.layouts.app')] class extends Component {
     width: 2px;
     background-color: #e2e8f0;
   }
-  .menu-child-list .menu-item {
+  .menu-drag-child-list .menu-drag-item {
     position: relative;
   }
-  .menu-child-list .menu-item::before {
+  .menu-drag-child-list .menu-drag-item::before {
     content: '';
     position: absolute;
     left: -1.25rem;
@@ -234,7 +234,7 @@ new #[Layout('components.layouts.app')] class extends Component {
     height: 2px;
     background-color: #e2e8f0;
   }
-  .menu-child-list:empty {
+  .menu-drag-child-list:empty {
     min-height: 35px;
     border: 1px dashed #cbd5e1;
     border-radius: 8px;
@@ -243,10 +243,10 @@ new #[Layout('components.layouts.app')] class extends Component {
     margin-bottom: 0.75rem;
     background: #f8fafc;
   }
-  .menu-child-list:empty::before {
+  .menu-drag-child-list:empty::before {
     display: none;
   }
-  .menu-child-list .menu-child-list:empty {
+  .menu-drag-child-list .menu-drag-child-list:empty {
     display: none;
   }
 </style>
@@ -368,14 +368,14 @@ new #[Layout('components.layouts.app')] class extends Component {
           <span>Seret gagang <i class="bx bx-grid-vertical"></i> untuk menyusun urutan menu secara dinamis. Anda dapat menaruh sub-menu di bawah menu utama (maksimal 2 tingkat kedalaman).</span>
         </div>
         
-        <ul class="menu-list menu-root-list" id="menu-root">
+        <ul class="menu-drag-list menu-root-list" id="menu-root">
           @forelse ($menus as $menu)
-            <li class="menu-item" data-id="{{ $menu->id }}">
-              <div class="menu-item-content d-flex align-items-center">
+            <li class="menu-drag-item" data-id="{{ $menu->id }}">
+              <div class="menu-drag-item-content d-flex align-items-center">
                 <div class="drag-handle">
                   <i class="bx bx-grid-vertical"></i>
                 </div>
-                <div class="menu-item-info d-flex align-items-center flex-grow-1">
+                <div class="menu-drag-item-info d-flex align-items-center flex-grow-1">
                   @if ($menu->icon)
                     <i class="{{ \App\Models\Menu::classIconRender($menu->icon) }} me-2 text-primary bx-sm"></i>
                   @endif
@@ -392,7 +392,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                     @endif
                   </span>
                 </div>
-                <div class="menu-item-actions d-flex align-items-center gap-1">
+                <div class="menu-drag-item-actions d-flex align-items-center gap-1">
                   <button class="btn btn-sm btn-icon btn-text-primary" wire:click="edit({{ $menu->id }})" title="{{ __('messages.edit') }}">
                     <i class="bx bx-edit-alt"></i>
                   </button>
@@ -413,14 +413,14 @@ new #[Layout('components.layouts.app')] class extends Component {
               </div>
               
               <!-- Submenus container -->
-              <ul class="menu-child-list" data-parent-id="{{ $menu->id }}">
+              <ul class="menu-drag-child-list" data-parent-id="{{ $menu->id }}">
                 @foreach ($menu->children as $child)
-                  <li class="menu-item" data-id="{{ $child->id }}">
-                    <div class="menu-item-content d-flex align-items-center">
+                  <li class="menu-drag-item" data-id="{{ $child->id }}">
+                    <div class="menu-drag-item-content d-flex align-items-center">
                       <div class="drag-handle">
                         <i class="bx bx-grid-vertical"></i>
                       </div>
-                      <div class="menu-item-info d-flex align-items-center flex-grow-1">
+                      <div class="menu-drag-item-info d-flex align-items-center flex-grow-1">
                         @if ($child->icon)
                           <i class="{{ \App\Models\Menu::classIconRender($child->icon) }} me-2 text-primary bx-sm"></i>
                         @endif
@@ -437,7 +437,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                           @endif
                         </span>
                       </div>
-                      <div class="menu-item-actions d-flex align-items-center gap-1">
+                      <div class="menu-drag-item-actions d-flex align-items-center gap-1">
                         <button class="btn btn-sm btn-icon btn-text-primary" wire:click="edit({{ $child->id }})" title="{{ __('messages.edit') }}">
                           <i class="bx bx-edit-alt"></i>
                         </button>
@@ -458,7 +458,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                     </div>
                     
                     {{-- Empty list inside sub-menu to block dragging deeper --}}
-                    <ul class="menu-child-list" data-parent-id="{{ $child->id }}"></ul>
+                    <ul class="menu-drag-child-list" data-parent-id="{{ $child->id }}"></ul>
                   </li>
                 @endforeach
               </ul>
@@ -570,13 +570,13 @@ new #[Layout('components.layouts.app')] class extends Component {
         fallbackOnBody: true,
         swapThreshold: 0.65,
         onMove(evt) {
-          const isDraggingToChildList = evt.to.classList.contains('menu-child-list');
+          const isDraggingToChildList = evt.to.classList.contains('menu-drag-child-list');
           if (isDraggingToChildList) {
             // Prevent nested drag exceeding 2 levels
-            const hasChildren = evt.dragged.querySelector('.menu-child-list li') !== null;
+            const hasChildren = evt.dragged.querySelector('.menu-drag-child-list li') !== null;
             if (hasChildren) return false;
 
-            const isParentAChildList = evt.to.parentElement.parentElement.classList.contains('menu-child-list');
+            const isParentAChildList = evt.to.parentElement.parentElement.classList.contains('menu-drag-child-list');
             if (isParentAChildList) return false;
           }
           return true;
@@ -588,7 +588,7 @@ new #[Layout('components.layouts.app')] class extends Component {
       window.menuSortableInstances.push(rootInst);
     }
     
-    document.querySelectorAll('.menu-child-list').forEach(el => {
+    document.querySelectorAll('.menu-drag-child-list').forEach(el => {
       const childInst = Sortable.create(el, {
         group: 'nested-menus',
         animation: 150,
@@ -596,13 +596,13 @@ new #[Layout('components.layouts.app')] class extends Component {
         fallbackOnBody: true,
         swapThreshold: 0.65,
         onMove(evt) {
-          const isDraggingToChildList = evt.to.classList.contains('menu-child-list');
+          const isDraggingToChildList = evt.to.classList.contains('menu-drag-child-list');
           if (isDraggingToChildList) {
             // Prevent nested drag exceeding 2 levels
-            const hasChildren = evt.dragged.querySelector('.menu-child-list li') !== null;
+            const hasChildren = evt.dragged.querySelector('.menu-drag-child-list li') !== null;
             if (hasChildren) return false;
 
-            const isParentAChildList = evt.to.parentElement.parentElement.classList.contains('menu-child-list');
+            const isParentAChildList = evt.to.parentElement.parentElement.classList.contains('menu-drag-child-list');
             if (isParentAChildList) return false;
           }
           return true;
@@ -620,7 +620,7 @@ new #[Layout('components.layouts.app')] class extends Component {
     document.querySelectorAll('#menu-root > li').forEach((parentLi, parentIndex) => {
       const parentId = parentLi.getAttribute('data-id');
       const children = [];
-      const childList = parentLi.querySelector(':scope > .menu-child-list');
+      const childList = parentLi.querySelector(':scope > .menu-drag-child-list');
       if (childList) {
         childList.querySelectorAll(':scope > li').forEach((childLi, childIndex) => {
           children.push({
