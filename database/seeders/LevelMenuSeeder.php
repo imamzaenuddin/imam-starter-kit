@@ -140,6 +140,13 @@ class LevelMenuSeeder extends Seeder
             'is_active' => true,
         ]);
 
+        $mFormGenerator = Menu::firstOrCreate(['nama' => 'Form Generator Wizard', 'parent_id' => $administrasi->id], [
+            'url' => '/admin/form-generator-wizard',
+            'icon' => 'bx bx-customize',
+            'urutan' => 25,
+            'is_active' => true,
+        ]);
+
         // --- Anggota (parent) ---
         $mAnggota = Menu::firstOrCreate(['nama' => 'Anggota', 'parent_id' => null], [
             'url' => '/anggota',
@@ -177,6 +184,28 @@ class LevelMenuSeeder extends Seeder
             'is_active' => true,
         ]);
 
+        // --- Manajemen Konten (parent) ---
+        $mManajemenKonten = Menu::firstOrCreate(['nama' => 'Manajemen Konten', 'parent_id' => null], [
+            'url' => '#',
+            'icon' => 'bx bx-edit-alt',
+            'urutan' => 85,
+            'is_active' => true,
+        ]);
+
+        $mBerita = Menu::firstOrCreate(['nama' => 'Berita & Artikel', 'parent_id' => $mManajemenKonten->id], [
+            'url' => '/manajemen-konten/berita',
+            'icon' => 'bx bx-news',
+            'urutan' => 1,
+            'is_active' => true,
+        ]);
+
+        $mSlider = Menu::firstOrCreate(['nama' => 'Slider Halaman Utama', 'parent_id' => $mManajemenKonten->id], [
+            'url' => '/manajemen-konten/slider',
+            'icon' => 'bx bx-slideshow',
+            'urutan' => 2,
+            'is_active' => true,
+        ]);
+
         // ============================
         // 3. MAPPING LEVEL ↔ MENU
         // ============================
@@ -198,7 +227,15 @@ class LevelMenuSeeder extends Seeder
         }
 
         // Admin: kelola anggota & laporan, tanpa menu administrasi sistem
-        foreach ([$administrasi, $mLevel, $mMenu, $mMapping, $mIdentitas, $mDashboard, $mImportExport, $mPengaturanAplikasi, $mPengaturanChatAi, $mBahasa, $mPengaturanEmail, $mUsers, $mMedia, $mBackupRestore, $mPemeliharaan, $mAnggota, $laporan, $lAktivitas, $lMonitoringLogin, $lChatAi] as $m) {
+        $adminMenus = [
+            $administrasi, $mLevel, $mMenu, $mMapping, $mIdentitas, $mDashboard, 
+            $mImportExport, $mPengaturanAplikasi, $mPengaturanChatAi, $mBahasa, 
+            $mPengaturanEmail, $mUsers, $mMedia, $mBackupRestore, $mPemeliharaan, 
+            $mFormGenerator, $mAnggota, $laporan, $lAktivitas, $lMonitoringLogin, 
+            $lChatAi, $mManajemenKonten, $mBerita, $mSlider
+        ];
+
+        foreach ($adminMenus as $m) {
             $akses = match ($m->id) {
                 $mUsers->id => [
                     'dapat_lihat' => true,
@@ -218,7 +255,7 @@ class LevelMenuSeeder extends Seeder
                     'dapat_restore' => false,
                     'dapat_hapus_backup' => false,
                 ],
-                $mBackupRestore->id, $mPemeliharaan->id => [
+                $mBackupRestore->id, $mPemeliharaan->id, $mFormGenerator->id => [
                     'dapat_lihat' => false,
                     'dapat_buat' => false,
                     'dapat_ubah' => false,
@@ -236,10 +273,21 @@ class LevelMenuSeeder extends Seeder
                     'dapat_restore' => false,
                     'dapat_hapus_backup' => false,
                 ],
-                $administrasi->id, $mLevel->id, $mMenu->id, $mMapping->id, $mIdentitas->id, $mDashboard->id, $mImportExport->id, $mPengaturanAplikasi->id, $mPengaturanChatAi->id, $mBahasa->id, $mPemeliharaan->id => [
+                $administrasi->id, $mLevel->id, $mMenu->id, $mMapping->id, $mIdentitas->id, 
+                $mDashboard->id, $mImportExport->id, $mPengaturanAplikasi->id, 
+                $mPengaturanChatAi->id, $mBahasa->id => [
                     'dapat_lihat' => false,
                     'dapat_buat' => false,
                     'dapat_ubah' => false,
+                    'dapat_hapus' => false,
+                    'dapat_backup' => false,
+                    'dapat_restore' => false,
+                    'dapat_hapus_backup' => false,
+                ],
+                $mManajemenKonten->id, $mBerita->id, $mSlider->id => [
+                    'dapat_lihat' => true,
+                    'dapat_buat' => true,
+                    'dapat_ubah' => true,
                     'dapat_hapus' => false,
                     'dapat_backup' => false,
                     'dapat_restore' => false,
@@ -270,15 +318,6 @@ class LevelMenuSeeder extends Seeder
                 'dapat_hapus_backup' => false,
             ],
             $lAktivitas->id => [
-                'dapat_lihat' => true,
-                'dapat_buat' => false,
-                'dapat_ubah' => false,
-                'dapat_hapus' => false,
-                'dapat_backup' => false,
-                'dapat_restore' => false,
-                'dapat_hapus_backup' => false,
-            ],
-            $lMonitoringLogin->id => [
                 'dapat_lihat' => true,
                 'dapat_buat' => false,
                 'dapat_ubah' => false,

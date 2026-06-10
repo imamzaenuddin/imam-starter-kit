@@ -24,6 +24,51 @@
 
         return str_starts_with($hasil, 'messages.menu_') ? $namaMenu : $hasil;
     };
+
+    // Render menu item secara rekursif
+    $renderMenuItem = function (\App\Models\Menu $menu, bool $isSub = false) use (&$renderMenuItem, &$isAktif, &$terjemahMenu, &$renderIcon) {
+        $aktif = $isAktif($menu);
+        $hasChildren = $menu->children->isNotEmpty();
+
+        $itemClass = 'menu-item';
+        if ($aktif) {
+            $itemClass .= ' active';
+        }
+
+        $linkClass = 'menu-link';
+        if ($hasChildren) {
+            $linkClass .= ' menu-toggle';
+        }
+
+        $href = $hasChildren ? 'javascript:void(0);' : ($menu->url ? url($menu->url) : 'javascript:void(0);');
+        $wireNavigate = (!$hasChildren && $menu->url) ? 'wire:navigate' : '';
+
+        $iconHtml = '';
+        if ($menu->icon) {
+            $iconHtml = '<i class="' . $renderIcon($menu->icon) . '"></i>';
+        } elseif (!$isSub) {
+            // Icon default untuk menu root jika tidak ada icon
+            $iconHtml = '<i class="menu-icon tf-icons bx bx-layer"></i>';
+        }
+
+        $output = '<li class="' . $itemClass . '">';
+        $output .= '<a href="' . $href . '" class="' . $linkClass . '" ' . $wireNavigate . '>';
+        $output .= $iconHtml;
+        $output .= '<div>' . e($terjemahMenu($menu->nama)) . '</div>';
+        $output .= '</a>';
+
+        if ($hasChildren) {
+            $output .= '<ul class="menu-sub">';
+            foreach ($menu->children as $child) {
+                $output .= $renderMenuItem($child, true);
+            }
+            $output .= '</ul>';
+        }
+
+        $output .= '</li>';
+
+        return $output;
+    };
 @endphp
 
 <!-- Horizontal Menu -->
@@ -45,51 +90,7 @@
            MENU DINAMIS: Diambil dari DB sesuai level user
            ============================================= --}}
       @foreach ($menus as $menu)
-        @php $aktif = $isAktif($menu); @endphp
-
-        @if ($menu->children->isNotEmpty())
-          {{-- Menu dengan sub-menu --}}
-          <li class="menu-item {{ $aktif ? 'active' : '' }}">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-              @if ($menu->icon)
-                <i class="{{ $renderIcon($menu->icon) }}"></i>
-              @else
-                <i class="menu-icon tf-icons bx bx-layer"></i>
-              @endif
-              <div>{{ $terjemahMenu($menu->nama) }}</div>
-            </a>
-            <ul class="menu-sub">
-              @foreach ($menu->children as $child)
-                @php $childAktif = $child->url && request()->is(ltrim($child->url, '/')); @endphp
-                <li class="menu-item {{ $childAktif ? 'active' : '' }}">
-                  <a class="menu-link"
-                     href="{{ $child->url ? url($child->url) : 'javascript:void(0);' }}"
-                     {{ $child->url ? 'wire:navigate' : '' }}>
-                    @if ($child->icon)
-                      <i class="{{ $renderIcon($child->icon) }}"></i>
-                    @endif
-                    <div>{{ $terjemahMenu($child->nama) }}</div>
-                  </a>
-                </li>
-              @endforeach
-            </ul>
-          </li>
-
-        @else
-          {{-- Menu tunggal tanpa sub-menu --}}
-          <li class="menu-item {{ $aktif ? 'active' : '' }}">
-            <a class="menu-link"
-               href="{{ $menu->url ? url($menu->url) : 'javascript:void(0);' }}"
-               {{ $menu->url ? 'wire:navigate' : '' }}>
-              @if ($menu->icon)
-                <i class="{{ $renderIcon($menu->icon) }}"></i>
-              @else
-                <i class="menu-icon tf-icons bx bx-circle"></i>
-              @endif
-              <div>{{ $terjemahMenu($menu->nama) }}</div>
-            </a>
-          </li>
-        @endif
+        {!! $renderMenuItem($menu) !!}
       @endforeach
 
       {{-- =============================================
@@ -140,9 +141,9 @@
         e.stopPropagation();
         const menuItem = menuToggle.closest('.menu-item');
         
-        // Close other open horizontal submenus
+        // Close other open horizontal submenus (except ancestor items)
         document.querySelectorAll('.menu-horizontal .menu-item.open').forEach(function(openItem) {
-          if (openItem !== menuItem) {
+          if (openItem !== menuItem && !openItem.contains(menuItem)) {
             openItem.classList.remove('open');
           }
         });

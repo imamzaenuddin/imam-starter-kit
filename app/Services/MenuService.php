@@ -34,17 +34,33 @@ class MenuService
                 ->wherePivot('dapat_lihat', true)
                 ->pluck('m_menu.id');
 
-            // Muat menu root beserta children yang diizinkan, eager-load pivot sekali
-            return Menu::with(['children' => function ($query) use ($menuIds) {
-                $query->whereIn('id', $menuIds)
-                    ->active()
-                    ->orderBy('urutan');
-            }])
-                ->whereIn('id', $menuIds)
+            // Ambil seluruh menu yang diizinkan dan aktif, urutkan berdasarkan urutan
+            $menus = Menu::whereIn('id', $menuIds)
                 ->active()
-                ->root()
                 ->orderBy('urutan')
                 ->get();
+
+            // Inisialisasi relasi children kosong pada seluruh menu
+            foreach ($menus as $menu) {
+                $menu->setRelation('children', new Collection);
+            }
+
+            $menuMap = $menus->keyBy('id');
+            $tree = new Collection;
+
+            // Susun hierarki menu di memori
+            foreach ($menus as $menu) {
+                if (empty($menu->parent_id)) {
+                    $tree->push($menu);
+                } else {
+                    $parent = $menuMap->get($menu->parent_id);
+                    if ($parent) {
+                        $parent->children->push($menu);
+                    }
+                }
+            }
+
+            return $tree;
         });
 
         return $result instanceof Collection ? $result : new Collection;

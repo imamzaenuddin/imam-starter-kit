@@ -108,25 +108,20 @@ new #[Layout('components.layouts.app')] class extends Component {
     public function updateMenuStructure(array $structure): void
     {
         \Illuminate\Support\Facades\DB::transaction(function () use ($structure) {
-            foreach ($structure as $parentIndex => $parentData) {
-                $parentId = (int) $parentData['id'];
-                
-                // Update parent item
-                Menu::where('id', $parentId)->update([
-                    'parent_id' => null,
-                    'urutan'    => $parentData['urutan'],
-                ]);
-                
-                // Update children
-                if (!empty($parentData['children'])) {
-                    foreach ($parentData['children'] as $childData) {
-                        Menu::where('id', (int) $childData['id'])->update([
-                            'parent_id' => $parentId,
-                            'urutan'    => $childData['urutan'],
-                        ]);
+            $saveRecursive = function (array $items, ?int $parentId) use (&$saveRecursive) {
+                foreach ($items as $item) {
+                    $id = (int) $item['id'];
+                    Menu::where('id', $id)->update([
+                        'parent_id' => $parentId,
+                        'urutan'    => (int) $item['urutan'],
+                    ]);
+                    if (!empty($item['children'])) {
+                        $saveRecursive($item['children'], $id);
                     }
                 }
-            }
+            };
+
+            $saveRecursive($structure, null);
         });
 
         // Clear menu cache to update sidebar immediately
@@ -135,15 +130,87 @@ new #[Layout('components.layouts.app')] class extends Component {
         session()->flash('sukses', 'Struktur dan urutan menu berhasil diperbarui.');
     }
 
+    private function isDescendantOf(int $menuId, int $parentId): bool
+    {
+        $menu = Menu::find($menuId);
+        while ($menu && $menu->parent_id !== null) {
+            if ($menu->parent_id === $parentId) {
+                return true;
+            }
+            $menu = Menu::find($menu->parent_id);
+        }
+        return false;
+    }
+
+    private function dapatkanParentDropdown(): array
+    {
+        $allMenus = Menu::active()->orderBy('urutan')->get();
+
+        // Build tree in memory
+        foreach ($allMenus as $m) {
+            $m->setRelation('children', new \Illuminate\Database\Eloquent\Collection);
+        }
+
+        $menuMap = $allMenus->keyBy('id');
+        $tree = new \Illuminate\Database\Eloquent\Collection;
+
+        foreach ($allMenus as $m) {
+            if (empty($m->parent_id)) {
+                $tree->push($m);
+            } else {
+                $parent = $menuMap->get($m->parent_id);
+                if ($parent) {
+                    $parent->children->push($m);
+                }
+            }
+        }
+
+        // Flatten tree with indentation
+        $list = [];
+        $flatten = function ($items, $depth = 0) use (&$flatten, &$list) {
+            foreach ($items as $item) {
+                // If editing, prevent selecting self or any of its descendants as parent
+                if ($this->editId && ($item->id === $this->editId || $this->isDescendantOf($item->id, $this->editId))) {
+                    continue;
+                }
+                
+                $prefix = str_repeat('— ', $depth);
+                $list[] = [
+                    'id'   => $item->id,
+                    'nama' => $prefix . $item->nama,
+                ];
+                if ($item->children->isNotEmpty()) {
+                    $flatten($item->children, $depth + 1);
+                }
+            }
+        };
+
+        $flatten($tree);
+        return $list;
+    }
+
     public function with(): array
     {
         if ($this->search === '') {
-            $menus = Menu::with(['children' => function($q) {
-                $q->orderBy('urutan');
-            }])
-            ->whereNull('parent_id')
-            ->orderBy('urutan')
-            ->get();
+            $allMenus = Menu::orderBy('urutan')->get();
+
+            foreach ($allMenus as $m) {
+                $m->setRelation('children', new \Illuminate\Database\Eloquent\Collection);
+            }
+
+            $menuMap = $allMenus->keyBy('id');
+            $menus = new \Illuminate\Database\Eloquent\Collection;
+
+            foreach ($allMenus as $m) {
+                if (empty($m->parent_id)) {
+                    $menus->push($m);
+                } else {
+                    $parent = $menuMap->get($m->parent_id);
+                    if ($parent) {
+                        $parent->children->push($m);
+                    }
+                }
+            }
         } else {
             $menus = Menu::with('parent')
                 ->where('nama', 'like', '%' . $this->search . '%')
@@ -153,7 +220,7 @@ new #[Layout('components.layouts.app')] class extends Component {
 
         return [
             'menus'    => $menus,
-            'parents'  => Menu::whereNull('parent_id')->active()->orderBy('urutan')->get(),
+            'parents'  => $this->dapatkanParentDropdown(),
             'iconValid' => Menu::iconTersedia($this->icon),
             'iconPreviewClass' => Menu::classIconRender($this->icon),
         ];
@@ -246,9 +313,7 @@ new #[Layout('components.layouts.app')] class extends Component {
   .menu-drag-child-list:empty::before {
     display: none;
   }
-  .menu-drag-child-list .menu-drag-child-list:empty {
-    display: none;
-  }
+  /* Remove empty list hiding to allow unlimited nested drops */
 </style>
 @endsection
 
@@ -360,109 +425,83 @@ new #[Layout('components.layouts.app')] class extends Component {
       <div class="card-footer">{{ $menus->links() }}</div>
     </div>
   @else
+    @php
+      $renderDragItem = function ($menu) use (&$renderDragItem) {
+          $iconHtml = '';
+          if ($menu->icon) {
+              $iconHtml = '<i class="' . e(\App\Models\Menu::classIconRender($menu->icon)) . ' me-2 text-primary bx-sm"></i>';
+          }
+          
+          $statusBadge = $menu->is_active
+              ? '<span class="badge bg-label-success">' . e(__('messages.active')) . '</span>'
+              : '<span class="badge bg-label-secondary">' . e(__('messages.inactive')) . '</span>';
+              
+          $urlHtml = '';
+          if ($menu->url) {
+              $urlHtml = '<code class="ms-2 px-2 py-0.5 rounded bg-light text-secondary" style="font-size: 0.75rem;">' . e($menu->url) . '</code>';
+          }
+
+          $confirmTitle = __('messages.confirm_delete');
+          $confirmText = __('messages.confirm_delete_menu', ['nama' => addslashes($menu->nama)]);
+          $yesDelete = __('messages.yes_delete');
+          $cancelText = __('messages.cancel');
+
+          $clickJs = 'Swal.fire({
+            title: \'' . addslashes($confirmTitle) . '\',
+            text: \'' . addslashes($confirmText) . '\',
+            icon: \'warning\',
+            showCancelButton: true,
+            confirmButtonText: \'' . addslashes($yesDelete) . '\',
+            cancelButtonText: \'' . addslashes($cancelText) . '\',
+          }).then(r => r.isConfirmed && $wire.hapus(' . (int) $menu->id . '))';
+
+          $html = '<li class="menu-drag-item" data-id="' . e($menu->id) . '">
+            <div class="menu-drag-item-content d-flex align-items-center">
+              <div class="drag-handle">
+                <i class="bx bx-grid-vertical"></i>
+              </div>
+              <div class="menu-drag-item-info d-flex align-items-center flex-grow-1">
+                ' . $iconHtml . '
+                <span class="fw-semibold text-dark">' . e($menu->nama) . '</span>
+                ' . $urlHtml . '
+                <span class="ms-auto me-3">
+                  ' . $statusBadge . '
+                </span>
+              </div>
+              <div class="menu-drag-item-actions d-flex align-items-center gap-1">
+                <button class="btn btn-sm btn-icon btn-text-primary" wire:click="edit(' . e($menu->id) . ')" title="' . e(__('messages.edit')) . '">
+                  <i class="bx bx-edit-alt"></i>
+                </button>
+                <button class="btn btn-sm btn-icon btn-text-danger"
+                        title="' . e(__('messages.delete')) . '"
+                        @click="' . e($clickJs) . '"
+                        >
+                  <i class="bx bx-trash"></i>
+                </button>
+              </div>
+            </div>
+            <ul class="menu-drag-child-list" data-parent-id="' . e($menu->id) . '">';
+          
+          foreach ($menu->children as $child) {
+              $html .= $renderDragItem($child);
+          }
+          
+          $html .= '</ul></li>';
+          return $html;
+      };
+    @endphp
+
     {{-- Drag & Drop Tree Layout --}}
     <div class="card">
       <div class="menu-tree-container">
         <div class="alert alert-light border d-flex align-items-center mb-4 text-muted" style="font-size: 0.85rem; background-color: #f8fafc;">
           <i class="bx bx-info-circle me-2 text-primary" style="font-size: 1.15rem;"></i>
-          <span>Seret gagang <i class="bx bx-grid-vertical"></i> untuk menyusun urutan menu secara dinamis. Anda dapat menaruh sub-menu di bawah menu utama (maksimal 2 tingkat kedalaman).</span>
+          <span>Seret gagang <i class="bx bx-grid-vertical"></i> untuk menyusun urutan menu secara dinamis. Anda dapat menaruh sub-menu di bawah menu utama (mendukung tingkat kedalaman tak terbatas).</span>
         </div>
         
         <ul class="menu-drag-list menu-root-list" id="menu-root">
           @forelse ($menus as $menu)
-            <li class="menu-drag-item" data-id="{{ $menu->id }}">
-              <div class="menu-drag-item-content d-flex align-items-center">
-                <div class="drag-handle">
-                  <i class="bx bx-grid-vertical"></i>
-                </div>
-                <div class="menu-drag-item-info d-flex align-items-center flex-grow-1">
-                  @if ($menu->icon)
-                    <i class="{{ \App\Models\Menu::classIconRender($menu->icon) }} me-2 text-primary bx-sm"></i>
-                  @endif
-                  <span class="fw-semibold text-dark">{{ $menu->nama }}</span>
-                  @if ($menu->url)
-                    <code class="ms-2 px-2 py-0.5 rounded bg-light text-secondary" style="font-size: 0.75rem;">{{ $menu->url }}</code>
-                  @endif
-                  
-                  <span class="ms-auto me-3">
-                    @if ($menu->is_active)
-                      <span class="badge bg-label-success">{{ __('messages.active') }}</span>
-                    @else
-                      <span class="badge bg-label-secondary">{{ __('messages.inactive') }}</span>
-                    @endif
-                  </span>
-                </div>
-                <div class="menu-drag-item-actions d-flex align-items-center gap-1">
-                  <button class="btn btn-sm btn-icon btn-text-primary" wire:click="edit({{ $menu->id }})" title="{{ __('messages.edit') }}">
-                    <i class="bx bx-edit-alt"></i>
-                  </button>
-                  <button class="btn btn-sm btn-icon btn-text-danger"
-                          title="{{ __('messages.delete') }}"
-                          @click="Swal.fire({
-                            title: '{{ __('messages.confirm_delete') }}',
-                            text: '{{ __('messages.confirm_delete_menu', ['nama' => addslashes($menu->nama)]) }}',
-                            icon: 'warning',
-                            showCancelButton: true,
-                            confirmButtonText: '{{ __('messages.yes_delete') }}',
-                            cancelButtonText: '{{ __('messages.cancel') }}',
-                          }).then(r => r.isConfirmed && $wire.hapus({{ $menu->id }}))"
-                          >
-                    <i class="bx bx-trash"></i>
-                  </button>
-                </div>
-              </div>
-              
-              <!-- Submenus container -->
-              <ul class="menu-drag-child-list" data-parent-id="{{ $menu->id }}">
-                @foreach ($menu->children as $child)
-                  <li class="menu-drag-item" data-id="{{ $child->id }}">
-                    <div class="menu-drag-item-content d-flex align-items-center">
-                      <div class="drag-handle">
-                        <i class="bx bx-grid-vertical"></i>
-                      </div>
-                      <div class="menu-drag-item-info d-flex align-items-center flex-grow-1">
-                        @if ($child->icon)
-                          <i class="{{ \App\Models\Menu::classIconRender($child->icon) }} me-2 text-primary bx-sm"></i>
-                        @endif
-                        <span class="fw-semibold text-dark">{{ $child->nama }}</span>
-                        @if ($child->url)
-                          <code class="ms-2 px-2 py-0.5 rounded bg-light text-secondary" style="font-size: 0.75rem;">{{ $child->url }}</code>
-                        @endif
-                        
-                        <span class="ms-auto me-3">
-                          @if ($child->is_active)
-                            <span class="badge bg-label-success">{{ __('messages.active') }}</span>
-                          @else
-                            <span class="badge bg-label-secondary">{{ __('messages.inactive') }}</span>
-                          @endif
-                        </span>
-                      </div>
-                      <div class="menu-drag-item-actions d-flex align-items-center gap-1">
-                        <button class="btn btn-sm btn-icon btn-text-primary" wire:click="edit({{ $child->id }})" title="{{ __('messages.edit') }}">
-                          <i class="bx bx-edit-alt"></i>
-                        </button>
-                        <button class="btn btn-sm btn-icon btn-text-danger"
-                                title="{{ __('messages.delete') }}"
-                                @click="Swal.fire({
-                                  title: '{{ __('messages.confirm_delete') }}',
-                                  text: '{{ __('messages.confirm_delete_menu', ['nama' => addslashes($child->nama)]) }}',
-                                  icon: 'warning',
-                                  showCancelButton: true,
-                                  confirmButtonText: '{{ __('messages.yes_delete') }}',
-                                  cancelButtonText: '{{ __('messages.cancel') }}',
-                                }).then(r => r.isConfirmed && $wire.hapus({{ $child->id }}))"
-                                >
-                          <i class="bx bx-trash"></i>
-                        </button>
-                      </div>
-                    </div>
-                    
-                    {{-- Empty list inside sub-menu to block dragging deeper --}}
-                    <ul class="menu-drag-child-list" data-parent-id="{{ $child->id }}"></ul>
-                  </li>
-                @endforeach
-              </ul>
-            </li>
+            {!! $renderDragItem($menu) !!}
           @empty
             <div class="text-center py-5 text-muted">
               <i class="bx bx-folder-open display-4 mb-2"></i>
@@ -496,7 +535,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                 <select wire:model="parentId" class="form-select">
                   <option value="">{{ __('messages.no_parent_root') }}</option>
                   @foreach ($parents as $p)
-                    <option value="{{ $p->id }}">{{ $p->nama }}</option>
+                    <option value="{{ $p['id'] }}">{{ $p['nama'] }}</option>
                   @endforeach
                 </select>
               </div>
@@ -569,18 +608,6 @@ new #[Layout('components.layouts.app')] class extends Component {
         handle: '.drag-handle',
         fallbackOnBody: true,
         swapThreshold: 0.65,
-        onMove(evt) {
-          const isDraggingToChildList = evt.to.classList.contains('menu-drag-child-list');
-          if (isDraggingToChildList) {
-            // Prevent nested drag exceeding 2 levels
-            const hasChildren = evt.dragged.querySelector('.menu-drag-child-list li') !== null;
-            if (hasChildren) return false;
-
-            const isParentAChildList = evt.to.parentElement.parentElement.classList.contains('menu-drag-child-list');
-            if (isParentAChildList) return false;
-          }
-          return true;
-        },
         onEnd() {
           window.saveMenuStructure();
         }
@@ -595,18 +622,6 @@ new #[Layout('components.layouts.app')] class extends Component {
         handle: '.drag-handle',
         fallbackOnBody: true,
         swapThreshold: 0.65,
-        onMove(evt) {
-          const isDraggingToChildList = evt.to.classList.contains('menu-drag-child-list');
-          if (isDraggingToChildList) {
-            // Prevent nested drag exceeding 2 levels
-            const hasChildren = evt.dragged.querySelector('.menu-drag-child-list li') !== null;
-            if (hasChildren) return false;
-
-            const isParentAChildList = evt.to.parentElement.parentElement.classList.contains('menu-drag-child-list');
-            if (isParentAChildList) return false;
-          }
-          return true;
-        },
         onEnd() {
           window.saveMenuStructure();
         }
@@ -616,25 +631,24 @@ new #[Layout('components.layouts.app')] class extends Component {
   };
 
   window.saveMenuStructure = function() {
-    const structure = [];
-    document.querySelectorAll('#menu-root > li').forEach((parentLi, parentIndex) => {
-      const parentId = parentLi.getAttribute('data-id');
-      const children = [];
-      const childList = parentLi.querySelector(':scope > .menu-drag-child-list');
-      if (childList) {
-        childList.querySelectorAll(':scope > li').forEach((childLi, childIndex) => {
-          children.push({
-            id: childLi.getAttribute('data-id'),
-            urutan: childIndex + 1
-          });
+    const parseList = function(ulElement) {
+      if (!ulElement) return [];
+      const items = [];
+      ulElement.querySelectorAll(':scope > li').forEach((li, index) => {
+        const id = li.getAttribute('data-id');
+        const childUl = li.querySelector(':scope > .menu-drag-child-list');
+        const children = parseList(childUl);
+        items.push({
+          id: id,
+          urutan: index + 1,
+          children: children
         });
-      }
-      structure.push({
-        id: parentId,
-        urutan: parentIndex + 1,
-        children: children
       });
-    });
+      return items;
+    };
+
+    const rootEl = document.getElementById('menu-root');
+    const structure = parseList(rootEl);
     
     // Find our specific Livewire component wrapper
     const wireEl = document.getElementById('menu-manager-root');

@@ -11,12 +11,49 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::disableForeignKeyConstraints();
+
+        Schema::create('m_level', function (Blueprint $table) {
+            $table->id();
+            $table->string('nama_level', 50)->unique();
+            $table->string('deskripsi', 255)->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->timestamps();
+        });
+
+        Schema::create('t_user', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('nama_panggilan', 100)->nullable();
+            $table->string('nomor_ktp', 30)->nullable();
+            $table->string('foto_profil')->nullable();
+            $table->string('tempat_lahir', 100)->nullable();
+            $table->date('tanggal_lahir')->nullable();
+            $table->string('jenis_kelamin', 1)->nullable();
+            $table->string('alamat_ktp')->nullable();
+            $table->string('rt', 3)->nullable();
+            $table->string('rw', 3)->nullable();
+            $table->string('kelurahan', 100)->nullable();
+            $table->string('kecamatan', 100)->nullable();
+            $table->string('kabupaten_kota', 100)->nullable();
+            $table->string('provinsi', 100)->nullable();
+            $table->string('agama', 30)->nullable();
+            $table->string('status_perkawinan', 30)->nullable();
+            $table->string('pekerjaan', 100)->nullable();
+            $table->string('kewarganegaraan', 30)->nullable();
             $table->string('email')->unique();
+            $table->string('google_id')->nullable()->unique();
+            $table->string('google_avatar')->nullable();
+            $table->foreignId('level_id')
+                ->nullable()
+                ->constrained('m_level')
+                ->nullOnDelete();
+            $table->boolean('is_active')->default(true);
+            $table->boolean('two_factor_enabled')->default(false);
+            $table->timestamp('two_factor_confirmed_at')->nullable();
+            $table->timestamp('last_login_at')->nullable();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('password')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
@@ -35,6 +72,8 @@ return new class extends Migration
             $table->longText('payload');
             $table->integer('last_activity')->index();
         });
+
+        Schema::enableForeignKeyConstraints();
     }
 
     /**
@@ -42,8 +81,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
+        Schema::disableForeignKeyConstraints();
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('t_user');
+        Schema::dropIfExists('m_level');
+        Schema::enableForeignKeyConstraints();
     }
 };
