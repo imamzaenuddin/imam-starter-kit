@@ -43,7 +43,7 @@ function buatUserDenganIzinPemeliharaan(string $email): User
     ]);
 }
 
-test('preferensi migration tersimpan dan termuat ulang dari session', function () {
+test('referensi migration tersimpan dan termuat ulang dari session', function () {
     $user = buatUserDenganIzinPemeliharaan('pref-1@example.com');
 
     $this->actingAs($user);
@@ -80,7 +80,7 @@ test('reset pengaturan migration kembali ke default cerdas', function () {
         ->assertSet('sortMigrationDir', 'asc');
 });
 
-test('preferensi migration terisolasi per user', function () {
+test('referensi migration terisolasi per user', function () {
     $userA = buatUserDenganIzinPemeliharaan('pref-a@example.com');
     $userB = buatUserDenganIzinPemeliharaan('pref-b@example.com');
 

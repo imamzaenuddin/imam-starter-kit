@@ -53,7 +53,7 @@ new #[Layout('components.layouts.app')] class extends Component {
             abort(403);
         }
 
-        $this->muatPreferensiMigrationDariSession();
+        $this->muatReferensiMigrationDariSession();
 
         $this->muatRingkasanMigration();
     }
@@ -97,7 +97,7 @@ new #[Layout('components.layouts.app')] class extends Component {
         $this->filterMigration = $filter;
         $this->terapkanSortDefaultPerFilter($filter);
         $this->halamanMigration = 1;
-        $this->simpanPreferensiMigrationKeSession();
+        $this->simpanReferensiMigrationKeSession();
 
         if ($this->showMigrationDetail) {
             $this->lihatMigration();
@@ -117,7 +117,7 @@ new #[Layout('components.layouts.app')] class extends Component {
         }
 
         $this->halamanMigration = 1;
-        $this->simpanPreferensiMigrationKeSession();
+        $this->simpanReferensiMigrationKeSession();
         $this->sinkronkanTabelMigration();
     }
 
@@ -151,7 +151,7 @@ new #[Layout('components.layouts.app')] class extends Component {
         }
 
         $this->halamanMigration = 1;
-        $this->simpanPreferensiMigrationKeSession();
+        $this->simpanReferensiMigrationKeSession();
         $this->sinkronkanTabelMigration();
     }
 
@@ -163,7 +163,7 @@ new #[Layout('components.layouts.app')] class extends Component {
         $this->halamanMigration = 1;
 
         $this->terapkanSortDefaultPerFilter($this->filterMigration);
-        $this->simpanPreferensiMigrationKeSession();
+        $this->simpanReferensiMigrationKeSession();
 
         if ($this->showMigrationDetail) {
             $this->lihatMigration();
@@ -332,7 +332,7 @@ new #[Layout('components.layouts.app')] class extends Component {
         $this->sortMigrationDir = 'asc';
     }
 
-    private function simpanPreferensiMigrationKeSession(): void
+    private function simpanReferensiMigrationKeSession(): void
     {
         session()->put($this->kunciSessionMigration('filter'), $this->filterMigration);
         session()->put($this->kunciSessionMigration('per_page'), $this->perPageMigration);
@@ -340,7 +340,7 @@ new #[Layout('components.layouts.app')] class extends Component {
         session()->put($this->kunciSessionMigration('sort_dir'), $this->sortMigrationDir);
     }
 
-    private function muatPreferensiMigrationDariSession(): void
+    private function muatReferensiMigrationDariSession(): void
     {
         $filter = (string) session()->get($this->kunciSessionMigration('filter'), 'pending');
         $perPage = (int) session()->get($this->kunciSessionMigration('per_page'), 20);

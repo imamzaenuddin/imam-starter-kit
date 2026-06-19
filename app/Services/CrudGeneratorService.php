@@ -14,8 +14,8 @@ class CrudGeneratorService
         $tableName = $table; // e.g. m_prodi
         $baseName = Str::camel(str_replace('m_', '', $tableName)); // prodi
         $modelName = Str::studly(str_replace('m_', '', $tableName)); // Prodi
-        $routePath = 'admin/preferensi/' . Str::kebab($baseName); // admin/preferensi/prodi
-        $viewPath = 'admin.preferensi.' . Str::kebab($baseName) . '.index'; // admin.preferensi.prodi.index
+        $routePath = 'admin/referensi/' . Str::kebab($baseName); // admin/referensi/prodi
+        $viewPath = 'admin.referensi.' . Str::kebab($baseName) . '.index'; // admin.referensi.prodi.index
 
         // Determine Primary Key
         $columns = Schema::getColumnListing($tableName);
@@ -267,7 +267,7 @@ BLADE;
             }
         }
 
-        $routeBase = '/admin/preferensi/' . Str::kebab($baseName);
+        $routeBase = '/admin/referensi/' . Str::kebab($baseName);
 
         $stub = <<<BLADE
 <?php
@@ -477,7 +477,7 @@ BLADE;
         $routesFile = base_path('routes/web.php');
         $content = File::get($routesFile);
 
-        $routeLine = "Volt::route('/$routePath', '$viewPath')->name('admin.preferensi." . str_replace('/', '.', str_replace('admin/preferensi/', '', $routePath)) . "');";
+        $routeLine = "Volt::route('/$routePath', '$viewPath')->name('admin.referensi." . str_replace('/', '.', str_replace('admin/referensi/', '', $routePath)) . "');";
 
         if (!str_contains($content, $routeLine)) {
             // Find a good place to inject. E.g. after middleware('auth')
@@ -492,8 +492,8 @@ BLADE;
         if (!$menu) {
             // Cari Parent Menu (Otomatis deteksi berdasarkan nama rute)
             $parentId = null;
-            if (str_contains($url, 'preferensi')) {
-                $parent = \App\Models\Menu::where('nama', 'Preferensi')->first();
+            if (str_contains($url, 'referensi')) {
+                $parent = \App\Models\Menu::where('nama', 'Referensi')->first();
                 if ($parent) $parentId = $parent->id;
             }
 
