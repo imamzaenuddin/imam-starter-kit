@@ -15,7 +15,7 @@
 
   /* ---- Left Branding Panel ---- */
   .isk-left-panel {
-    background: linear-gradient(145deg, #0f172a 0%, color-mix(in srgb, var(--sio-auth-main) 32%, #0f172a) 45%, color-mix(in srgb, var(--sio-auth-secondary) 35%, #111827) 100%);
+    background: var(--sio-auth-main);
     position: relative;
     overflow: hidden;
     padding: 2.5rem;
@@ -88,15 +88,11 @@
   .isk-hero-icon {
     width: 110px;
     height: 110px;
-    background: rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(12px);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    border-radius: 28px;
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 1.75rem;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.2);
   }
 
   /* Feature pills */
@@ -168,13 +164,11 @@
   /* Small logo for desktop top-left of form */
   .isk-form-logo {
     width: 44px; height: 44px;
-    background: linear-gradient(135deg, var(--sio-auth-main), var(--sio-auth-secondary));
-    border-radius: 12px;
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
   }
 
   /* Form inputs */
@@ -285,6 +279,16 @@
   $versiAplikasi = $identitas?->versi ?? '1.0.0';
   $sloganAplikasi = $identitas?->slogan ?? 'Platform terintegrasi untuk pengelolaan organisasi.';
   $deskripsiAplikasi = $identitas?->deskripsi ?? 'Platform terintegrasi untuk mengelola data organisasi, sumber daya manusia, dan seluruh aktivitas organisasi secara efisien dan real-time.';
+  
+  $bgLoginPath = trim((string) ($identitas?->bg_login ?? ''));
+  $bgLoginStyle = "background: var(--sio-auth-main);";
+  if ($bgLoginPath !== '') {
+    $bgLoginUrl = Str::startsWith($bgLoginPath, ['http://', 'https://']) ? $bgLoginPath : asset('storage/' . ltrim($bgLoginPath, '/'));
+    $bgLoginVersi = (string) ($identitas?->updated_at?->timestamp ?? '1');
+    $bgLoginUrlFinal = Str::contains($bgLoginUrl, '?') ? $bgLoginUrl . '&v=' . $bgLoginVersi : $bgLoginUrl . '?v=' . $bgLoginVersi;
+    $bgLoginStyle = "background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('{$bgLoginUrlFinal}') center/cover no-repeat;";
+  }
+
   $logoDefault = asset('assets/img/identitas/gedung-default.svg');
   $logoPath = trim((string) ($identitas?->logo_path ?? ''));
   $logoAplikasi = $logoDefault;
@@ -320,14 +324,9 @@
 <div class="isk-auth-wrapper">
 
   {{-- ========== LEFT PANEL: BRANDING ========== --}}
-  <div class="isk-left-panel col-lg-7 d-none d-lg-flex">
+  <div class="isk-left-panel col-lg-7 d-none d-lg-flex" style="{!! $bgLoginStyle !!}">
 
-    {{-- Decorative elements --}}
-    <div class="isk-decor isk-decor-1"></div>
-    <div class="isk-decor isk-decor-2"></div>
-    <div class="isk-decor isk-decor-3"></div>
-    <div class="isk-decor isk-decor-4"></div>
-    <div class="isk-decor isk-decor-5"></div>
+    {{-- Decorative elements hidden by request --}}
 
     {{-- Top: Platform Badge --}}
     <div class="position-relative" style="z-index:2">
@@ -346,7 +345,7 @@
     <div class="position-relative text-center" style="z-index:2">
       <div class="isk-hero-icon animate__animated animate__zoomIn" style="--animate-duration: 900ms;">
          <img src="{{ $logoAplikasiFinal }}" alt="Logo {{ $namaAplikasi }}"
-             style="width:58px;height:58px;object-fit:cover;border-radius:12px"
+             style="width:100%;height:100%;object-fit:contain;border-radius:0"
            onerror="this.onerror=null;this.src='{{ $logoDefault }}';">
       </div>
 
@@ -409,9 +408,9 @@
 
       {{-- Mobile header --}}
       <div class="d-lg-none text-center mb-4">
-        <div class="animate__animated animate__zoomIn" style="width:56px;height:56px;background:linear-gradient(135deg,var(--sio-main-color,#696cff),var(--sio-secondary-color,#8592a3));border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto .75rem;box-shadow:0 4px 16px rgba(79,70,229,.35);--animate-duration: 850ms;">
+        <div class="animate__animated animate__zoomIn" style="width:56px;height:56px;background:transparent;display:flex;align-items:center;justify-content:center;margin:0 auto .75rem;--animate-duration: 850ms;">
           <img src="{{ $logoAplikasiFinal }}" alt="Logo {{ $namaAplikasi }}"
-               style="width:30px;height:30px;object-fit:cover;border-radius:8px"
+               style="width:100%;height:100%;object-fit:contain;border-radius:0"
             onerror="this.onerror=null;this.src='{{ $logoDefault }}';">
         </div>
         @if ($halamanLogin)
@@ -440,7 +439,7 @@
       <div class="d-none d-lg-flex align-items-center mb-4" style="gap:.65rem">
         <div class="isk-form-logo animate__animated animate__fadeInDown" style="--animate-duration: 700ms;">
           <img src="{{ $logoAplikasiFinal }}" alt="Logo {{ $namaAplikasi }}"
-               style="width:24px;height:24px;object-fit:cover;border-radius:6px"
+               style="width:100%;height:100%;object-fit:contain;border-radius:0"
             onerror="this.onerror=null;this.src='{{ $logoDefault }}';">
         </div>
         <div>

@@ -26,6 +26,8 @@ new #[Layout('components.layouts.app')] class extends Component {
     public string $secondaryColor = '#8592a3';
     public $logoUpload = null;
     public ?string $logoPath = null;
+    public $bgLoginUpload = null;
+    public ?string $bgLogin = null;
     public string $email = '';
     public string $waCenter = '';
     public string $telepon = '';
@@ -79,6 +81,8 @@ new #[Layout('components.layouts.app')] class extends Component {
         $this->secondaryColor = $data->secondary_color ?? '#8592a3';
         $this->logoPath = $data->logo_path;
         $this->logoUpload = null;
+        $this->bgLogin = $data->bg_login;
+        $this->bgLoginUpload = null;
         $this->email = $data->email ?? '';
         $this->waCenter = $data->wa_center ?? '';
         $this->telepon = $data->telepon ?? '';
@@ -113,6 +117,7 @@ new #[Layout('components.layouts.app')] class extends Component {
             'mainColor' => ['nullable', 'regex:/^#([A-Fa-f0-9]{6})$/'],
             'secondaryColor' => ['nullable', 'regex:/^#([A-Fa-f0-9]{6})$/'],
             'logoUpload' => 'nullable|image|max:2048|mimes:jpg,jpeg,png,webp,svg',
+            'bgLoginUpload' => 'nullable|image|max:4096|mimes:jpg,jpeg,png,webp',
             'email' => 'nullable|email|max:120',
             'waCenter' => 'nullable|string|max:25',
             'telepon' => 'nullable|string|max:25',
@@ -137,6 +142,7 @@ new #[Layout('components.layouts.app')] class extends Component {
             'main_color' => $data['mainColor'] ?: '#696cff',
             'secondary_color' => $data['secondaryColor'] ?: '#8592a3',
             'logo_path' => $this->logoPath,
+            'bg_login' => $this->bgLogin,
             'email' => $data['email'] ?: null,
             'wa_center' => $data['waCenter'] ?: null,
             'telepon' => $data['telepon'] ?: null,
@@ -160,6 +166,16 @@ new #[Layout('components.layouts.app')] class extends Component {
                 Storage::disk('public')->delete($this->logoPath);
             }
             $payload['logo_path'] = $this->logoUpload->store('identitas-logo', 'public');
+        }
+
+        if ($this->bgLoginUpload) {
+            if ($this->bgLogin && Storage::disk('public')->exists($this->bgLogin)) {
+                Storage::disk('public')->delete($this->bgLogin);
+            }
+            $payload['bg_login'] = $this->bgLoginUpload->store('identitas-bg', 'public');
+        } elseif ($this->bgLogin === false) {
+            // Jika ditandai untuk dihapus (menggunakan nilai false atau string kosong)
+            $payload['bg_login'] = null;
         }
 
         if ($this->editId) {
@@ -217,9 +233,30 @@ new #[Layout('components.layouts.app')] class extends Component {
         if ($data->logo_path && Storage::disk('public')->exists($data->logo_path)) {
             Storage::disk('public')->delete($data->logo_path);
         }
+        if ($data->bg_login && Storage::disk('public')->exists($data->bg_login)) {
+            Storage::disk('public')->delete($data->bg_login);
+        }
         $data->delete();
         app(IdentitasService::class)->hapusCache();
         $this->resetPage();
+    }
+
+    public function hapusBgLoginPreview(): void
+    {
+        if ($this->bgLoginUpload) {
+            $this->bgLoginUpload = null;
+        } else {
+            // Tandai untuk dihapus di database saat simpan
+            if ($this->bgLogin && Storage::disk('public')->exists($this->bgLogin)) {
+                Storage::disk('public')->delete($this->bgLogin);
+            }
+            $this->bgLogin = false; // Menggunakan false sebagai penanda hapus
+            
+            // Langsung update database jika sedang mode edit
+            if ($this->editId) {
+                Identitas::where('id', $this->editId)->update(['bg_login' => null]);
+            }
+        }
     }
 
     /** Normalisasi input warna agar selalu format #RRGGBB */
@@ -260,7 +297,7 @@ new #[Layout('components.layouts.app')] class extends Component {
     private function resetForm(): void
     {
         $this->reset([
-            'editId', 'namaAplikasi', 'singkatanAplikasi', 'versi', 'icon', 'mainColor', 'secondaryColor', 'logoUpload', 'logoPath', 'email', 'waCenter',
+            'editId', 'namaAplikasi', 'singkatanAplikasi', 'versi', 'icon', 'mainColor', 'secondaryColor', 'logoUpload', 'logoPath', 'bgLoginUpload', 'bgLogin', 'email', 'waCenter',
             'telepon', 'website', 'alamat', 'slogan', 'deskripsi', 'footerText', 'fiturLogin', 'statistikLogin', 'isActive',
         ]);
 
@@ -456,7 +493,35 @@ new #[Layout('components.layouts.app')] class extends Component {
                                         @endif
                                     </div>
                                 </div>
-
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Upload BG Login</label>
+                                    <input wire:model="bgLoginUpload" type="file" class="form-control" accept="image/*">
+                                    <small class="text-muted">Gunakan gambar resolusi tinggi untuk hasil terbaik.</small>
+                                    @error('bgLoginUpload') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Preview BG Login</label>
+                                    <div class="border rounded p-2 d-flex align-items-center gap-2" style="min-height:72px">
+                                        @if ($bgLoginUpload)
+                                            <div class="position-relative">
+                                                <img src="{{ $bgLoginUpload->temporaryUrl() }}" alt="Preview" style="height:48px;width:80px;object-fit:cover" class="rounded">
+                                                <button type="button" class="btn btn-sm btn-danger p-0 position-absolute top-0 end-0 rounded-circle" style="width:20px;height:20px;transform:translate(30%,-30%)" wire:click="hapusBgLoginPreview"><i class="bx bx-x" style="font-size:14px"></i></button>
+                                            </div>
+                                            <span class="text-muted small">{{ __('messages.new_upload_preview') }}</span>
+                                        @elseif ($bgLogin && $bgLogin !== false)
+                                            <div class="position-relative">
+                                                <img src="{{ asset('storage/' . $bgLogin) }}" alt="Current BG" style="height:48px;width:80px;object-fit:cover" class="rounded">
+                                                <button type="button" class="btn btn-sm btn-danger p-0 position-absolute top-0 end-0 rounded-circle" style="width:20px;height:20px;transform:translate(30%,-30%)" wire:click="hapusBgLoginPreview"><i class="bx bx-x" style="font-size:14px"></i></button>
+                                            </div>
+                                            <span class="text-muted small">BG Tersimpan</span>
+                                        @else
+                                            <div class="bg-light rounded d-flex align-items-center justify-content-center text-muted" style="height:48px;width:80px;font-size:20px;">
+                                                <i class="bx bx-image"></i>
+                                            </div>
+                                            <span class="text-muted small">Belum ada BG</span>
+                                        @endif
+                                    </div>
+                                </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-semibold">{{ __('messages.email') }}</label>
                                     <input wire:model="email" type="email" class="form-control @error('email') is-invalid @enderror" placeholder="{{ __('messages.identity_email_placeholder') }}">

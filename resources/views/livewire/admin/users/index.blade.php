@@ -15,6 +15,7 @@ new #[Layout('components.layouts.app')] class extends Component {
     public string $name = '';
     public string $email = '';
     public ?int $levelId = null;
+    public array $userLevels = [];
     public bool $isActive = true;
     public string $password = '';
     public string $password_confirmation = '';
@@ -56,6 +57,7 @@ new #[Layout('components.layouts.app')] class extends Component {
         $this->name = $user->name;
         $this->email = $user->email;
         $this->levelId = $user->level_id;
+        $this->userLevels = $user->levels->pluck('id')->map(fn($id) => (string)$id)->toArray();
         $this->isActive = (bool) ($user->is_active ?? true);
         $this->password = '';
         $this->password_confirmation = '';
@@ -72,10 +74,17 @@ new #[Layout('components.layouts.app')] class extends Component {
         $data = $this->validate([
             'name' => 'required|string|max:150',
             'email' => 'required|email|max:150|unique:t_user,email,' . ($this->editId ?? 'NULL'),
+            'userLevels' => 'required|array|min:1',
+            'userLevels.*' => 'exists:m_level,id',
             'levelId' => 'required|exists:m_level,id',
             'isActive' => 'boolean',
             'password' => ($this->editId ? 'nullable' : 'required') . '|string|min:8|confirmed',
         ]);
+
+        if (! in_array((string)$data['levelId'], $data['userLevels'])) {
+            $this->addError('levelId', 'Level aktif harus salah satu dari level yang dipilih.');
+            return;
+        }
 
         if ($this->editId) {
             $user = User::findOrFail($this->editId);
@@ -97,6 +106,7 @@ new #[Layout('components.layouts.app')] class extends Component {
             }
 
             $user->update($payload);
+            $user->levels()->sync($data['userLevels']);
 
             app(LogAktivitasService::class)->catatManual(
                 __('messages.user_management_module_name'),
@@ -114,6 +124,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                 'is_active' => (bool) $data['isActive'],
                 'password' => $data['password'],
             ]);
+            $user->levels()->sync($data['userLevels']);
 
             app(LogAktivitasService::class)->catatManual(
                 __('messages.user_management_module_name'),
@@ -214,7 +225,7 @@ new #[Layout('components.layouts.app')] class extends Component {
     {
         return [
             'users' => User::query()
-                ->with('level:id,nama_level')
+                ->with(['level:id,nama_level', 'levels:id,nama_level'])
                 ->when($this->search, function ($query) {
                     $query->where('name', 'like', '%' . $this->search . '%')
                         ->orWhere('email', 'like', '%' . $this->search . '%');
@@ -227,7 +238,7 @@ new #[Layout('components.layouts.app')] class extends Component {
 
     private function resetForm(): void
     {
-        $this->reset(['name', 'email', 'levelId', 'isActive', 'password', 'password_confirmation', 'editId']);
+        $this->reset(['name', 'email', 'levelId', 'userLevels', 'isActive', 'password', 'password_confirmation', 'editId']);
         $this->isActive = true;
         $this->resetValidation();
     }
@@ -273,7 +284,16 @@ new #[Layout('components.layouts.app')] class extends Component {
                 <div class="fw-semibold">{{ $user->name }}</div>
                 <small class="text-muted">{{ $user->email }}</small>
               </td>
-              <td>{{ $user->level?->nama_level ?? '-' }}</td>
+              <td>
+                <div class="fw-semibold">{{ $user->level?->nama_level ?? '-' }} <span class="badge bg-label-primary p-1" style="font-size:0.6rem;">Aktif</span></div>
+                <div class="mt-1 d-flex flex-wrap gap-1">
+                  @foreach ($user->levels as $lvl)
+                    @if ($lvl->id !== $user->level_id)
+                      <span class="badge bg-label-secondary" style="font-size:0.65rem; padding:0.2em 0.4em;">{{ $lvl->nama_level }}</span>
+                    @endif
+                  @endforeach
+                </div>
+              </td>
               <td>
                 @if ($user->is_active)
                   <span class="badge bg-label-success">{{ __('messages.active') }}</span>
@@ -328,14 +348,38 @@ new #[Layout('components.layouts.app')] class extends Component {
                 @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
               </div>
               <div class="mb-3">
-                <label class="form-label fw-semibold">{{ __('messages.level') }} <span class="text-danger">*</span></label>
-                <select wire:model="levelId" class="form-select @error('levelId') is-invalid @enderror">
-                  <option value="">{{ __('messages.select_level_option') }}</option>
+                <label class="form-label fw-semibold">Pilihan Level (Bisa Multi Level) <span class="text-danger">*</span></label>
+                <div class="border rounded p-3 bg-light">
                   @foreach ($levels as $level)
-                    <option value="{{ $level->id }}">{{ $level->nama_level }}</option>
+                    <div class="form-check mb-2">
+                      <input class="form-check-input" type="checkbox" 
+                             wire:model.live="userLevels" 
+                             value="{{ $level->id }}" 
+                             id="lvlCheck{{ $level->id }}">
+                      <label class="form-check-label" for="lvlCheck{{ $level->id }}">
+                        <strong>{{ $level->nama_level }}</strong> 
+                        @if($level->deskripsi)
+                          <span class="text-muted small">({{ $level->deskripsi }})</span>
+                        @endif
+                      </label>
+                    </div>
+                  @endforeach
+                </div>
+                @error('userLevels') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Level Aktif Saat Ini <span class="text-danger">*</span></label>
+                <select wire:model="levelId" class="form-select @error('levelId') is-invalid @enderror">
+                  <option value="">Pilih Level Aktif</option>
+                  @foreach ($levels as $level)
+                    @if (in_array((string)$level->id, $userLevels))
+                      <option value="{{ $level->id }}">{{ $level->nama_level }}</option>
+                    @endif
                   @endforeach
                 </select>
                 @error('levelId') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                <div class="form-text small text-muted">Level yang aktif saat pengguna masuk ke sistem pertama kali.</div>
               </div>
               <div class="mb-3">
                 <label class="form-label fw-semibold">{{ __('messages.password') }} {{ $editId ? '(' . __('messages.user_password_optional_on_edit') . ')' : '' }}</label>

@@ -112,7 +112,26 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
+        // ── Koneksi Database Legacy (Source — Read-Only untuk ETL) ──
+        // Konfigurasi via variabel DB_LEGACY_* di .env
+        'legacy' => [
+            'driver'    => 'mysql',
+            'host'      => env('DB_LEGACY_HOST', '127.0.0.1'),
+            'port'      => env('DB_LEGACY_PORT', '3306'),
+            'database'  => env('DB_LEGACY_DATABASE', 'siakad_lama'),
+            'username'  => env('DB_LEGACY_USERNAME', 'root'),
+            'password'  => env('DB_LEGACY_PASSWORD', ''),
+            'charset'   => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix'    => '',
+            'strict'    => false,
+            'options'   => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+
     ],
+
 
     /*
     |--------------------------------------------------------------------------

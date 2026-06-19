@@ -65,10 +65,17 @@ class User extends Authenticatable
         ];
     }
 
-    /** Relasi ke tabel m_level */
+    /** Relasi ke tabel m_level (level aktif) */
     public function level(): BelongsTo
     {
         return $this->belongsTo(Level::class);
+    }
+
+    /** Relasi many-to-many ke tabel m_level (semua level yang dimiliki) */
+    public function levels(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Level::class, 't_user_level', 'user_id', 'level_id')
+                    ->withTimestamps();
     }
 
     /**

@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             DashboardWidgetSeeder::class,
             ChatAiSeeder::class,
             ImamStarterKitContentSeeder::class,
+            PreferensiAgamaMenuSeeder::class,
         ]);
     }
 }

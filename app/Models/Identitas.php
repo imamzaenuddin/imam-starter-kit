@@ -14,6 +14,7 @@ class Identitas extends Model
         'versi',
         'icon',
         'logo_path',
+        'bg_login',
         'main_color',
         'secondary_color',
         'email',

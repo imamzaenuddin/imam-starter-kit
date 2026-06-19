@@ -110,7 +110,7 @@
                                     </div>
                                     <div class="flex-grow-1">
                                         <h6 class="mb-0">{{ Auth::user()->name }}</h6>
-                                        <small class="text-body-secondary">{{ Auth::user()->role ?? __('messages.user') }}</small>
+                                        <small class="text-body-secondary">{{ Auth::user()->level?->nama_level ?? __('messages.user') }}</small>
                                         <!-- Display user role -->
                                     </div>
                                 </div>
@@ -124,6 +124,29 @@
                                 href="{{ route('settings.profile') }}" wire:navigate>
                                 <i class="icon-base bx bx-user icon-md me-3"></i><span>{{ __('messages.my_profile') }}</span>
                             </a>
+                        </li>
+                        @if(Auth::user()->levels->count() > 1)
+                            <li>
+                                <div class="dropdown-divider my-1"></div>
+                            </li>
+                            <li>
+                                <form method="POST" action="{{ route('ganti-level') }}">
+                                    @csrf
+                                    <div class="dropdown-item py-2">
+                                        <select name="level_id" class="form-select form-select-sm w-100" style="font-size: 0.8rem; cursor: pointer; border-color: #d9dee3; border-radius: 0.375rem;" onchange="this.form.submit()">
+                                            <option value="" disabled selected>-- Pindah Level --</option>
+                                            @foreach(Auth::user()->levels as $lvl)
+                                                @if($lvl->id !== Auth::user()->level_id)
+                                                    <option value="{{ $lvl->id }}">{{ $lvl->nama_level }}</option>
+                                                @endif
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </form>
+                            </li>
+                        @endif
+                        <li>
+                            <div class="dropdown-divider my-1"></div>
                         </li>
                         <li>
                             <a class="dropdown-item {{ request()->routeIs('settings.password') ? 'active' : '' }}"
