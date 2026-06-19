@@ -94,6 +94,14 @@ new #[Layout('components.layouts.app')] class extends Component {
         $this->resetPage();
     }
 
+    public function toggleAktif($id): void
+    {
+        if (! auth()->user()?->bisaMenu('/admin/referensi/biayastudi', 'dapat_ubah')) abort(403);
+
+        $item = Biayastudi::findOrFail($id);
+        $item->update(['na' => $item->na === 'N' ? 'Y' : 'N']);
+    }
+
     public function with(): array
     {
         $data = Biayastudi::query()
@@ -159,11 +167,14 @@ new #[Layout('components.layouts.app')] class extends Component {
               <td>{{ $row->beasiswa }}</td>
               <td>{{ $row->beasiswa_id }}</td>
               <td>
-                @if ($row->na === 'N')
-                  <span class="badge bg-label-success">Aktif</span>
-                @else
-                  <span class="badge bg-label-danger">Tidak Aktif</span>
-                @endif
+                <div class="form-check form-switch mb-0" style="min-height: 0;">
+                  <input class="form-check-input cursor-pointer" type="checkbox" role="switch" id="switch-{{ $row->biaya_studi_id }}"
+                         wire:click="toggleAktif('{{ $row->biaya_studi_id }}')"
+                         {{ $row->na === 'N' ? 'checked' : '' }}>
+                  <label class="form-check-label text-{{ $row->na === 'N' ? 'success' : 'danger' }} small fw-semibold cursor-pointer" for="switch-{{ $row->biaya_studi_id }}" style="margin-top: 1px;">
+                    {{ $row->na === 'N' ? 'Aktif' : 'Tidak Aktif' }}
+                  </label>
+                </div>
               </td>
 
               <td class="text-center">
